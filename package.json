@@ -1,0 +1,1 @@
+{"name":"the-portal","private":true,"type":"module","engines":{"node":">=20"},"dependencies":{"@neondatabase/serverless":"^1.0.2"}}
