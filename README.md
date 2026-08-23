@@ -1,31 +1,37 @@
 # The Portal
 
-An interactive cabinet of strange things that imagined the future before it arrived.
+An archive of strange things that imagined the future before it arrived.
 
-## Production architecture
+## V3
 
-The browser calls `/api/artifact`. A Vercel serverless function calls the OpenAI Responses API and returns schema-validated artifact data. `OPENAI_API_KEY` remains server-side and is never exposed to browser code.
+The Portal is deliberately not a feed. It has no popularity ranking, engagement optimization, trending page, or behavioral recommendation profile.
 
-## Intelligence
+The browser calls `/api/artifact`. A Vercel serverless curator calls the OpenAI Responses API, validates a strict schema, then assigns a deterministic canonical ID such as `PTL-1964-A19F02C9E1`. The browser keeps a private cabinet for revisiting discoveries without extra AI calls.
 
-The curator uses an OpenAI GPT-5.6 model with Structured Outputs. The generation prompt emphasizes originality, material specificity, diversity across eras and media, and unresolved questions while avoiding real named copyrighted works.
+Each artifact carries graph-ready structure: era, year, object type, imagined future, problem, outcome status, modern conceptual descendant, concepts, provenance, condition and an unresolved question.
 
-## Production safeguards
+See `ARCHITECTURE.md` for the durable shared-archive design and database schema.
 
-- Server-only OpenAI credential
-- Strict structured artifact schema
-- POST-only generation endpoint
-- Per-instance request throttling and HTTP 429 handling
-- Upstream request timeout protection
-- No-store API responses
-- Content Security Policy and restrictive browser security headers
-- Accessible loading, error, reduced-motion, and condition states
-- Graceful client handling for throttling, timeout, and upstream errors
+## Security and cost controls
 
-The in-memory throttle is intentionally a lightweight safety layer because serverless instances are ephemeral. Account-level OpenAI usage budgets remain the authoritative cost ceiling for a public deployment.
+- `OPENAI_API_KEY` remains server-side.
+- POST-only generation endpoint.
+- Strict Structured Outputs schema.
+- Per-instance request throttling and HTTP 429 handling.
+- 25-second upstream timeout.
+- `no-store` generation responses.
+- Restrictive browser security headers and CSP.
+- No AI generation on ordinary page load.
+- Local cabinet retrieval costs no model call.
+
+The current in-memory throttle is intentionally lightweight because Vercel instances are ephemeral. For a public high-traffic release, use Upstash Redis for distributed rate limiting and an account-level OpenAI spend ceiling.
+
+## Persistence tiers
+
+**Current / zero-additional-infrastructure:** canonical server IDs plus a private browser cabinet.
+
+**Permanent shared archive:** provision Neon Postgres from the Vercel Marketplace and expose `DATABASE_URL`. The target schema and rollout contract are in `ARCHITECTURE.md`.
 
 ## Deploy
 
-Import this repository into Vercel and add `OPENAI_API_KEY` as a protected environment variable for Production and Preview. Never commit the key to GitHub.
-
-Every push to `main` triggers a new Vercel deployment when Git integration is enabled.
+The Vercel project must have `OPENAI_API_KEY` protected in Production and Preview. Never commit credentials. Git integration deploys pushes to `main` automatically.
