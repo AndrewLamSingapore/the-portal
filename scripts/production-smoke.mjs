@@ -13,12 +13,9 @@ async function get(path){
   } finally { clearTimeout(timer); }
 }
 
-function json(text,label){
-  try{return JSON.parse(text)}catch{throw new Error(`${label} did not return valid JSON`)}
-}
+function json(text,label){try{return JSON.parse(text)}catch{throw new Error(`${label} did not return valid JSON`)}}
 
 console.log(`Production smoke: ${base}`);
-
 const home=await get('/');
 assert.equal(home.response.status,200,'homepage must return 200');
 assert.match(home.text,/<title>THE PORTAL/i,'homepage must contain Portal title');
@@ -30,6 +27,7 @@ const health=json(healthResponse.text,'health endpoint');
 assert.equal(health.ok,true,'health.ok must be true');
 assert.equal(health.database,true,'database must be available');
 assert.equal(health.archive,true,'archive must be available');
+assert.equal(health.generation_configured,true,'AI generation must be configured');
 assert.equal(health.has_artifacts,true,'shared archive must contain artifacts');
 assert.equal(health.schema_version,3,'schema version must be 3');
 
@@ -50,4 +48,4 @@ assert.equal(artifact.id,first.id,'retrieved artifact id must match requested id
 assert.ok(artifact.title,'retrieved artifact must have a title');
 assert.ok(Array.isArray(artifact.concepts),'retrieved artifact must have concepts');
 
-console.log(`PASS: homepage, health, archive and artifact retrieval verified (${archive.count} objects visible).`);
+console.log(`PASS: homepage, health, generation readiness, archive and artifact retrieval verified (${archive.count} objects visible).`);
