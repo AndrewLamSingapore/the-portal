@@ -5,16 +5,43 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+  schedule:
+    - cron: '17 2 * * *'
+  workflow_dispatch:
 
 permissions:
   contents: read
 
+concurrency:
+  group: portal-quality-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   verify:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
       - run: npm run verify
+
+  production-smoke:
+    if: github.event_name != 'pull_request'
+    needs: verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Wait for production deployment
+        if: github.event_name == 'push'
+        run: sleep 45
+      - name: Verify live production
+        env:
+          PORTAL_URL: https://the-portal-ten.vercel.app
+          SMOKE_TIMEOUT_MS: '15000'
+        run: npm run smoke:production
