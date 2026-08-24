@@ -118,13 +118,12 @@ The executable database contract is [`schema.sql`](schema.sql).
 ## Quality gate
 
 ```bash
-npm install
 npm run verify
 ```
 
-`verify` syntax-checks the server/API modules. GitHub Actions runs the same gate on pushes and pull requests to `main`.
+`verify` syntax-checks the server/API modules and requires no secrets or external services. GitHub Actions runs the same gate on pushes and pull requests to `main`.
 
-This is intentionally a minimum gate, not a claim of exhaustive test coverage. Representative API contract tests are the next engineering-quality step.
+Install dependencies with `npm install` when running or deploying the application. The current repository intentionally has a lightweight verification gate rather than claiming exhaustive test coverage.
 
 ---
 
