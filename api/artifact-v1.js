@@ -1,0 +1,1 @@
+export default function handler(req,res){res.setHeader('Content-Type','application/json; charset=utf-8');res.setHeader('Cache-Control','no-store');return res.status(410).json({error:'Legacy artifact contract retired','replacement':'/api/artifact','schema_version':4})}
