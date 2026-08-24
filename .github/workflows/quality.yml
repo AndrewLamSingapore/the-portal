@@ -44,6 +44,7 @@ jobs:
         env:
           PORTAL_URL: https://the-portal-ten.vercel.app
           SMOKE_TIMEOUT_MS: '15000'
+          EXPECTED_REVISION: ${{ github.event_name == 'push' && github.sha || '' }}
         run: |
           for attempt in 1 2 3 4 5; do
             echo "Production verification attempt $attempt/5"
