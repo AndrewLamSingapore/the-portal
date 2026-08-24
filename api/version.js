@@ -1,0 +1,1 @@
+export default function handler(req,res){res.setHeader('Content-Type','application/json; charset=utf-8');res.setHeader('Cache-Control','public, s-maxage=3600');return res.status(200).json({product:'The Portal',version:'4.0.0',generation:4,experience:'Evidence & Ancestry'})}
