@@ -1,0 +1,1 @@
+import assert from 'node:assert/strict';import fs from 'node:fs';const h=fs.readFileSync('index.html','utf8');for(const x of ['<html lang="en">','aria-live="polite"','focus-visible','prefers-reduced-motion','rel="noopener noreferrer"'])assert.ok(h.includes(x),`missing accessibility contract: ${x}`);console.log('PASS: accessibility baseline contract.');
