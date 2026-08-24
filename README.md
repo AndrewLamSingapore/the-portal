@@ -8,7 +8,9 @@ It is deliberately **not a feed**.
 
 No popularity ranking. No trending page. No engagement optimisation. No behavioural recommendation profile.
 
-Instead, each discovery is treated as a structured artifact with provenance, concepts, an outcome and an unresolved question.
+Instead, each discovery becomes a structured artifact with provenance, concepts, an outcome and an unresolved question.
+
+**Evidence level: E2 — working software prototype.**
 
 ---
 
@@ -22,9 +24,7 @@ The Portal asks a different question:
 
 A historical object can be interesting not because it was famous, but because it contains an idea that later became ordinary.
 
-The Portal is software for exploring those connections. It is **not** presented as a historical authority: AI-generated curation should be treated as a discovery surface whose claims require source verification.
-
-**Evidence level: E2 — working software prototype.**
+The Portal is software for exploring those connections. It is **not a historical authority**: AI-generated curation is a discovery surface, and factual historical claims require independent source verification.
 
 ---
 
@@ -39,14 +39,13 @@ Server-side OpenAI Responses API
         ↓
 Strict structured-output validation
         ↓
-Canonical artifact ID
+Deterministic canonical artifact ID
         ↓
-Structured discovery card
-        ↓
-Private browser cabinet for revisiting
+        ├── private browser cabinet
+        └── shared Postgres archive when configured
 ```
 
-The curator assigns deterministic canonical IDs such as `PTL-1964-A19F02C9E1`.
+Canonical IDs look like `PTL-1964-A19F02C9E1`.
 
 Each artifact is graph-ready and can carry:
 
@@ -61,49 +60,71 @@ Each artifact is graph-ready and can carry:
 - condition
 - unresolved question
 
-See [`ARCHITECTURE.md`](ARCHITECTURE.md) for the durable shared-archive design and database contract.
+The archive API can retrieve an artifact, follow shared concepts, filter outcomes and summarize the visible collection when durable persistence is enabled.
+
+See [`ARCHITECTURE.md`](ARCHITECTURE.md) for the complete system contract.
 
 ---
 
 ## Design principles
 
 ### Discovery without behavioural capture
-The product does not need a behavioural recommendation profile to be interesting.
+The experience does not require a behavioural recommendation profile.
 
 ### Structure before scale
-Artifacts are created in a form that can later support a shared graph/archive rather than becoming disposable generated text.
+Artifacts are created in a form that can support a shared graph/archive rather than becoming disposable generated text.
 
 ### Provenance over false certainty
-The interface can suggest connections; it should not convert model output into historical fact merely because the prose sounds confident.
+The interface may suggest conceptual connections; fluent model output does not become historical fact merely because it sounds confident.
 
 ### AI calls should have a reason
 Ordinary page loads do not generate content. Saved local discoveries can be revisited without another model call.
+
+### Graceful infrastructure tiers
+Generation and the private cabinet remain useful without Postgres. When `DATABASE_URL` is configured, the same canonical artifacts can become part of a durable shared archive.
 
 ---
 
 ## Security and cost boundaries
 
 - `OPENAI_API_KEY` remains server-side.
+- `DATABASE_URL` remains server-side when configured.
 - Generation is POST-only.
 - Responses use a strict Structured Outputs schema.
 - Per-instance throttling and HTTP 429 handling are implemented.
-- Upstream calls have a 25-second timeout.
+- Upstream model calls have a 25-second timeout.
 - Generation responses use `no-store`.
 - Browser security headers and CSP are restrictive.
 - Ordinary page load makes no AI generation call.
 - Local cabinet retrieval costs no model call.
 
-The current in-memory throttle is intentionally lightweight because Vercel instances are ephemeral. A higher-traffic public release should use distributed rate limiting and an account-level model-spend ceiling.
+The current in-memory throttle is intentionally lightweight because Vercel instances are ephemeral. Before materially increasing public traffic, use durable distributed rate limiting and an account-level model-spend ceiling.
+
+See [`SECURITY.md`](SECURITY.md).
 
 ---
 
-## Persistence path
+## Persistence
 
-**Current:** canonical server IDs + a private browser cabinet.
+| Tier | Behaviour | Requirement |
+|---|---|---|
+| **Local/private** | Canonical server IDs + private browser cabinet | `OPENAI_API_KEY` |
+| **Shared archive** | Adds durable Postgres persistence, retrieval and concept traversal | `OPENAI_API_KEY` + `DATABASE_URL` |
 
-**Designed next tier:** permanent shared archive backed by Postgres. The target schema and rollout contract live in [`ARCHITECTURE.md`](ARCHITECTURE.md).
+The executable database contract is [`schema.sql`](schema.sql).
 
-This keeps infrastructure proportional to evidence of demand instead of adding complexity before it is needed.
+---
+
+## Quality gate
+
+```bash
+npm install
+npm run verify
+```
+
+`verify` syntax-checks the server/API modules. GitHub Actions runs the same gate on pushes and pull requests to `main`.
+
+This is intentionally a minimum gate, not a claim of exhaustive test coverage. Representative API contract tests are the next engineering-quality step.
 
 ---
 
@@ -121,6 +142,8 @@ Both ask a related question:
 
 ## Deploy
 
-The Vercel project requires `OPENAI_API_KEY` in protected Production and Preview environment variables. Credentials must never be committed.
+Copy `.env.example` for the runtime-variable contract.
+
+The Vercel project requires `OPENAI_API_KEY` in protected Production and Preview environment variables. `DATABASE_URL` is optional and enables the shared archive. Credentials must never be committed.
 
 Git integration deploys pushes to `main` automatically.
