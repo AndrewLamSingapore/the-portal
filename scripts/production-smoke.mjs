@@ -2,17 +2,7 @@ import assert from 'node:assert/strict';
 
 const base=(process.env.PORTAL_URL||'https://the-portal-ten.vercel.app').replace(/\/$/,'');
 const timeoutMs=Number(process.env.SMOKE_TIMEOUT_MS||15000);
-
-async function get(path){
-  const controller=new AbortController();
-  const timer=setTimeout(()=>controller.abort(),timeoutMs);
-  try{
-    const response=await fetch(base+path,{headers:{'user-agent':'the-portal-production-smoke/1.0','cache-control':'no-cache'},signal:controller.signal});
-    const text=await response.text();
-    return {response,text};
-  } finally { clearTimeout(timer); }
-}
-
+async function get(path){const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),timeoutMs);try{const response=await fetch(base+path,{headers:{'user-agent':'the-portal-production-smoke/1.0','cache-control':'no-cache'},signal:controller.signal});return{response,text:await response.text()}}finally{clearTimeout(timer)}}
 function json(text,label){try{return JSON.parse(text)}catch{throw new Error(`${label} did not return valid JSON`)}}
 
 console.log(`Production smoke: ${base}`);
@@ -20,6 +10,8 @@ const home=await get('/');
 assert.equal(home.response.status,200,'homepage must return 200');
 assert.match(home.text,/<title>THE PORTAL/i,'homepage must contain Portal title');
 assert.match(home.text,/id="archiveCount"/,'homepage must contain archive status surface');
+assert.match(home.text,/loadArchive\s*\(/,'client must contain archive initialization logic');
+assert.match(home.text,/privateMode\s*\(/,'client must contain bounded private fallback');
 
 const healthResponse=await get('/api/health');
 assert.equal(healthResponse.response.status,200,'health endpoint must return 200');
@@ -48,4 +40,4 @@ assert.equal(artifact.id,first.id,'retrieved artifact id must match requested id
 assert.ok(artifact.title,'retrieved artifact must have a title');
 assert.ok(Array.isArray(artifact.concepts),'retrieved artifact must have concepts');
 
-console.log(`PASS: homepage, health, generation readiness, archive and artifact retrieval verified (${archive.count} objects visible).`);
+console.log(`PASS: homepage/init contract, health, generation readiness, archive and artifact retrieval verified (${archive.count} objects visible).`);
