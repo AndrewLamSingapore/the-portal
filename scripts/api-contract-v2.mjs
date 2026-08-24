@@ -1,0 +1,1 @@
+import assert from 'node:assert/strict';import fs from 'node:fs';for(const f of ['artifact','archive','evidence','verify','graph','relationship','serendipity','exhibition','exhibitions','metrics','readiness','status','manifest'])assert.ok(fs.existsSync(`api/${f}.js`),`missing /api/${f}`);console.log('PASS: complete Portal V2 API surface present.');
