@@ -1,1 +1,16 @@
-{"name":"the-portal","private":true,"type":"module","engines":{"node":">=20"},"dependencies":{"@neondatabase/serverless":"^1.0.2"}}
+{
+  "name": "the-portal",
+  "version": "3.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "check": "node --check api/artifact.js && node --check api/archive.js && node --check api/health.js && node --check lib/db.js",
+    "verify": "npm run check"
+  },
+  "dependencies": {
+    "@neondatabase/serverless": "^1.0.2"
+  }
+}
