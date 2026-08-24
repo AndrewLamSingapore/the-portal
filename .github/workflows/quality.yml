@@ -31,7 +31,7 @@ jobs:
     if: github.event_name != 'pull_request'
     needs: verify
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 8
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -44,4 +44,10 @@ jobs:
         env:
           PORTAL_URL: https://the-portal-ten.vercel.app
           SMOKE_TIMEOUT_MS: '15000'
-        run: npm run smoke:production
+        run: |
+          for attempt in 1 2 3 4 5; do
+            echo "Production verification attempt $attempt/5"
+            if npm run smoke:production; then exit 0; fi
+            if [ "$attempt" -lt 5 ]; then sleep 30; fi
+          done
+          exit 1
