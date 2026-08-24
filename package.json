@@ -1,17 +1,5 @@
 {
-  "name": "the-portal",
-  "version": "3.0.0",
-  "private": true,
-  "type": "module",
-  "engines": {
-    "node": ">=20"
-  },
-  "scripts": {
-    "check": "node --check api/artifact.js && node --check api/archive.js && node --check api/health.js && node --check lib/db.js && node --check scripts/production-smoke.mjs",
-    "verify": "npm run check",
-    "smoke:production": "node scripts/production-smoke.mjs"
-  },
-  "dependencies": {
-    "@neondatabase/serverless": "^1.0.2"
-  }
+  "name":"the-portal","version":"4.0.0","private":true,"type":"module","engines":{"node":">=20"},
+  "scripts":{"check":"node --check api/artifact.js && node --check api/archive.js && node --check api/health.js && node --check lib/db.js && node --check scripts/production-smoke.mjs && node --check scripts/v2-contract.mjs","verify":"npm run check && node scripts/v2-contract.mjs","smoke:production":"node scripts/production-smoke.mjs"},
+  "dependencies":{"@neondatabase/serverless":"^1.0.2"}
 }
