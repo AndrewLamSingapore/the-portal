@@ -1,37 +1,126 @@
 # The Portal
 
-An archive of strange things that imagined the future before it arrived.
+## An archive of strange things that imagined the future before it arrived.
 
-## V3
+The Portal is an AI-assisted discovery experiment about **forgotten futures**: inventions, proposals, systems, artworks and ideas that anticipated something recognisable in the world that followed.
 
-The Portal is deliberately not a feed. It has no popularity ranking, engagement optimization, trending page, or behavioral recommendation profile.
+It is deliberately **not a feed**.
 
-The browser calls `/api/artifact`. A Vercel serverless curator calls the OpenAI Responses API, validates a strict schema, then assigns a deterministic canonical ID such as `PTL-1964-A19F02C9E1`. The browser keeps a private cabinet for revisiting discoveries without extra AI calls.
+No popularity ranking. No trending page. No engagement optimisation. No behavioural recommendation profile.
 
-Each artifact carries graph-ready structure: era, year, object type, imagined future, problem, outcome status, modern conceptual descendant, concepts, provenance, condition and an unresolved question.
+Instead, each discovery is treated as a structured artifact with provenance, concepts, an outcome and an unresolved question.
 
-See `ARCHITECTURE.md` for the durable shared-archive design and database schema.
+---
 
-## Security and cost controls
+## The experiment
+
+Most discovery systems optimise for what is popular now.
+
+The Portal asks a different question:
+
+> **What becomes visible when discovery is organised around conceptual ancestry instead of engagement?**
+
+A historical object can be interesting not because it was famous, but because it contains an idea that later became ordinary.
+
+The Portal is software for exploring those connections. It is **not** presented as a historical authority: AI-generated curation should be treated as a discovery surface whose claims require source verification.
+
+**Evidence level: E2 — working software prototype.**
+
+---
+
+## How it works
+
+```text
+Visitor requests a discovery
+        ↓
+POST /api/artifact
+        ↓
+Server-side OpenAI Responses API
+        ↓
+Strict structured-output validation
+        ↓
+Canonical artifact ID
+        ↓
+Structured discovery card
+        ↓
+Private browser cabinet for revisiting
+```
+
+The curator assigns deterministic canonical IDs such as `PTL-1964-A19F02C9E1`.
+
+Each artifact is graph-ready and can carry:
+
+- era and year
+- object type
+- imagined future
+- problem addressed
+- outcome status
+- modern conceptual descendant
+- concepts
+- provenance
+- condition
+- unresolved question
+
+See [`ARCHITECTURE.md`](ARCHITECTURE.md) for the durable shared-archive design and database contract.
+
+---
+
+## Design principles
+
+### Discovery without behavioural capture
+The product does not need a behavioural recommendation profile to be interesting.
+
+### Structure before scale
+Artifacts are created in a form that can later support a shared graph/archive rather than becoming disposable generated text.
+
+### Provenance over false certainty
+The interface can suggest connections; it should not convert model output into historical fact merely because the prose sounds confident.
+
+### AI calls should have a reason
+Ordinary page loads do not generate content. Saved local discoveries can be revisited without another model call.
+
+---
+
+## Security and cost boundaries
 
 - `OPENAI_API_KEY` remains server-side.
-- POST-only generation endpoint.
-- Strict Structured Outputs schema.
-- Per-instance request throttling and HTTP 429 handling.
-- 25-second upstream timeout.
-- `no-store` generation responses.
-- Restrictive browser security headers and CSP.
-- No AI generation on ordinary page load.
+- Generation is POST-only.
+- Responses use a strict Structured Outputs schema.
+- Per-instance throttling and HTTP 429 handling are implemented.
+- Upstream calls have a 25-second timeout.
+- Generation responses use `no-store`.
+- Browser security headers and CSP are restrictive.
+- Ordinary page load makes no AI generation call.
 - Local cabinet retrieval costs no model call.
 
-The current in-memory throttle is intentionally lightweight because Vercel instances are ephemeral. For a public high-traffic release, use Upstash Redis for distributed rate limiting and an account-level OpenAI spend ceiling.
+The current in-memory throttle is intentionally lightweight because Vercel instances are ephemeral. A higher-traffic public release should use distributed rate limiting and an account-level model-spend ceiling.
 
-## Persistence tiers
+---
 
-**Current / zero-additional-infrastructure:** canonical server IDs plus a private browser cabinet.
+## Persistence path
 
-**Permanent shared archive:** provision Neon Postgres from the Vercel Marketplace and expose `DATABASE_URL`. The target schema and rollout contract are in `ARCHITECTURE.md`.
+**Current:** canonical server IDs + a private browser cabinet.
+
+**Designed next tier:** permanent shared archive backed by Postgres. The target schema and rollout contract live in [`ARCHITECTURE.md`](ARCHITECTURE.md).
+
+This keeps infrastructure proportional to evidence of demand instead of adding complexity before it is needed.
+
+---
+
+## Portfolio role
+
+The Portal is an experimental **BUILD** project inside [Andrew Lam's operations-intelligence portfolio](https://github.com/AndrewLamSingapore).
+
+Where [Open Aqua](https://github.com/AndrewLamSingapore/open-aqua) explores intelligence around a physical living system, The Portal explores intelligence around a cultural information system.
+
+Both ask a related question:
+
+> **Can better structure reveal relationships that ordinary observation misses?**
+
+---
 
 ## Deploy
 
-The Vercel project must have `OPENAI_API_KEY` protected in Production and Preview. Never commit credentials. Git integration deploys pushes to `main` automatically.
+The Vercel project requires `OPENAI_API_KEY` in protected Production and Preview environment variables. Credentials must never be committed.
+
+Git integration deploys pushes to `main` automatically.
