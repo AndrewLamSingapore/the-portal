@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
-const generation = fs.readFileSync('api/artifact.js', 'utf8');
+const generation = fs.readFileSync('api/artifact.js', 'utf8') + fs.readFileSync('lib/artifact-generation.js', 'utf8');
 const meta = fs.readFileSync('api/meta.js', 'utf8');
 const browser = fs.readFileSync('app.js', 'utf8');
 
