@@ -29,7 +29,7 @@ function normalize(value) {
   return String(value || '').trim().replace(/\s+/g, ' ');
 }
 
-function canonical(artifact, mode) {
+function canonical(artifact, mode, allowedTargetIds = new Set()) {
   const fingerprint = crypto.createHash('sha256')
     .update([artifact.year, normalize(artifact.title).toLowerCase(), normalize(artifact.description).toLowerCase()].join('|'))
     .digest('hex')
@@ -39,12 +39,13 @@ function canonical(artifact, mode) {
     ...artifact,
     id: `PTL-${artifact.year}-${fingerprint}`,
     mode,
-    schema_version: 4,
+    schema_version: 5,
     created_at: new Date().toISOString(),
     concepts: [...new Set((artifact.concepts || []).map(normalize).filter(Boolean))],
     // Public generation accepts no source input, so generated objects can never
     // acquire an unverified URL merely because it appeared in model output.
-    sources: []
+    sources: [],
+    connections: (artifact.connections || []).filter((item, index, all) => allowedTargetIds.has(item.target_id) && all.findIndex(other => other.target_id === item.target_id && other.type === item.type) === index)
   };
 }
 
@@ -59,11 +60,11 @@ export default async function handler(req, res) {
   if (!allowed(ip(req))) return res.status(429).json({ error: 'The archive needs time to settle. Try again later.' });
 
   const mode = MODES[req.body?.mode] ? req.body.mode : 'wander';
-  let context = '';
+  let context = '', recent = [];
   if (hasDatabase()) {
     try {
-      const recent = await findArtifacts({ limit: 8 });
-      context = `\nRECENT TITLES TO AVOID RESEMBLING: ${recent.map(item => `${item.year} ${item.title} [${(item.concepts || []).join(', ')}]`).join(' | ')}`;
+      recent = await findArtifacts({ limit: 12 });
+      context = `\nRECENT ARTIFACTS: ${recent.map(item => `${item.id}: ${item.year} ${item.title} [${(item.concepts || []).join(', ')}]`).join(' | ')}`;
     } catch {
       context = '';
     }
@@ -72,7 +73,7 @@ export default async function handler(req, res) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), GENERATION_TIMEOUT_MS);
   try {
-    const artifact = canonical(await generateArtifact({ mode, context, signal: controller.signal }), mode);
+    const artifact = canonical(await generateArtifact({ mode, context, signal: controller.signal }), mode, new Set(recent.map(item => item.id)));
     if (hasDatabase()) {
       try {
         await saveArtifact(artifact);
