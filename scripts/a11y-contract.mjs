@@ -14,7 +14,9 @@ for (const token of [
   'aria-modal="true"',
   'aria-hidden="true"',
   'inert',
-  'aria-label="Interactive conceptual graph"'
+  'aria-label="Interactive conceptual graph"',
+  'aria-describedby="portalSoundHint"',
+  'id="portalSoundLabel"'
 ]) assert.ok(html.includes(token), `missing accessibility contract: ${token}`);
 
 for (const token of [':focus-visible', 'prefers-reduced-motion']) {

@@ -21,40 +21,41 @@ const safeHttpsUrl = value => {
   }
 };
 
+const PORTAL_SOUND_PREFERENCE = 'portal-sound-v1';
 const portalSound = {
-  enabled: false,
+  enabled: true,
   unavailable: false,
   fadeFrame: null
 };
+try { portalSound.enabled = localStorage.getItem(PORTAL_SOUND_PREFERENCE) !== 'off'; } catch {}
 
-function readSoundPreference() {
-  try {
-    return localStorage.getItem('portal-sound-enabled-v1') === 'true';
-  } catch {
-    return false;
-  }
+function rememberPortalSound(value) {
+  try { localStorage.setItem(PORTAL_SOUND_PREFERENCE, value); } catch {}
 }
 
-function writeSoundPreference(enabled) {
-  try { localStorage.setItem('portal-sound-enabled-v1', String(enabled)); } catch {}
-}
-
-function updateSoundControl(message) {
-  const button = el('soundToggle');
+function updatePortalSoundControl(label) {
+  const audio = el('portalTheme');
+  const button = el('portalSound');
+  const playing = !audio.paused && !audio.ended;
+  button.classList.toggle('is-playing', playing);
   button.setAttribute('aria-pressed', String(portalSound.enabled));
-  button.classList.toggle('active', portalSound.enabled);
-  button.textContent = portalSound.unavailable ? 'SOUND · UNAVAILABLE' : `SOUND · ${portalSound.enabled ? 'ON' : 'OFF'}`;
   button.disabled = portalSound.unavailable;
-  el('soundStatus').textContent = message || `Portal sound is ${portalSound.enabled ? 'on and ready' : 'off'}.`;
+  el('portalSoundLabel').textContent = portalSound.unavailable ? 'SOUND UNAVAILABLE' : label || (playing ? 'SOUND ACTIVE' : portalSound.enabled ? 'SOUND READY' : 'SOUND OFF');
+  el('portalSoundStatus').textContent = portalSound.unavailable
+    ? 'The Portal theme is unavailable.'
+    : playing
+      ? 'The Portal theme is playing.'
+      : `The Portal sound is ${portalSound.enabled ? 'ready' : 'off'}.`;
 }
 
-function stopSound({ immediate = false } = {}) {
+function stopPortalTheme({ immediate = false } = {}) {
   const audio = el('portalTheme');
   cancelAnimationFrame(portalSound.fadeFrame);
   if (audio.paused) return;
   if (immediate) {
     audio.pause();
     audio.volume = 0;
+    updatePortalSoundControl();
     return;
   }
   const started = performance.now();
@@ -63,7 +64,10 @@ function stopSound({ immediate = false } = {}) {
     const progress = Math.min((now - started) / 360, 1);
     audio.volume = initialVolume * (1 - progress);
     if (progress < 1) portalSound.fadeFrame = requestAnimationFrame(fade);
-    else audio.pause();
+    else {
+      audio.pause();
+      updatePortalSoundControl();
+    }
   };
   portalSound.fadeFrame = requestAnimationFrame(fade);
 }
@@ -72,9 +76,9 @@ async function playPortalTheme({ restart = false } = {}) {
   if (!portalSound.enabled || portalSound.unavailable) return;
   const audio = el('portalTheme');
   cancelAnimationFrame(portalSound.fadeFrame);
-  if (restart) audio.currentTime = 0;
-  audio.volume = 0;
   try {
+    if (restart || audio.ended) audio.currentTime = 0;
+    audio.volume = 0;
     await audio.play();
     const started = performance.now();
     const fade = now => {
@@ -83,35 +87,23 @@ async function playPortalTheme({ restart = false } = {}) {
       if (progress < 1 && !audio.paused) portalSound.fadeFrame = requestAnimationFrame(fade);
     };
     portalSound.fadeFrame = requestAnimationFrame(fade);
-    updateSoundControl('Portal theme is playing.');
+    updatePortalSoundControl('SOUND ACTIVE');
   } catch {
-    portalSound.unavailable = true;
-    portalSound.enabled = false;
-    writeSoundPreference(false);
-    updateSoundControl('Portal sound is unavailable in this browser.');
+    updatePortalSoundControl('PLAY THEME');
   }
 }
 
-function setSoundEnabled(enabled, { preview = false } = {}) {
-  portalSound.enabled = enabled;
-  writeSoundPreference(enabled);
-  updateSoundControl(enabled ? 'Portal sound is on.' : 'Portal sound is off.');
-  if (enabled && preview) playPortalTheme({ restart: true });
-  if (!enabled) stopSound();
-}
-
-function initializeSound() {
-  const audio = el('portalTheme');
-  portalSound.enabled = readSoundPreference();
-  audio.volume = 0;
-  audio.addEventListener('ended', () => updateSoundControl('Portal theme complete. Sound remains on.'));
-  audio.addEventListener('error', () => {
-    portalSound.unavailable = true;
-    portalSound.enabled = false;
-    writeSoundPreference(false);
-    updateSoundControl('Portal sound could not be loaded.');
-  });
-  updateSoundControl();
+function togglePortalSound() {
+  portalSound.enabled = !portalSound.enabled;
+  if (!portalSound.enabled) {
+    rememberPortalSound('off');
+    stopPortalTheme();
+    updatePortalSoundControl('SOUND OFF');
+    return;
+  }
+  rememberPortalSound('on');
+  updatePortalSoundControl('SOUND READY');
+  playPortalTheme({ restart: true });
 }
 
 function readCabinet() {
@@ -378,7 +370,7 @@ async function loadPortal() {
   else if (graphResult.status === 'fulfilled') state.network = graphResult.value;
   if (!(state.network.nodes || []).length) state.network = deriveNetwork(allArtifacts());
   const health = healthResult.status === 'fulfilled' ? healthResult.value : null;
-  el('systemState').textContent = health?.ok ? `ARCHIVE ONLINE · ${health.product_version || '5.1.0'}` : 'PRIVATE CABINET MODE';
+  el('systemState').textContent = health?.ok ? `ARCHIVE ONLINE · ${health.product_version || '5.2.0'}` : 'PRIVATE CABINET MODE';
   el('systemState').className = `system-state ${health?.ok ? 'operational' : 'degraded'}`;
   el('status').textContent = state.archive.artifacts.length
     ? `${state.archive.count || state.archive.artifacts.length} NODES · ${(state.network.edges || []).length} CONCEPTUAL CONNECTIONS`
@@ -461,11 +453,18 @@ async function maximizeSerendipity(event) {
 }
 
 el('curatorForm').addEventListener('submit', generateEncounter);
+el('portalSound').addEventListener('click', togglePortalSound);
+el('portalTheme').addEventListener('ended', () => updatePortalSoundControl('REPLAY THEME'));
+el('portalTheme').addEventListener('error', () => {
+  portalSound.unavailable = true;
+  portalSound.enabled = false;
+  rememberPortalSound('off');
+  updatePortalSoundControl('SOUND UNAVAILABLE');
+});
 el('enterGraph').addEventListener('click', () => {
   playPortalTheme({ restart: true });
   el('graphSection').scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
 });
-el('soundToggle').addEventListener('click', () => setSoundEnabled(!portalSound.enabled, { preview: !portalSound.enabled }));
 el('openCurator').addEventListener('click', () => {
   el('curator').scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
   el('mode').focus({ preventScroll: true });
@@ -499,10 +498,11 @@ addEventListener('resize', () => {
 });
 
 document.addEventListener('visibilitychange', () => {
-  if (document.hidden) stopSound({ immediate: true });
+  if (document.hidden) stopPortalTheme({ immediate: true });
 });
 
-initializeSound();
+updatePortalSoundControl();
+
 loadPortal().catch(() => {
   el('systemState').textContent = 'PRIVATE CABINET MODE';
   el('systemState').className = 'system-state degraded';

@@ -2,12 +2,12 @@
 
 ## 5.2.0 — Portal Sonic Identity
 
-- Adds an original 8.4-second stereo theme built around a rising, glass-like discovery motif and warm resolved harmony.
-- Introduces a persistent, accessible `SOUND · OFF/ON` control with sound off by default.
-- Previews the theme only after explicit activation and replays it when the visitor enters the graph.
-- Adds restrained fade-in/fade-out behavior, hidden-tab pausing and mobile autoplay-policy compatibility.
-- Serves the versioned audio asset with immutable caching and an explicit self-only media security policy.
-- Adds an executable sound integration contract to release verification.
+- Adds an original 8.4-second stereo entry theme built around a rising, glass-like discovery motif and warm resolved harmony.
+- Preserves the animated waveform control and entry invitation while adding a persistent enabled/off preference.
+- Plays only after a user gesture, with restrained level, smooth fades, hidden-tab pausing and mobile-browser compatibility.
+- Serves the primary versioned audio asset with immutable caching and retains the original theme as a fallback source.
+- Adds an explicit same-origin media security policy and verifies the deployed audio surface in production smoke checks.
+- Adds an executable sound integration contract to the complete release suite.
 
 ## 5.1.0 — Kinetic Living System
 

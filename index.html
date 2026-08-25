@@ -21,12 +21,21 @@
   <header class="topbar" aria-label="Portal identity">
     <a class="brand" href="/" aria-label="The Portal home">PTL<span>↻</span></a>
     <span class="edition">LIVING SYSTEM · 5.2</span>
-    <div class="topbar-controls">
+    <div class="topbar-end">
+      <button class="sound-toggle" id="portalSound" type="button" aria-pressed="false" aria-describedby="portalSoundHint">
+        <span class="sound-mark" aria-hidden="true"><i></i><i></i><i></i></span>
+        <span id="portalSoundLabel">SOUND READY</span>
+      </button>
       <span class="system-state" id="systemState">CHECKING ARCHIVE</span>
-      <button class="sound-toggle" id="soundToggle" type="button" aria-pressed="false" aria-describedby="soundStatus">SOUND · OFF</button>
-      <span class="sr-only" id="soundStatus" role="status" aria-live="polite">Portal sound is off.</span>
     </div>
   </header>
+
+  <audio id="portalTheme" preload="metadata">
+    <source src="/assets/the-portal-theme-v1.mp3" type="audio/mpeg">
+    <source src="/portal-theme.mp3" type="audio/mpeg">
+  </audio>
+  <p class="visually-hidden" id="portalSoundHint">The thematic sound begins when you enter the graph. Use this control to play or mute it.</p>
+  <p class="visually-hidden" id="portalSoundStatus" role="status" aria-live="polite">The Portal sound is ready.</p>
 
   <main id="main">
     <header class="hero">
@@ -41,6 +50,7 @@
         <button class="primary" id="enterGraph" type="button">ENTER THE GRAPH</button>
         <button class="secondary" id="openCurator" type="button">CREATE AN ENCOUNTER</button>
       </div>
+      <p class="sound-invitation">THE PORTAL THEME AWAKENS ON ENTRY · SOUND CONTROL ABOVE</p>
     </header>
 
     <section class="section curator" id="curator" aria-labelledby="curatorTitle">
@@ -148,6 +158,5 @@
     <p>THE PORTAL · ENCOUNTER → CONNECT → EXPERIMENT → EVOLVE ↻</p>
     <p>Discovery without behavioural capture.</p>
   </footer>
-  <audio id="portalTheme" preload="metadata" src="/assets/the-portal-theme-v1.mp3"></audio>
 </body>
 </html>
