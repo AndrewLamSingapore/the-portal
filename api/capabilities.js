@@ -1,1 +1,0 @@
-export default function handler(req,res){return res.status(200).json({complete:true,version:4,features:{evidence_layer:true,source_trails:true,temporal_graph:true,artifact_relationships:true,serendipity_engine:true,curated_exhibitions:true,first_30_seconds:true,museum_details:true,domain_ready:true,operational_maturity:true},external_commitments:{custom_domain_purchase:false}})}

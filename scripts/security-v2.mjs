@@ -1,1 +1,17 @@
-import assert from 'node:assert/strict';import fs from 'node:fs';const g=fs.readFileSync('api/artifact.js','utf8'),v=fs.readFileSync('api/verify.js','utf8');assert.ok(g.includes('Never fabricate a URL or citation'));assert.ok(!g.includes("evidence_level:'HISTORICALLY-VERIFIED'"));assert.ok(v.includes('CURATOR_TOKEN'));assert.ok(v.includes("evidence_level='HISTORICALLY-VERIFIED'"));console.log('PASS: verified status is curator-gated and generated citations are prohibited.');
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+
+const generation = fs.readFileSync('api/artifact.js', 'utf8');
+const meta = fs.readFileSync('api/meta.js', 'utf8');
+const browser = fs.readFileSync('app.js', 'utf8');
+
+assert.ok(generation.includes('Never fabricate a URL or citation'));
+assert.ok(!generation.includes("evidence_level: 'HISTORICALLY-VERIFIED'"));
+assert.ok(generation.includes('sources: []'));
+assert.ok(meta.includes('CURATOR_TOKEN'));
+assert.ok(meta.includes("evidence_level='HISTORICALLY-VERIFIED'"));
+assert.ok(browser.includes('safeHttpsUrl'));
+assert.ok(browser.includes('rel="noopener noreferrer"'));
+assert.ok(browser.includes('&quot;'));
+
+console.log('PASS: curator verification, citation, browser escaping and outbound-link security verified.');

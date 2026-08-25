@@ -1,1 +1,17 @@
-import assert from 'node:assert/strict';import fs from 'node:fs';const files=['api/artifact.js','api/archive.js','api/serendipity.js','api/graph.js','api/relationship.js','api/evidence.js','api/verify.js','api/exhibition.js','api/exhibitions.js','api/metrics.js','api/readiness.js','index.html'];for(const f of files)assert.ok(fs.existsSync(f),`missing ${f}`);const ui=fs.readFileSync('index.html','utf8');for(const token of ['id="status"','id="graph"','id="lenses"','ENCOUNTER → CONNECT → EXPERIMENT → EVOLVE ↻','ENTER THE GRAPH','/api/archive?limit=60','/api/graph'])assert.ok(ui.includes(token),`missing living-graph preflight token: ${token}`);console.log('PASS: Portal living knowledge graph release preflight.');
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+
+for (const file of ['api/artifact.js', 'api/archive.js', 'api/serendipity.js', 'api/graph.js', 'api/relationship.js', 'api/exhibition.js', 'api/exhibitions.js', 'api/health.js', 'api/meta.js', 'index.html', 'app.js', 'styles.css']) {
+  assert.ok(fs.existsSync(file), `missing ${file}`);
+}
+
+const html = fs.readFileSync('index.html', 'utf8');
+const app = fs.readFileSync('app.js', 'utf8');
+for (const token of ['id="status"', 'id="graph"', 'id="lenses"', 'id="curatorForm"', 'ENCOUNTER', 'CONNECT', 'EXPERIMENT', 'EVOLVE', 'ENTER THE GRAPH', 'CREATE AN ENCOUNTER']) {
+  assert.ok(html.includes(token), `missing living-graph preflight token: ${token}`);
+}
+for (const token of ['/api/archive?limit=60', '/api/graph', '/api/artifact', '/api/serendipity', 'portal-cabinet-v4']) {
+  assert.ok(app.includes(token), `missing browser flow: ${token}`);
+}
+
+console.log('PASS: complete living knowledge graph release preflight.');

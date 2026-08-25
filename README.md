@@ -165,7 +165,7 @@ Selected encounters can be presented as digital artifacts: an image or object, i
 - `OPENAI_API_KEY` and `DATABASE_URL` remain server-side.
 - Generation is POST-only and uses strict Structured Outputs.
 - Per-instance throttling and HTTP 429 handling are implemented.
-- Upstream generation has a 25-second timeout and responses use `no-store`.
+- Upstream generation has a 45-second timeout and responses use `no-store`.
 - Browser security headers and CSP are restrictive.
 - Ordinary page loads make no AI generation call.
 - Production smoke verification never calls the generation endpoint, so scheduled health checks do not consume model output.
@@ -188,7 +188,7 @@ npm run verify
 npm run smoke:production
 ```
 
-`verify` syntax-checks the server/API and production-smoke modules without secrets or external services.
+`verify` syntax-checks the browser, server/API and production-smoke modules; checks accessibility, evidence and security contracts; and prevents the Vercel function count from exceeding the Hobby deployment ceiling.
 
 `smoke:production` verifies the live public system end-to-end without generating a new AI artifact: homepage availability, database/archive health, AI-generation configuration, non-empty Shared Stacks, canonical artifact IDs and retrieval of a known persisted artifact.
 
@@ -210,7 +210,7 @@ The Portal extends that question one step further:
 
 Copy `.env.example` for the runtime-variable contract. The Vercel project requires `OPENAI_API_KEY` in protected Production and Preview environment variables. `DATABASE_URL` enables the shared archive. Credentials must never be committed.
 
-Git integration deploys pushes to `main` automatically. The production smoke workflow provides an independent verification layer after deployment.
+Git integration deploys pushes to `main` automatically. The production smoke workflow verifies the exact deployed Git revision, live browser assets, health/readiness, archive, graph, serendipity and historical V2 surface without spending a generation call.
 
 ---
 

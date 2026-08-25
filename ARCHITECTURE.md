@@ -1,4 +1,4 @@
-# The Portal — V3 Architecture
+# The Portal — 4.1 Architecture
 
 ## Product invariant
 
@@ -79,7 +79,7 @@ Generates one schema-valid artifact. Returns the canonical artifact plus a `pers
 - `local` — database not configured
 - `local-fallback` — generation succeeded but persistence failed
 
-The route is POST-only, bounded by a 25-second upstream timeout and protected by a lightweight per-instance request limiter.
+The route is POST-only, bounded by a 45-second upstream timeout and protected by a lightweight per-instance request limiter.
 
 ### `GET /api/archive`
 
@@ -107,6 +107,8 @@ See [`SECURITY.md`](SECURITY.md) for the operational security policy.
 ## Quality gate
 
 `npm run verify` performs syntax validation over all server/API modules. GitHub Actions runs this verification on pushes and pull requests to `main`.
+
+Metadata, status and curator-verification routes are dispatched through one consolidated function while their public URLs remain stable through Vercel rewrites. This keeps the deployment below the Hobby plan's 12-function ceiling without shrinking the API.
 
 ## Next infrastructure gate
 

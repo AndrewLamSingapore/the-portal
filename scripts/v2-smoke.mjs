@@ -1,1 +1,25 @@
-import assert from 'node:assert/strict';const base=(process.env.PORTAL_URL||'https://the-portal-ten.vercel.app').replace(/\/$/,'');async function get(p){const r=await fetch(base+p,{headers:{'cache-control':'no-cache'}});return{r,j:async()=>r.json(),t:async()=>r.text()}}const h=await get('/');assert.equal(h.r.status,200);const html=await h.t();for(const x of ['EVIDENCE & ANCESTRY','TEMPORAL GRAPH','CURATED EXHIBITIONS','MAXIMIZE SERENDIPITY'])assert.ok(html.includes(x));const a=await get('/api/archive?limit=60');assert.equal(a.r.status,200);const archive=await a.j();assert.ok(Array.isArray(archive.temporal_graph?.nodes));assert.ok(Array.isArray(archive.exhibitions));assert.ok(archive.artifacts.length>0);const s=await get('/api/serendipity?from='+encodeURIComponent(archive.artifacts[0].id));assert.equal(s.r.status,200);const ser=await s.j();assert.ok(ser.id&&ser.id!==archive.artifacts[0].id);console.log('PASS: Portal V2 production experience verified.');
+import assert from 'node:assert/strict';
+
+const base = (process.env.PORTAL_URL || 'https://the-portal-ten.vercel.app').replace(/\/$/, '');
+async function get(path) {
+  const response = await fetch(base + path, { headers: { 'cache-control': 'no-cache' }, signal: AbortSignal.timeout(15_000) });
+  return { response, json: () => response.json(), text: () => response.text() };
+}
+
+const home = await get('/');
+assert.equal(home.response.status, 200);
+const html = await home.text();
+for (const token of ['THE LIVING KNOWLEDGE GRAPH', 'CREATE AN ENCOUNTER', 'MAXIMIZE SERENDIPITY', 'Questions over manufactured certainty']) {
+  assert.ok(html.includes(token));
+}
+const archiveResponse = await get('/api/archive?limit=60');
+assert.equal(archiveResponse.response.status, 200);
+const archive = await archiveResponse.json();
+assert.ok(Array.isArray(archive.temporal_graph?.nodes));
+assert.ok(Array.isArray(archive.exhibitions));
+assert.ok(archive.artifacts.length > 0);
+const serendipityResponse = await get('/api/serendipity?from=' + encodeURIComponent(archive.artifacts[0].id));
+assert.equal(serendipityResponse.response.status, 200);
+const serendipity = await serendipityResponse.json();
+assert.ok(serendipity.id && serendipity.id !== archive.artifacts[0].id);
+console.log('PASS: Portal living knowledge graph production experience verified.');

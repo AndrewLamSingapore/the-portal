@@ -1,1 +1,13 @@
-import assert from 'node:assert/strict';import fs from 'node:fs';const h=fs.readFileSync('index.html','utf8');for(const phrase of ['THE LIVING KNOWLEDGE GRAPH','Not a record of what I have done.','ENCOUNTER → CONNECT → EXPERIMENT → EVOLVE ↻','ENTER THE GRAPH','THE GRAPH','CONSTELLATIONS','ENCOUNTERS & ARTIFACTS','Concepts are connective tissue, not proof of causation.'])assert.ok(h.includes(phrase),`missing living-graph experience contract: ${phrase}`);console.log('PASS: living knowledge graph first-30-seconds experience contract.');
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+
+const html = fs.readFileSync('index.html', 'utf8');
+const app = fs.readFileSync('app.js', 'utf8');
+for (const phrase of ['THE LIVING KNOWLEDGE GRAPH', 'Not a record of what has been done.', 'ENTER THE GRAPH', 'CREATE AN ENCOUNTER', 'Open an unexpected drawer', 'The graph', 'Constellations', 'Encounters &amp; artifacts', 'My cabinet', 'Questions over manufactured certainty']) {
+  assert.ok(html.includes(phrase), `missing living-graph experience contract: ${phrase}`);
+}
+for (const behavior of ['generateEncounter', 'maximizeSerendipity', 'renderCabinet', 'renderLenses', 'drawGraph', 'detailMarkup']) {
+  assert.ok(app.includes(behavior), `missing interaction contract: ${behavior}`);
+}
+
+console.log('PASS: living graph discovery, generation, cabinet and evidence UI contracts verified.');

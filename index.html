@@ -1,1 +1,136 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#050403"><title>THE PORTAL · Living Graph</title><style>body{margin:0;background:#050403;color:#eadfc9;font:14px monospace}main{max-width:1080px;margin:auto;padding:32px 20px 90px}.hero{text-align:center;padding:8vh 0}.hero h1{font-size:clamp(48px,10vw,88px);letter-spacing:.2em;margin:.2em}.hero p{max-width:720px;margin:auto;color:#aa9072;line-height:1.8}.loop{margin:28px 0;letter-spacing:.12em;color:#bd6845}.status{font-size:10px;color:#80684f}.section{border-top:1px solid #eadfc920;padding:28px 0}.section h2{font-size:12px;letter-spacing:.18em;color:#b69673}.graph{position:relative;height:540px;border:1px solid #eadfc920;background:radial-gradient(circle,#24160d,#080503 65%);overflow:hidden}.edge{position:absolute;height:1px;background:#94785c55;transform-origin:0 0}.node{position:absolute;width:14px;height:14px;border-radius:50%;border:1px solid #d0ad84;background:#120c08;cursor:pointer}.node:hover{background:#8d4c2d}.node span{position:absolute;left:20px;top:-2px;width:150px;color:#d8c4a6;font-size:9px}.lenses,.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px}.card{border:1px solid #eadfc920;background:#eadfc906;color:#eadfc9;padding:15px;text-align:left;cursor:pointer}.card b{display:block;margin:8px 0}.card small{color:#94785c}.drawer{position:fixed;left:0;right:0;bottom:0;background:#e6d8bd;color:#17100c;padding:24px max(20px,calc((100vw - 900px)/2));max-height:70vh;overflow:auto;transform:translateY(110%);transition:.3s;z-index:5}.drawer.open{transform:none}.drawer p{line-height:1.7}.close{float:right}.tag{display:inline-block;border:1px solid #765f4855;padding:6px;margin:3px;font-size:9px}.primary{margin-top:20px;padding:14px 20px;border:0;background:#eadfc9;color:#17100c;cursor:pointer}@media(max-width:600px){.graph{height:460px}.hero h1{letter-spacing:.1em}}</style></head><body><main><header class="hero"><div>THE LIVING KNOWLEDGE GRAPH</div><h1>THE PORTAL</h1><p>Not a record of what I have done. A living map of how encounters become connections, connections become experiments, and experiments create new ways of seeing the world.</p><div class="loop">ENCOUNTER → CONNECT → EXPERIMENT → EVOLVE ↻</div><div class="status" id="status">CONNECTING TO THE GRAPH…</div><button class="primary" onclick="document.getElementById('graphSection').scrollIntoView()">ENTER THE GRAPH</button></header><section class="section" id="graphSection"><h2>THE GRAPH</h2><p>Concepts are connective tissue, not proof of causation. Select a node to inspect its evidence and unresolved questions.</p><div class="graph" id="graph"></div></section><section class="section"><h2>CONSTELLATIONS</h2><p>Different lenses over the same archive. One artifact can belong to many constellations.</p><div class="lenses" id="lenses"></div></section><section class="section"><h2>ENCOUNTERS & ARTIFACTS</h2><div class="grid" id="grid"></div></section></main><aside class="drawer" id="drawer"><button class="close" onclick="drawer.classList.remove('open')">CLOSE</button><div id="detail"></div></aside><script>let archive={artifacts:[]},network={nodes:[],edges:[]},active=null;const el=id=>document.getElementById(id),safe=s=>String(s||'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));function show(id){const a=archive.artifacts.find(x=>x.id===id);if(!a)return;active=id;el('detail').innerHTML='<h2>'+safe(a.title)+'</h2><p>'+safe(a.description)+'</p><p><b>Encounter / imagined future</b><br>'+safe(a.imagined_future)+'</p><p><b>Outcome / descendant</b><br>'+safe(a.modern_descendant)+'</p><div>'+(a.concepts||[]).map(c=>'<span class="tag">'+safe(c)+'</span>').join('')+'</div><p><b>Unresolved question</b><br>'+safe(a.unresolved_question||a.question||'What becomes visible when this is connected to another domain?')+'</p>';el('drawer').classList.add('open');draw(id)}function subset(focus){let ns=network.nodes||[],es=network.edges||[];if(focus){const ids=new Set([focus]);es.filter(e=>e.from===focus||e.to===focus).slice(0,9).forEach(e=>{ids.add(e.from);ids.add(e.to)});ns=ns.filter(n=>ids.has(n.id))}else ns=ns.slice(0,12);const ids=new Set(ns.map(n=>n.id));return{ns,es:es.filter(e=>ids.has(e.from)&&ids.has(e.to))}}function draw(focus){const box=el('graph'),g=subset(focus),w=box.clientWidth,h=box.clientHeight,cx=w/2,cy=h/2,r=Math.min(w,h)*.34,pos={};g.ns.forEach((n,i)=>{const a=6.283*i/Math.max(g.ns.length,1);pos[n.id]={x:cx+Math.cos(a)*r*(i%3?1:.62),y:cy+Math.sin(a)*r*(i%3?1:.62)}});box.innerHTML=g.es.map(e=>{const a=pos[e.from],b=pos[e.to];if(!a||!b)return'';const dx=b.x-a.x,dy=b.y-a.y,len=Math.hypot(dx,dy),ang=Math.atan2(dy,dx);return'<i class="edge" style="left:'+a.x+'px;top:'+a.y+'px;width:'+len+'px;transform:rotate('+ang+'rad)"></i>'}).join('')+g.ns.map(n=>'<button class="node" data-node="'+safe(n.id)+'" style="left:'+(pos[n.id].x-7)+'px;top:'+(pos[n.id].y-7)+'px"><span>'+safe(n.title.length>25?n.title.slice(0,23)+'…':n.title)+'</span></button>').join('');document.querySelectorAll('[data-node]').forEach(b=>b.onclick=()=>show(b.dataset.node))}function render(){const xs=archive.artifacts||[];el('status').textContent=(archive.count||xs.length)+' NODES · '+(network.edges||[]).length+' CONCEPTUAL CONNECTIONS';el('grid').innerHTML=xs.slice(0,18).map(a=>'<button class="card" data-id="'+safe(a.id)+'"><b>'+safe(a.title)+'</b><small>'+safe(a.year)+' · '+safe((a.concepts||[]).slice(0,3).join(' · '))+'</small></button>').join('');document.querySelectorAll('[data-id]').forEach(b=>b.onclick=()=>show(b.dataset.id));const counts={};xs.forEach(a=>(a.concepts||[]).forEach(c=>counts[c]=(counts[c]||0)+1));el('lenses').innerHTML=Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,8).map(([c,n])=>'<button class="card" data-lens="'+safe(c)+'"><small>CONSTELLATION</small><b>'+safe(c)+'</b><small>'+n+' connected artifacts</small></button>').join('');document.querySelectorAll('[data-lens]').forEach(b=>b.onclick=()=>{const ids=new Set(xs.filter(a=>(a.concepts||[]).includes(b.dataset.lens)).map(a=>a.id));const old=network.nodes;network.nodes=old.filter(n=>ids.has(n.id));draw();network.nodes=old});draw()}Promise.all([fetch('/api/archive?limit=60').then(r=>{if(!r.ok)throw Error();return r.json()}),fetch('/api/graph').then(r=>r.ok?r.json():({nodes:[],edges:[]}))]).then(([a,g])=>{archive=a;network=g.nodes.length?g:{nodes:(a.artifacts||[]).map(x=>({id:x.id,title:x.title,concepts:x.concepts})),edges:[]};render()}).catch(()=>{el('status').textContent='PRIVATE CABINET MODE · SHARED GRAPH UNAVAILABLE';el('graph').innerHTML='<p style="padding:40px;color:#80684f">The shared graph is temporarily unavailable.</p>'});addEventListener('resize',()=>draw(active));</script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#080604">
+  <meta name="description" content="The Portal is a living knowledge graph where encounters become connections, experiments and new ways of seeing.">
+  <meta property="og:title" content="The Portal · Living Knowledge Graph">
+  <meta property="og:description" content="Follow encounters as they become connections, experiments and new ways of seeing.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://the-portal-ten.vercel.app/">
+  <meta name="twitter:card" content="summary">
+  <title>THE PORTAL · Living Knowledge Graph</title>
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to the graph</a>
+  <header class="topbar" aria-label="Portal identity">
+    <a class="brand" href="/" aria-label="The Portal home">PTL<span>↻</span></a>
+    <span class="edition">LIVING GRAPH · 4.1</span>
+    <span class="system-state" id="systemState">CHECKING ARCHIVE</span>
+  </header>
+
+  <main id="main">
+    <header class="hero">
+      <p class="eyebrow">THE LIVING KNOWLEDGE GRAPH</p>
+      <h1>THE<br>PORTAL</h1>
+      <p class="thesis">Not a record of what has been done. A living map of how encounters become connections, connections become experiments, and experiments create new ways of seeing the world.</p>
+      <p class="loop" aria-label="Encounter, connect, experiment, evolve, repeat">
+        <span>ENCOUNTER</span><i>→</i><span>CONNECT</span><i>→</i><span>EXPERIMENT</span><i>→</i><span>EVOLVE</span><i>↻</i>
+      </p>
+      <p class="status" id="status" role="status" aria-live="polite">CONNECTING TO THE GRAPH…</p>
+      <div class="hero-actions">
+        <button class="primary" id="enterGraph" type="button">ENTER THE GRAPH</button>
+        <button class="secondary" id="openCurator" type="button">CREATE AN ENCOUNTER</button>
+      </div>
+    </header>
+
+    <section class="section curator" id="curator" aria-labelledby="curatorTitle">
+      <div class="section-heading">
+        <div>
+          <p class="index">01 · ENCOUNTER</p>
+          <h2 id="curatorTitle">Open an unexpected drawer</h2>
+        </div>
+        <p class="section-note">AI creates a discovery object—not verified history. New objects keep their evidence boundary visible.</p>
+      </div>
+      <form class="curator-form" id="curatorForm">
+        <label for="mode">Curator lens</label>
+        <select id="mode" name="mode">
+          <option value="wander">Wander · maximize surprise</option>
+          <option value="distant">Distant echo · 1750–1939</option>
+          <option value="early">Too early · infrastructure was missing</option>
+          <option value="failed">Failed future · learn from collapse</option>
+          <option value="waiting">Still waiting · not yet ordinary</option>
+          <option value="arrived">Arrived · trace the descendant</option>
+        </select>
+        <button class="primary generate" id="generate" type="submit">GENERATE ONE ENCOUNTER</button>
+      </form>
+      <p class="curator-state" id="curatorState" role="status" aria-live="polite">Each request creates one structured, graph-ready artifact.</p>
+    </section>
+
+    <section class="section" id="graphSection" aria-labelledby="graphTitle">
+      <div class="section-heading">
+        <div>
+          <p class="index">02 · CONNECT</p>
+          <h2 id="graphTitle">The graph</h2>
+        </div>
+        <p class="section-note">Shared concepts are connective tissue, not proof of causation. Select a node to inspect its evidence and unresolved question.</p>
+      </div>
+      <div class="graph-toolbar">
+        <button class="text-button" id="serendipity" type="button">MAXIMIZE SERENDIPITY</button>
+        <button class="text-button" id="resetGraph" type="button">RESET VIEW</button>
+      </div>
+      <div class="graph" id="graph" role="group" aria-label="Interactive conceptual graph"></div>
+    </section>
+
+    <section class="section" aria-labelledby="constellationsTitle">
+      <div class="section-heading">
+        <div>
+          <p class="index">03 · EXPERIMENT</p>
+          <h2 id="constellationsTitle">Constellations</h2>
+        </div>
+        <p class="section-note">Different lenses over the same archive. One artifact can belong to several constellations at once.</p>
+      </div>
+      <div class="lenses" id="lenses"></div>
+    </section>
+
+    <section class="section" aria-labelledby="artifactsTitle">
+      <div class="section-heading">
+        <div>
+          <p class="index">04 · EVOLVE</p>
+          <h2 id="artifactsTitle">Encounters &amp; artifacts</h2>
+        </div>
+        <p class="section-note" id="artifactSummary">Loading the shared archive…</p>
+      </div>
+      <div class="grid" id="grid"></div>
+      <button class="text-button clear-filter" id="clearFilter" type="button" hidden>SHOW ALL ARTIFACTS</button>
+    </section>
+
+    <section class="section cabinet" aria-labelledby="cabinetTitle">
+      <div class="section-heading">
+        <div>
+          <p class="index">PRIVATE LAYER</p>
+          <h2 id="cabinetTitle">My cabinet</h2>
+        </div>
+        <p class="section-note">Artifacts created in this browser remain available here. No behavioural profile is built.</p>
+      </div>
+      <div class="grid" id="cabinetGrid"></div>
+    </section>
+
+    <section class="section evidence-key" aria-labelledby="evidenceTitle">
+      <p class="index">EVIDENCE KEY</p>
+      <h2 id="evidenceTitle">Questions over manufactured certainty</h2>
+      <div class="evidence-grid">
+        <article><span class="badge ai">AI-CURATED</span><p>A discovery prompt generated by the curator. Not independently verified history.</p></article>
+        <article><span class="badge inference">CONCEPTUAL-INFERENCE</span><p>An interpretive relationship worth examining. Not a claim of causation.</p></article>
+        <article><span class="badge verified">HISTORICALLY-VERIFIED</span><p>A curator-reviewed record with a genuine source trail.</p></article>
+      </div>
+    </section>
+  </main>
+
+  <aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="drawerTitle" aria-hidden="true" inert>
+    <div class="drawer-shell">
+      <button class="close" id="closeDrawer" type="button">CLOSE <span aria-hidden="true">×</span></button>
+      <div id="detail"></div>
+    </div>
+  </aside>
+  <div class="backdrop" id="backdrop" hidden></div>
+
+  <footer>
+    <p>THE PORTAL · ENCOUNTER → CONNECT → EXPERIMENT → EVOLVE ↻</p>
+    <p>Discovery without behavioural capture.</p>
+  </footer>
+</body>
+</html>

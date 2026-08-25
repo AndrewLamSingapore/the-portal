@@ -1,5 +1,15 @@
 # Changelog
 
+## 4.1.0 — Living Graph release
+
+- Restores AI encounter creation to the primary Living Graph experience.
+- Adds a browser-private cabinet, constellation filtering, serendipity traversal and evidence-rich artifact details.
+- Restores keyboard focus, live-region, dialog, reduced-motion and responsive behavior.
+- Consolidates metadata routes so the complete API remains within the 12-function Vercel Hobby deployment limit.
+- Makes health and readiness verify the deployed evidence schema instead of reporting a hard-coded version.
+- Aligns production smoke tests with the actual homepage and verifies the exact deployed Git revision.
+- Extends the bounded generation window to 45 seconds and preserves local fallback when shared persistence fails.
+
 ## 4.0.0 — Evidence & Ancestry
 
 - Evidence states distinguish AI curation, conceptual inference and curator-verified material.

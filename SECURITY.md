@@ -14,7 +14,7 @@ The `main` branch is the supported public source for The Portal.
 ## Current controls
 
 - Artifact generation accepts POST only.
-- The generation endpoint uses strict structured output, a 25-second upstream timeout and `no-store` responses.
+- The generation endpoint uses strict structured output, a 45-second upstream timeout and `no-store` responses.
 - Browser responses receive restrictive security headers and CSP through `vercel.json`.
 - The API key never leaves the serverless function.
 - The current request throttle is per-instance and is not a durable distributed abuse-control boundary.
