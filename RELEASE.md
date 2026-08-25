@@ -10,5 +10,6 @@ A production release is acceptable only when:
 6. `/api/health` verifies the evidence columns in the live database.
 7. `npm run smoke:production` passes against the exact Git revision deployed to production.
 8. The generation endpoint itself is tested once after deployment; scheduled checks must not spend model calls.
+9. A newly persisted encounter appears in the archive and graph without a CDN-staleness window.
 
 A dedicated domain remains a separate owner branding and financial decision.

@@ -255,7 +255,8 @@ async function loadPortal() {
     fetch('/api/health', { cache: 'no-store' }).then(response => response.json())
   ]);
   if (archiveResult.status === 'fulfilled') state.archive = archiveResult.value;
-  if (graphResult.status === 'fulfilled') state.network = graphResult.value;
+  if ((state.archive.temporal_graph?.nodes || []).length) state.network = state.archive.temporal_graph;
+  else if (graphResult.status === 'fulfilled') state.network = graphResult.value;
   if (!(state.network.nodes || []).length) state.network = deriveNetwork(allArtifacts());
   const health = healthResult.status === 'fulfilled' ? healthResult.value : null;
   el('systemState').textContent = health?.ok ? `ARCHIVE ONLINE · ${health.product_version || '4.1.0'}` : 'PRIVATE CABINET MODE';
