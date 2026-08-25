@@ -1,5 +1,7 @@
 # The Portal
 
+Version 5 is a living knowledge system: encounters do not merely enter an archive. Each can propose a testable experiment, connect explicitly to earlier artifacts, and leave a transparent evolution event. Personal experiment outcomes remain in the visitor's browser.
+
 ## An explorable model of how encounters become connections, experiments and new ways of seeing.
 
 The Portal is an AI-assisted discovery and knowledge-graph experiment. It is not a website *about* Andrew Lam and it is not a conventional feed. Its long-term direction is to model a living process:
