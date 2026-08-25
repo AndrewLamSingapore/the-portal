@@ -3,7 +3,7 @@ import path from 'node:path';
 
 import { db, findArtifacts, getArtifact, hasDatabase } from '../lib/db.js';
 
-const PRODUCT_VERSION = '5.0.0';
+const PRODUCT_VERSION = '5.1.0';
 const SCHEMA_VERSION = 5;
 const EXPERIENCE = 'Living Knowledge System';
 const META_ROUTES = new Set(['capabilities', 'evidence', 'manifest', 'metrics', 'readiness', 'status', 'verify', 'version', 'v2']);

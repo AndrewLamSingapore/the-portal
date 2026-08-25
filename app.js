@@ -285,7 +285,7 @@ async function loadPortal() {
   else if (graphResult.status === 'fulfilled') state.network = graphResult.value;
   if (!(state.network.nodes || []).length) state.network = deriveNetwork(allArtifacts());
   const health = healthResult.status === 'fulfilled' ? healthResult.value : null;
-  el('systemState').textContent = health?.ok ? `ARCHIVE ONLINE · ${health.product_version || '5.0.0'}` : 'PRIVATE CABINET MODE';
+  el('systemState').textContent = health?.ok ? `ARCHIVE ONLINE · ${health.product_version || '5.1.0'}` : 'PRIVATE CABINET MODE';
   el('systemState').className = `system-state ${health?.ok ? 'operational' : 'degraded'}`;
   el('status').textContent = state.archive.artifacts.length
     ? `${state.archive.count || state.archive.artifacts.length} NODES · ${(state.network.edges || []).length} CONCEPTUAL CONNECTIONS`

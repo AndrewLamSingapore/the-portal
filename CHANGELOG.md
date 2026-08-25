@@ -1,5 +1,13 @@
 # Changelog
 
+## 5.1.0 — Kinetic Living System
+
+- Adds an ambient constellation field and a slowly breathing portal halo.
+- Introduces staged hero, section, card, graph-node and connection motion.
+- Gives primary actions a restrained automatic light sweep and stronger tactile response.
+- Pauses ambient work in hidden tabs and honors the system reduced-motion preference.
+- Keeps the motion layer dependency-free, progressively enhanced and isolated from core graph behavior.
+
 ## 4.1.0 — Living Graph release
 
 - Restores AI encounter creation to the primary Living Graph experience.
