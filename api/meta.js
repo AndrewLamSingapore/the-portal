@@ -154,6 +154,9 @@ export default async function handler(req, res) {
         source_trails: true,
         temporal_graph: true,
         artifact_relationships: true,
+        testable_experiments: true,
+        typed_connections: true,
+        evolution_ledger: true,
         serendipity_engine: true,
         curated_exhibitions: true,
         ai_curator: true,
@@ -172,7 +175,7 @@ export default async function handler(req, res) {
       product_version: PRODUCT_VERSION,
       schema_version: SCHEMA_VERSION,
       experience: EXPERIENCE,
-      capabilities: ['evidence-layer', 'source-trails', 'temporal-graph', 'artifact-relationships', 'serendipity-engine', 'curated-exhibitions', 'ai-curator', 'private-cabinet', 'accessibility-baseline', 'production-monitoring', 'domain-ready'],
+      capabilities: ['evidence-layer', 'source-trails', 'temporal-graph', 'artifact-relationships', 'testable-experiments', 'typed-connections', 'evolution-ledger', 'serendipity-engine', 'curated-exhibitions', 'ai-curator', 'private-cabinet', 'accessibility-baseline', 'production-monitoring', 'domain-ready'],
       evidence_states: ['AI-CURATED', 'CONCEPTUAL-INFERENCE', 'HISTORICALLY-VERIFIED']
     });
   }

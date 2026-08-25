@@ -1,4 +1,6 @@
-# The Portal — 4.1 Architecture
+# The Portal — 5.0 Architecture
+
+Version 5 closes the living loop: a single generation creates an artifact, a testable experiment, optional typed links to existing artifact IDs, and a derived evolution event. Browser-recorded experiment outcomes stay private and only affect that visitor's graph display.
 
 ## Product invariant
 

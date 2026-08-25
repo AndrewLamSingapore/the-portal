@@ -5,7 +5,7 @@ const timeout = Number(process.env.SMOKE_TIMEOUT_MS || 15_000);
 
 async function get(path) {
   const response = await fetch(base + path, {
-    headers: { 'user-agent': 'portal-smoke/4.1', 'cache-control': 'no-cache' },
+    headers: { 'user-agent': 'portal-smoke/5.0', 'cache-control': 'no-cache' },
     signal: AbortSignal.timeout(timeout)
   });
   return { response, text: await response.text() };
@@ -21,7 +21,7 @@ function json(result, path) {
 
 const home = await get('/');
 assert.equal(home.response.status, 200);
-for (const token of ['<title>THE PORTAL · Living Knowledge Graph</title>', 'id="curatorForm"', 'id="graph"', 'id="lenses"', 'id="cabinetGrid"']) {
+for (const token of ['<title>THE PORTAL · Living Knowledge System</title>', 'id="curatorForm"', 'id="graph"', 'id="experiments"', 'id="evolution"', 'id="cabinetGrid"']) {
   assert.ok(home.text.includes(token), `homepage missing ${token}`);
 }
 assert.equal(home.response.headers.get('x-frame-options'), 'DENY');
@@ -45,9 +45,9 @@ assert.match(styleResult.text, /prefers-reduced-motion/);
 const version = json(versionResult, '/api/version');
 assert.equal(versionResult.response.status, 200);
 assert.equal(version.product, 'The Portal');
-assert.equal(version.version, '4.1.0');
-assert.equal(version.schema_version, 4);
-assert.equal(version.experience, 'Living Knowledge Graph');
+assert.equal(version.version, '5.0.0');
+assert.equal(version.schema_version, 5);
+assert.equal(version.experience, 'Living Knowledge System');
 
 const health = json(healthResult, '/api/health');
 assert.equal(healthResult.response.status, 200);
@@ -56,20 +56,20 @@ assert.equal(health.database, true);
 assert.equal(health.archive, true);
 assert.equal(health.generation_configured, true);
 assert.equal(health.evidence_schema, true);
-assert.equal(health.schema_version, 4);
-assert.equal(health.product_version, '4.1.0');
+assert.equal(health.schema_version, 5);
+assert.equal(health.product_version, '5.0.0');
 if (process.env.EXPECTED_REVISION) assert.equal(health.revision, process.env.EXPECTED_REVISION);
 
 const status = json(statusResult, '/api/status');
 assert.equal(statusResult.response.status, 200);
 assert.equal(status.status, 'OPERATIONAL');
-assert.equal(status.product_version, '4.1.0');
+assert.equal(status.product_version, '5.0.0');
 const readiness = json(readinessResult, '/api/readiness');
 assert.equal(readinessResult.response.status, 200);
 assert.equal(readiness.ok, true);
 const manifest = json(manifestResult, '/api/manifest');
 assert.equal(manifestResult.response.status, 200);
-assert.equal(manifest.experience, 'Living Knowledge Graph');
+assert.equal(manifest.experience, 'Living Knowledge System');
 
 const archiveResult = await get('/api/archive?limit=5');
 const archive = json(archiveResult, '/api/archive');
@@ -99,4 +99,5 @@ assert.ok(serendipity.id && serendipity.id !== first.id);
 assert.equal(historicalResult.response.status, 200);
 assert.match(historicalResult.text, /Evidence &amp; Ancestry|Evidence & Ancestry/);
 
-console.log(`PASS: Portal 4.1 production verified end to end (${archive.count} objects, revision ${health.revision || 'unknown'}).`);
+assert.ok(archive.evolution && Array.isArray(archive.evolution.events));
+console.log(`PASS: Portal 5.0 production verified end to end (${archive.count} objects, revision ${health.revision || 'unknown'}).`);

@@ -1,4 +1,6 @@
-# Portal 4.1 release gate
+# Portal 5.0 release gate
+
+The release gate now covers structured experiments, typed connections, deterministic evolution events, and backward compatibility with earlier artifacts.
 
 A production release is acceptable only when:
 
