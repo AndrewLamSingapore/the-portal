@@ -20,8 +20,12 @@
   <a class="skip-link" href="#main">Skip to the graph</a>
   <header class="topbar" aria-label="Portal identity">
     <a class="brand" href="/" aria-label="The Portal home">PTL<span>↻</span></a>
-    <span class="edition">LIVING SYSTEM · 5.1</span>
-    <span class="system-state" id="systemState">CHECKING ARCHIVE</span>
+    <span class="edition">LIVING SYSTEM · 5.2</span>
+    <div class="topbar-controls">
+      <span class="system-state" id="systemState">CHECKING ARCHIVE</span>
+      <button class="sound-toggle" id="soundToggle" type="button" aria-pressed="false" aria-describedby="soundStatus">SOUND · OFF</button>
+      <span class="sr-only" id="soundStatus" role="status" aria-live="polite">Portal sound is off.</span>
+    </div>
   </header>
 
   <main id="main">
@@ -144,5 +148,6 @@
     <p>THE PORTAL · ENCOUNTER → CONNECT → EXPERIMENT → EVOLVE ↻</p>
     <p>Discovery without behavioural capture.</p>
   </footer>
+  <audio id="portalTheme" preload="metadata" src="/assets/the-portal-theme-v1.mp3"></audio>
 </body>
 </html>

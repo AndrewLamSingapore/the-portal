@@ -148,6 +148,10 @@ The desired progression is:
 simple → curious → deeper → surprising
 ```
 
+### Sonic identity
+
+The Portal includes an original 8.4-second entry theme: a warm low foundation, rising glass-like notes and a confident harmonic resolution. Sound remains off by default. A visitor can enable it with the persistent `SOUND · OFF/ON` control; enabling sound previews the theme, and `ENTER THE GRAPH` replays it as an intentional transition into the knowledge system. The preference is stored only in the visitor's browser, audio never autoplays before a user gesture, and playback pauses when the page is hidden.
+
 Selected encounters can be presented as digital artifacts: an image or object, its provenance, the observation it triggered, the connections it suggests, the unresolved question and any experiment that followed.
 
 ## Design principles

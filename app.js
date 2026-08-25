@@ -21,6 +21,99 @@ const safeHttpsUrl = value => {
   }
 };
 
+const portalSound = {
+  enabled: false,
+  unavailable: false,
+  fadeFrame: null
+};
+
+function readSoundPreference() {
+  try {
+    return localStorage.getItem('portal-sound-enabled-v1') === 'true';
+  } catch {
+    return false;
+  }
+}
+
+function writeSoundPreference(enabled) {
+  try { localStorage.setItem('portal-sound-enabled-v1', String(enabled)); } catch {}
+}
+
+function updateSoundControl(message) {
+  const button = el('soundToggle');
+  button.setAttribute('aria-pressed', String(portalSound.enabled));
+  button.classList.toggle('active', portalSound.enabled);
+  button.textContent = portalSound.unavailable ? 'SOUND · UNAVAILABLE' : `SOUND · ${portalSound.enabled ? 'ON' : 'OFF'}`;
+  button.disabled = portalSound.unavailable;
+  el('soundStatus').textContent = message || `Portal sound is ${portalSound.enabled ? 'on and ready' : 'off'}.`;
+}
+
+function stopSound({ immediate = false } = {}) {
+  const audio = el('portalTheme');
+  cancelAnimationFrame(portalSound.fadeFrame);
+  if (audio.paused) return;
+  if (immediate) {
+    audio.pause();
+    audio.volume = 0;
+    return;
+  }
+  const started = performance.now();
+  const initialVolume = audio.volume;
+  const fade = now => {
+    const progress = Math.min((now - started) / 360, 1);
+    audio.volume = initialVolume * (1 - progress);
+    if (progress < 1) portalSound.fadeFrame = requestAnimationFrame(fade);
+    else audio.pause();
+  };
+  portalSound.fadeFrame = requestAnimationFrame(fade);
+}
+
+async function playPortalTheme({ restart = false } = {}) {
+  if (!portalSound.enabled || portalSound.unavailable) return;
+  const audio = el('portalTheme');
+  cancelAnimationFrame(portalSound.fadeFrame);
+  if (restart) audio.currentTime = 0;
+  audio.volume = 0;
+  try {
+    await audio.play();
+    const started = performance.now();
+    const fade = now => {
+      const progress = Math.min((now - started) / 620, 1);
+      audio.volume = 0.18 * progress;
+      if (progress < 1 && !audio.paused) portalSound.fadeFrame = requestAnimationFrame(fade);
+    };
+    portalSound.fadeFrame = requestAnimationFrame(fade);
+    updateSoundControl('Portal theme is playing.');
+  } catch {
+    portalSound.unavailable = true;
+    portalSound.enabled = false;
+    writeSoundPreference(false);
+    updateSoundControl('Portal sound is unavailable in this browser.');
+  }
+}
+
+function setSoundEnabled(enabled, { preview = false } = {}) {
+  portalSound.enabled = enabled;
+  writeSoundPreference(enabled);
+  updateSoundControl(enabled ? 'Portal sound is on.' : 'Portal sound is off.');
+  if (enabled && preview) playPortalTheme({ restart: true });
+  if (!enabled) stopSound();
+}
+
+function initializeSound() {
+  const audio = el('portalTheme');
+  portalSound.enabled = readSoundPreference();
+  audio.volume = 0;
+  audio.addEventListener('ended', () => updateSoundControl('Portal theme complete. Sound remains on.'));
+  audio.addEventListener('error', () => {
+    portalSound.unavailable = true;
+    portalSound.enabled = false;
+    writeSoundPreference(false);
+    updateSoundControl('Portal sound could not be loaded.');
+  });
+  updateSoundControl();
+}
+
 function readCabinet() {
   try {
     const saved = JSON.parse(localStorage.getItem('portal-cabinet-v4') || '[]');
@@ -368,7 +461,11 @@ async function maximizeSerendipity(event) {
 }
 
 el('curatorForm').addEventListener('submit', generateEncounter);
-el('enterGraph').addEventListener('click', () => el('graphSection').scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }));
+el('enterGraph').addEventListener('click', () => {
+  playPortalTheme({ restart: true });
+  el('graphSection').scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+});
+el('soundToggle').addEventListener('click', () => setSoundEnabled(!portalSound.enabled, { preview: !portalSound.enabled }));
 el('openCurator').addEventListener('click', () => {
   el('curator').scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
   el('mode').focus({ preventScroll: true });
@@ -401,6 +498,11 @@ addEventListener('resize', () => {
   resizeFrame = requestAnimationFrame(drawGraph);
 });
 
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) stopSound({ immediate: true });
+});
+
+initializeSound();
 loadPortal().catch(() => {
   el('systemState').textContent = 'PRIVATE CABINET MODE';
   el('systemState').className = 'system-state degraded';

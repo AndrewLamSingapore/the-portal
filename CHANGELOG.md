@@ -1,5 +1,14 @@
 # Changelog
 
+## 5.2.0 — Portal Sonic Identity
+
+- Adds an original 8.4-second stereo theme built around a rising, glass-like discovery motif and warm resolved harmony.
+- Introduces a persistent, accessible `SOUND · OFF/ON` control with sound off by default.
+- Previews the theme only after explicit activation and replays it when the visitor enters the graph.
+- Adds restrained fade-in/fade-out behavior, hidden-tab pausing and mobile autoplay-policy compatibility.
+- Serves the versioned audio asset with immutable caching and an explicit self-only media security policy.
+- Adds an executable sound integration contract to release verification.
+
 ## 5.1.0 — Kinetic Living System
 
 - Adds an ambient constellation field and a slowly breathing portal halo.
