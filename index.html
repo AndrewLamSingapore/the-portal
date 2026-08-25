@@ -21,8 +21,19 @@
   <header class="topbar" aria-label="Portal identity">
     <a class="brand" href="/" aria-label="The Portal home">PTL<span>↻</span></a>
     <span class="edition">LIVING SYSTEM · 5.1</span>
-    <span class="system-state" id="systemState">CHECKING ARCHIVE</span>
+    <div class="topbar-end">
+      <button class="sound-toggle" id="portalSound" type="button" aria-pressed="false" aria-describedby="portalSoundHint">
+        <span class="sound-mark" aria-hidden="true"><i></i><i></i><i></i></span>
+        <span id="portalSoundLabel">SOUND READY</span>
+      </button>
+      <span class="system-state" id="systemState">CHECKING ARCHIVE</span>
+    </div>
   </header>
+
+  <audio id="portalTheme" preload="metadata">
+    <source src="/portal-theme.mp3" type="audio/mpeg">
+  </audio>
+  <p class="visually-hidden" id="portalSoundHint">The thematic sound begins when you enter the graph. Use this control to play or mute it.</p>
 
   <main id="main">
     <header class="hero">
@@ -37,6 +48,7 @@
         <button class="primary" id="enterGraph" type="button">ENTER THE GRAPH</button>
         <button class="secondary" id="openCurator" type="button">CREATE AN ENCOUNTER</button>
       </div>
+      <p class="sound-invitation">THE PORTAL THEME AWAKENS ON ENTRY · SOUND CONTROL ABOVE</p>
     </header>
 
     <section class="section curator" id="curator" aria-labelledby="curatorTitle">

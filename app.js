@@ -21,6 +21,50 @@ const safeHttpsUrl = value => {
   }
 };
 
+const PORTAL_SOUND_PREFERENCE = 'portal-sound-v1';
+let portalSoundAllowed = true;
+try { portalSoundAllowed = localStorage.getItem(PORTAL_SOUND_PREFERENCE) !== 'off'; } catch {}
+
+function rememberPortalSound(value) {
+  try { localStorage.setItem(PORTAL_SOUND_PREFERENCE, value); } catch {}
+}
+
+function updatePortalSoundControl(label) {
+  const audio = el('portalTheme');
+  const button = el('portalSound');
+  const playing = !audio.paused && !audio.ended;
+  button.classList.toggle('is-playing', playing);
+  button.setAttribute('aria-pressed', String(playing));
+  el('portalSoundLabel').textContent = label || (playing ? 'SOUND ACTIVE' : portalSoundAllowed ? 'SOUND READY' : 'SOUND OFF');
+}
+
+async function playPortalTheme({ restart = false } = {}) {
+  if (!portalSoundAllowed) return;
+  const audio = el('portalTheme');
+  if (restart || audio.ended) audio.currentTime = 0;
+  audio.volume = 0.62;
+  try {
+    await audio.play();
+    updatePortalSoundControl('SOUND ACTIVE');
+  } catch {
+    updatePortalSoundControl('PLAY THEME');
+  }
+}
+
+function togglePortalSound() {
+  const audio = el('portalTheme');
+  if (!audio.paused && !audio.ended) {
+    audio.pause();
+    portalSoundAllowed = false;
+    rememberPortalSound('off');
+    updatePortalSoundControl('SOUND OFF');
+    return;
+  }
+  portalSoundAllowed = true;
+  rememberPortalSound('on');
+  playPortalTheme({ restart: audio.ended });
+}
+
 function readCabinet() {
   try {
     const saved = JSON.parse(localStorage.getItem('portal-cabinet-v4') || '[]');
@@ -368,7 +412,17 @@ async function maximizeSerendipity(event) {
 }
 
 el('curatorForm').addEventListener('submit', generateEncounter);
-el('enterGraph').addEventListener('click', () => el('graphSection').scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }));
+el('portalSound').addEventListener('click', togglePortalSound);
+el('portalTheme').addEventListener('ended', () => updatePortalSoundControl('REPLAY THEME'));
+el('portalTheme').addEventListener('error', () => {
+  portalSoundAllowed = false;
+  updatePortalSoundControl('SOUND UNAVAILABLE');
+  el('portalSound').disabled = true;
+});
+el('enterGraph').addEventListener('click', () => {
+  playPortalTheme({ restart: true });
+  el('graphSection').scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+});
 el('openCurator').addEventListener('click', () => {
   el('curator').scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
   el('mode').focus({ preventScroll: true });
@@ -400,6 +454,8 @@ addEventListener('resize', () => {
   cancelAnimationFrame(resizeFrame);
   resizeFrame = requestAnimationFrame(drawGraph);
 });
+
+updatePortalSoundControl();
 
 loadPortal().catch(() => {
   el('systemState').textContent = 'PRIVATE CABINET MODE';
