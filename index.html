@@ -5,12 +5,12 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#080604">
   <meta name="description" content="The Portal is a living knowledge graph where encounters become connections, experiments and new ways of seeing.">
-  <meta property="og:title" content="The Portal · Living Knowledge Graph">
+  <meta property="og:title" content="The Portal · Living Knowledge System">
   <meta property="og:description" content="Follow encounters as they become connections, experiments and new ways of seeing.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://the-portal-ten.vercel.app/">
   <meta name="twitter:card" content="summary">
-  <title>THE PORTAL · Living Knowledge Graph</title>
+  <title>THE PORTAL · Living Knowledge System</title>
   <link rel="stylesheet" href="/styles.css">
   <script src="/app.js" defer></script>
 </head>
@@ -18,7 +18,7 @@
   <a class="skip-link" href="#main">Skip to the graph</a>
   <header class="topbar" aria-label="Portal identity">
     <a class="brand" href="/" aria-label="The Portal home">PTL<span>↻</span></a>
-    <span class="edition">LIVING GRAPH · 4.1</span>
+    <span class="edition">LIVING SYSTEM · 5.0</span>
     <span class="system-state" id="systemState">CHECKING ARCHIVE</span>
   </header>
 
@@ -75,23 +75,33 @@
       <div class="graph" id="graph" role="group" aria-label="Interactive conceptual graph"></div>
     </section>
 
-    <section class="section" aria-labelledby="constellationsTitle">
+    <section class="section" aria-labelledby="experimentsTitle">
       <div class="section-heading">
         <div>
           <p class="index">03 · EXPERIMENT</p>
-          <h2 id="constellationsTitle">Constellations</h2>
+          <h2 id="experimentsTitle">Experiments worth running</h2>
         </div>
-        <p class="section-note">Different lenses over the same archive. One artifact can belong to several constellations at once.</p>
+        <p class="section-note">Every new encounter proposes a small test. Your result remains private to this browser.</p>
       </div>
+      <div class="experiment-grid" id="experiments"></div>
+      <h3 class="subheading">Constellations</h3>
       <div class="lenses" id="lenses"></div>
+    </section>
+
+    <section class="section" aria-labelledby="evolutionTitle">
+      <div class="section-heading">
+        <div>
+          <p class="index">04 · EVOLVE</p>
+          <h2 id="evolutionTitle">Evolution ledger</h2>
+        </div>
+        <p class="section-note">A transparent record of what each encounter introduced, strengthened, and connected.</p>
+      </div>
+      <div class="evolution-ledger" id="evolution"></div>
     </section>
 
     <section class="section" aria-labelledby="artifactsTitle">
       <div class="section-heading">
-        <div>
-          <p class="index">04 · EVOLVE</p>
-          <h2 id="artifactsTitle">Encounters &amp; artifacts</h2>
-        </div>
+        <div><p class="index">05 · ARCHIVE</p><h2 id="artifactsTitle">Shared archive</h2></div>
         <p class="section-note" id="artifactSummary">Loading the shared archive…</p>
       </div>
       <div class="grid" id="grid"></div>

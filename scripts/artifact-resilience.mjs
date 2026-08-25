@@ -18,7 +18,9 @@ const artifact = {
   question: 'What changes when hesitation becomes inspectable?',
   evidence_level: 'CONCEPTUAL-INFERENCE',
   sources: [],
-  relationships: [{ type: 'ECHOED_BY', label: 'Modern uncertainty visualization.' }]
+  relationships: [{ type: 'ECHOED_BY', label: 'Modern uncertainty visualization.' }],
+  experiment: { hypothesis: 'Visible uncertainty improves deliberation.', method: 'Show one decision with and without confidence ranges.', success_signal: 'Participants ask more clarifying questions.', failure_signal: 'Discussion quality does not change.' },
+  connections: []
 };
 
 function response(body) {

@@ -3,9 +3,9 @@ import path from 'node:path';
 
 import { db, findArtifacts, getArtifact, hasDatabase } from '../lib/db.js';
 
-const PRODUCT_VERSION = '4.1.0';
-const SCHEMA_VERSION = 4;
-const EXPERIENCE = 'Living Knowledge Graph';
+const PRODUCT_VERSION = '5.0.0';
+const SCHEMA_VERSION = 5;
+const EXPERIENCE = 'Living Knowledge System';
 const META_ROUTES = new Set(['capabilities', 'evidence', 'manifest', 'metrics', 'readiness', 'status', 'verify', 'version', 'v2']);
 
 function jsonHeaders(res, cache = 'no-store') {
@@ -33,7 +33,7 @@ async function evidenceSchemaReady() {
   const sql = db();
   const rows = await sql`select column_name from information_schema.columns where table_schema='public' and table_name='artifacts'`;
   const columns = new Set(rows.map(row => row.column_name));
-  return ['evidence_level', 'sources', 'relationships'].every(column => columns.has(column));
+  return ['evidence_level', 'sources', 'relationships', 'experiment', 'connections'].every(column => columns.has(column));
 }
 
 async function handleEvidence(req, res) {

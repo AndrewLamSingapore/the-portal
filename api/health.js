@@ -1,6 +1,6 @@
 import { db, findArtifacts, hasDatabase } from '../lib/db.js';
 
-const PRODUCT_VERSION = '4.1.0';
+const PRODUCT_VERSION = '5.0.0';
 
 export default async function handler(req, res) {
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
@@ -22,7 +22,7 @@ export default async function handler(req, res) {
       sql`select column_name from information_schema.columns where table_schema='public' and table_name='artifacts'`
     ]);
     const availableColumns = new Set(columns.map(row => row.column_name));
-    const evidenceSchema = ['evidence_level', 'sources', 'relationships'].every(column => availableColumns.has(column));
+    const evidenceSchema = ['evidence_level', 'sources', 'relationships', 'experiment', 'connections'].every(column => availableColumns.has(column));
     const archive = artifacts.length > 0;
     const ok = archive && generation && evidenceSchema;
     return res.status(ok ? 200 : 503).json({
@@ -31,9 +31,9 @@ export default async function handler(req, res) {
       archive,
       generation_configured: generation,
       evidence_schema: evidenceSchema,
-      schema_version: evidenceSchema ? 4 : 3,
+      schema_version: evidenceSchema ? 5 : 4,
       product_version: PRODUCT_VERSION,
-      experience: 'Living Knowledge Graph',
+      experience: 'Living Knowledge System',
       revision
     });
   } catch (error) {

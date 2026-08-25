@@ -109,6 +109,24 @@ function renderLenses() {
   });
 }
 
+function readResults() { try { return JSON.parse(localStorage.getItem('portal-experiment-results-v5') || '{}') || {}; } catch { return {}; } }
+function recordResult(id, outcome) {
+  try { localStorage.setItem('portal-experiment-results-v5', JSON.stringify({ ...readResults(), [id]: outcome })); renderExperiments(); if (state.activeId === id) el('detail').innerHTML = detailMarkup(artifactById(id)); drawGraph(); } catch {}
+}
+function experimentMarkup(item) {
+  const x = item.experiment || {}, outcome = readResults()[item.id];
+  return `<article class="experiment-card"><small>${escapeHtml(item.title)}</small><h3>${escapeHtml(x.hypothesis)}</h3><p>${escapeHtml(x.method)}</p><p><b>Success:</b> ${escapeHtml(x.success_signal)}</p><p><b>Failure:</b> ${escapeHtml(x.failure_signal)}</p><div class="outcomes" data-experiment="${escapeHtml(item.id)}"><button type="button" data-outcome="SUPPORTED">SUPPORTED</button><button type="button" data-outcome="CHALLENGED">CHALLENGED</button><button type="button" data-outcome="INCONCLUSIVE">INCONCLUSIVE</button></div><small class="private-result">${outcome ? `PRIVATE RESULT · ${escapeHtml(outcome)}` : 'PRIVATE · NOT YET TESTED'}</small></article>`;
+}
+function bindOutcomes(root = document) { root.querySelectorAll('[data-experiment] [data-outcome]').forEach(button => button.addEventListener('click', () => recordResult(button.parentElement.dataset.experiment, button.dataset.outcome))); }
+function renderExperiments() {
+  const items = state.archive.evolution?.open_experiments || (state.archive.artifacts || []).filter(a => a.experiment?.hypothesis).slice(0, 8).map(a => ({ id: a.id, title: a.title, experiment: a.experiment }));
+  el('experiments').innerHTML = items.length ? items.map(experimentMarkup).join('') : '<p class="empty">The next generated encounter will open the first experiment.</p>'; bindOutcomes(el('experiments'));
+}
+function renderEvolution() {
+  const events = state.archive.evolution?.events || [];
+  el('evolution').innerHTML = events.length ? events.map(event => `<button type="button" class="evolution-event" data-id="${escapeHtml(event.id)}"><b>${escapeHtml(event.title)}</b><span>${event.new_concepts.length ? `Introduced ${escapeHtml(event.new_concepts.join(', '))}` : 'Extended existing knowledge'}${event.strengthened_concepts.length ? ` · Strengthened ${escapeHtml(event.strengthened_concepts.join(', '))}` : ''}${event.connections_created ? ` · ${event.connections_created} typed connection${event.connections_created === 1 ? '' : 's'}` : ''}</span></button>`).join('') : '<p class="empty">Evolution events begin with Version 5 encounters.</p>'; bindArtifactButtons(el('evolution'));
+}
+
 function deriveNetwork(artifacts) {
   const nodes = artifacts.map(artifact => ({ id: artifact.id, title: artifact.title, year: artifact.year, concepts: artifact.concepts || [] }));
   const edges = [];
@@ -118,6 +136,8 @@ function deriveNetwork(artifacts) {
       if (shared.length) edges.push({ from: nodes[i].id, to: nodes[j].id, concepts: shared });
     }
   }
+  const ids = new Set(nodes.map(node => node.id));
+  for (const artifact of artifacts) for (const connection of artifact.connections || []) if (ids.has(connection.target_id)) edges.push({ from: artifact.id, to: connection.target_id, type: connection.type, concepts: connection.concept ? [connection.concept] : [], strength: connection.confidence });
   return { nodes, edges: edges.slice(0, 100) };
 }
 
@@ -165,7 +185,8 @@ function drawGraph() {
     if (!from || !to) return '';
     const deltaX = to.x - from.x;
     const deltaY = to.y - from.y;
-    return `<i class="edge" style="left:${from.x}px;top:${from.y}px;width:${Math.hypot(deltaX, deltaY)}px;transform:rotate(${Math.atan2(deltaY, deltaX)}rad)"></i>`;
+    const outcome = readResults()[edge.from];
+    return `<i class="edge ${edge.type !== 'CONCEPTUAL_ECHO' ? 'typed' : ''} ${outcome ? `result-${outcome.toLowerCase()}` : ''}" title="${escapeHtml(edge.type || 'CONCEPTUAL_ECHO')}" style="left:${from.x}px;top:${from.y}px;width:${Math.hypot(deltaX, deltaY)}px;transform:rotate(${Math.atan2(deltaY, deltaX)}rad)"></i>`;
   }).join('');
   const buttons = nodes.map(node => {
     const position = positions[node.id];
@@ -183,6 +204,8 @@ function detailMarkup(artifact) {
     ? `<h3>Source trail</h3>${sources.map(source => `<a href="${escapeHtml(source.safeUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(source.title || source.safeUrl)}</a>`).join('')}`
     : '<p class="evidence-notice"><b>Evidence boundary:</b> no independent source trail is attached. Treat this as a discovery prompt, not historical authority.</p>';
   const relationships = (artifact.relationships || []).map(relationship => `<span class="relationship">${escapeHtml(relationship.type)} · ${escapeHtml(relationship.label)}</span>`).join('');
+  const connections = (artifact.connections || []).map(connection => `<span class="relationship">${escapeHtml(connection.type)} → ${escapeHtml(connection.target_id)} · ${escapeHtml(connection.reason)}</span>`).join('');
+  const experiment = artifact.experiment?.hypothesis ? `<h3>Test this idea</h3>${experimentMarkup({ id: artifact.id, title: artifact.title, experiment: artifact.experiment })}` : '';
   return `${evidenceBadge(artifact)}
     <h2 id="drawerTitle">${escapeHtml(artifact.title)}</h2>
     <p class="meta">${escapeHtml(artifact.id)} · ${escapeHtml(artifact.year)} · ${escapeHtml(artifact.status || 'EXPLORING')} · ${escapeHtml(artifact.persistence || 'ARCHIVE')}</p>
@@ -193,6 +216,8 @@ function detailMarkup(artifact) {
     <h3>Outcome / modern descendant</h3><p>${escapeHtml(artifact.modern_descendant)}</p>
     <h3>Concepts</h3><div>${(artifact.concepts || []).map(concept => `<span class="tag">${escapeHtml(concept)}</span>`).join('')}</div>
     ${relationships ? `<h3>Conceptual relationships</h3><div>${relationships}</div>` : ''}
+    ${connections ? `<h3>Typed graph connections</h3><div>${connections}</div>` : ''}
+    ${experiment}
     <h3>Unresolved question</h3><p>${escapeHtml(artifact.unresolved_question || artifact.question || 'What becomes visible when this connects to another domain?')}</p>
     ${level === 'HISTORICALLY-VERIFIED' && !sources.length ? '<p class="evidence-notice">This record is labelled verified but has no visible source trail. Treat verification as incomplete.</p>' : sourceMarkup}`;
 }
@@ -203,6 +228,7 @@ function showArtifact(id, trigger) {
   state.activeId = id;
   state.lastTrigger = trigger || document.activeElement;
   el('detail').innerHTML = detailMarkup(artifact);
+  bindOutcomes(el('detail'));
   const drawer = el('drawer');
   drawer.removeAttribute('inert');
   drawer.setAttribute('aria-hidden', 'false');
@@ -259,12 +285,14 @@ async function loadPortal() {
   else if (graphResult.status === 'fulfilled') state.network = graphResult.value;
   if (!(state.network.nodes || []).length) state.network = deriveNetwork(allArtifacts());
   const health = healthResult.status === 'fulfilled' ? healthResult.value : null;
-  el('systemState').textContent = health?.ok ? `ARCHIVE ONLINE · ${health.product_version || '4.1.0'}` : 'PRIVATE CABINET MODE';
+  el('systemState').textContent = health?.ok ? `ARCHIVE ONLINE · ${health.product_version || '5.0.0'}` : 'PRIVATE CABINET MODE';
   el('systemState').className = `system-state ${health?.ok ? 'operational' : 'degraded'}`;
   el('status').textContent = state.archive.artifacts.length
     ? `${state.archive.count || state.archive.artifacts.length} NODES · ${(state.network.edges || []).length} CONCEPTUAL CONNECTIONS`
     : 'PRIVATE CABINET READY · SHARED GRAPH UNAVAILABLE';
   renderLenses();
+  renderExperiments();
+  renderEvolution();
   renderArtifacts();
   renderCabinet();
   drawGraph();
@@ -295,8 +323,13 @@ async function generateEncounter(event) {
     state.archive.artifacts = [payload, ...(state.archive.artifacts || []).filter(artifact => artifact.id !== payload.id)];
     state.archive.count = Math.max(state.archive.count || 0, state.archive.artifacts.length);
     state.network = deriveNetwork(state.archive.artifacts);
+    state.archive.evolution = state.archive.evolution || { events: [], open_experiments: [] };
+    state.archive.evolution.open_experiments = [{ id: payload.id, title: payload.title, experiment: payload.experiment }, ...(state.archive.evolution.open_experiments || []).filter(item => item.id !== payload.id)].filter(item => item.experiment?.hypothesis).slice(0, 8);
+    state.archive.evolution.events = [{ id: payload.id, title: payload.title, new_concepts: payload.concepts || [], strengthened_concepts: [], connections_created: (payload.connections || []).length, experiment: payload.experiment }, ...(state.archive.evolution.events || []).filter(item => item.id !== payload.id)].slice(0, 20);
     state.activeLens = null;
     renderLenses();
+    renderExperiments();
+    renderEvolution();
     renderArtifacts();
     renderCabinet();
     message.textContent = payload.persistence === 'shared'
@@ -345,6 +378,8 @@ el('resetGraph').addEventListener('click', () => {
   state.activeId = null;
   state.activeLens = null;
   renderLenses();
+  renderExperiments();
+  renderEvolution();
   renderArtifacts();
   drawGraph();
 });

@@ -163,6 +163,19 @@ button:disabled { cursor: wait; opacity: .55; }
 .drawer .meta { color: #7c543c; font: 10px/1.6 ui-monospace, monospace; letter-spacing: .08em; }
 .drawer a { display: block; margin: 7px 0; color: #265a57; overflow-wrap: anywhere; }
 .drawer .tag, .drawer .relationship { border-color: rgba(23, 16, 12, .22); }
+.experiment-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(260px,1fr)); gap: 14px; }
+.experiment-card { border: 1px solid var(--line); padding: 18px; background: rgba(255,255,255,.025); }
+.experiment-card h3 { margin: 8px 0; font: 400 20px/1.25 Georgia,serif; text-transform: none; letter-spacing: 0; }
+.experiment-card p { font-size: 13px; line-height: 1.55; }
+.outcomes { display: flex; flex-wrap: wrap; gap: 6px; margin: 14px 0 8px; }
+.outcomes button { border: 1px solid currentColor; background: transparent; color: inherit; padding: 7px 8px; font: 9px ui-monospace,monospace; }
+.private-result { color: var(--accent); letter-spacing: .08em; }
+.subheading { margin: 34px 0 14px; font: 400 22px Georgia,serif; }
+.evolution-ledger { border-top: 1px solid var(--line); }
+.evolution-event { width: 100%; display: grid; grid-template-columns: minmax(180px,.7fr) 1.3fr; gap: 20px; text-align: left; border: 0; border-bottom: 1px solid var(--line); background: transparent; color: inherit; padding: 15px 0; }
+.evolution-event span { color: var(--muted); font-size: 12px; }
+.edge.typed { height: 2px; background: var(--accent); opacity: .75; }
+.edge.result-supported { opacity: 1; height: 3px; }.edge.result-challenged { background: #bb6758; }.edge.result-inconclusive { opacity: .3; }
 .evidence-notice { padding: 12px 14px; border-left: 3px solid #9b6042; background: rgba(155, 96, 66, .08); }
 .backdrop { position: fixed; inset: 0; z-index: 11; background: rgba(0, 0, 0, .62); }
 
