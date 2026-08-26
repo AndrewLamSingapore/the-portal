@@ -192,9 +192,9 @@ npm run smoke:production
 
 `verify` syntax-checks the browser, server/API and production-smoke modules; checks accessibility, evidence and security contracts; and prevents the Vercel function count from exceeding the Hobby deployment ceiling.
 
-`smoke:production` verifies the live public system end-to-end without generating a new AI artifact: homepage availability, database/archive health, AI-generation configuration, non-empty Shared Stacks, canonical artifact IDs and retrieval of a known persisted artifact.
+`smoke:production` verifies the live public system end-to-end without generating a new AI artifact: homepage availability, database/archive health, AI-generation configuration, non-empty shared archive, canonical artifact IDs, retrieval of a known persisted artifact, and real Chromium initialization to a bounded online/fallback state.
 
-GitHub Actions runs static verification on pushes and pull requests to `main`. Production smoke verification runs after pushes to `main`, can be launched manually, and also runs daily as an independent production-health check. No application secrets are required by the smoke job.
+GitHub Actions runs static verification on pushes and pull requests to `main`. Production smoke verification polls until the exact pushed revision is healthy, then runs the HTTP and browser gates. It can also be launched manually and runs daily as an independent production-health check. No application secrets are required by the smoke job or printed to its logs.
 
 ## Portfolio role
 
