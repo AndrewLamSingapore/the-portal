@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 
 const base = (process.env.PORTAL_URL || 'https://the-portal-ten.vercel.app').replace(/\/$/, '');
 const timeout = Number(process.env.SMOKE_TIMEOUT_MS || 15_000);
+const deployTimeout = Number(process.env.DEPLOY_TIMEOUT_MS || 240_000);
 
 async function get(path) {
   const response = await fetch(base + path, {
@@ -18,6 +19,26 @@ function json(result, path) {
     assert.fail(`${path} did not return JSON`);
   }
 }
+
+async function waitForDeployment() {
+  const deadline = Date.now() + deployTimeout;
+  let lastState = 'not reachable';
+  while (Date.now() < deadline) {
+    try {
+      const result = await get('/api/health');
+      const health = json(result, '/api/health');
+      lastState = `HTTP ${result.response.status}, revision ${health.revision || 'unknown'}`;
+      const revisionReady = !process.env.EXPECTED_REVISION || health.revision === process.env.EXPECTED_REVISION;
+      if (result.response.status === 200 && health.ok === true && revisionReady) return;
+    } catch (error) {
+      lastState = error?.message || String(error);
+    }
+    await new Promise(resolve => setTimeout(resolve, 10_000));
+  }
+  assert.fail(`deployment did not become ready within ${deployTimeout}ms (${lastState})`);
+}
+
+await waitForDeployment();
 
 const home = await get('/');
 assert.equal(home.response.status, 200);
