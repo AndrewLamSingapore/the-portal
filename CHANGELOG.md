@@ -1,5 +1,14 @@
 # Changelog
 
+## 6.2.0 — The Future on Trial
+
+- Replaces the ambiguous single entrance with three clear public doorways: trial, graph and encounter.
+- Adds a daily, deterministic “Future on Trial” ritual that asks visitors to judge before seeing the room.
+- Persists only anonymous aggregate verdict counters—failed, too early or arrived quietly—with no voter identity or public profile.
+- Reveals the public distribution, leading and minority readings only after a visitor votes.
+- Adds evidence inspection, native sharing with clipboard fallback, deep links and onward traversal into a connected case.
+- Adds database, API, privacy, accessibility and deployment contracts for the complete participation loop.
+
 ## 6.1.0 — Archive Awakening
 
 - Turns the hero into a layered portal aperture with pointer-responsive depth and a cinematic first-load ignition.

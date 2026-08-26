@@ -3,10 +3,10 @@ import fs from 'node:fs';
 
 const html = fs.readFileSync('index.html', 'utf8');
 const app = fs.readFileSync('app.js', 'utf8');
-for (const phrase of ['THE CONTINUOUS FUTURES MODEL', 'continuously evolving model', 'How futures move', 'Latest transitions', 'Realization watchlist', 'ENTER THE GRAPH', 'CREATE AN ENCOUNTER', 'Open an unexpected drawer', 'The graph', 'Constellations', 'Experiments worth running', 'Evolution ledger', 'Shared archive', 'My cabinet', 'Questions over manufactured certainty']) {
+for (const phrase of ['THE CONTINUOUS FUTURES MODEL', 'continuously evolving model', 'How futures move', 'Latest transitions', 'Realization watchlist', 'PUT A FUTURE ON TRIAL', 'WANDER THE GRAPH', 'CREATE AN ENCOUNTER', 'The Future on Trial', 'Open an unexpected drawer', 'The graph', 'Constellations', 'Experiments worth running', 'Evolution ledger', 'Shared archive', 'My cabinet', 'Questions over manufactured certainty']) {
   assert.ok(html.includes(phrase), `missing living-graph experience contract: ${phrase}`);
 }
-for (const behavior of ['generateEncounter', 'maximizeSerendipity', 'renderCabinet', 'renderLenses', 'renderExperiments', 'renderEvolution', 'renderContinuousModel', 'drawGraph', 'detailMarkup', 'playPortalTheme', 'togglePortalSound']) {
+for (const behavior of ['generateEncounter', 'maximizeSerendipity', 'renderCabinet', 'renderLenses', 'renderExperiments', 'renderEvolution', 'renderContinuousModel', 'renderTrial', 'castTrialVerdict', 'shareTrialVerdict', 'openConnectedTrial', 'drawGraph', 'detailMarkup', 'playPortalTheme', 'togglePortalSound']) {
   assert.ok(app.includes(behavior), `missing interaction contract: ${behavior}`);
 }
 for (const soundContract of ['id="portalTheme"', 'src="/portal-theme.mp3"', 'id="portalSound"', 'THE PORTAL THEME AWAKENS ON ENTRY']) {

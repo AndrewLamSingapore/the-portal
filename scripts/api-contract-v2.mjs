@@ -5,7 +5,7 @@ const directRoutes = new Set(fs.readdirSync('api').filter(file => file.endsWith(
 const config = JSON.parse(fs.readFileSync('vercel.json', 'utf8'));
 const graph = fs.readFileSync('api/graph.js', 'utf8');
 const rewrittenRoutes = new Set((config.rewrites || []).map(rewrite => rewrite.source.replace(/^\/api\//, '')));
-const publicRoutes = ['artifact', 'artifact-v1', 'archive', 'capabilities', 'evidence', 'exhibition', 'exhibitions', 'graph', 'health', 'manifest', 'metrics', 'readiness', 'relationship', 'serendipity', 'status', 'v2', 'verify', 'version'];
+const publicRoutes = ['artifact', 'artifact-v1', 'archive', 'capabilities', 'evidence', 'exhibition', 'exhibitions', 'graph', 'health', 'manifest', 'metrics', 'readiness', 'relationship', 'serendipity', 'status', 'trial', 'v2', 'verify', 'version'];
 
 for (const route of publicRoutes) {
   assert.ok(directRoutes.has(route) || rewrittenRoutes.has(route), `missing public route /api/${route}`);

@@ -41,3 +41,12 @@ create index if not exists artifacts_status_idx on artifacts(status);
 create index if not exists artifacts_concepts_gin on artifacts using gin(concepts);
 create index if not exists artifacts_evidence_level_idx on artifacts(evidence_level);
 create index if not exists artifacts_current_phase_idx on artifacts(current_phase);
+
+create table if not exists artifact_verdicts (
+  artifact_id text not null references artifacts(id) on delete cascade,
+  verdict text not null check (verdict in ('FAILED', 'TOO_EARLY', 'ARRIVED_QUIETLY')),
+  vote_count bigint not null default 0 check (vote_count >= 0),
+  updated_at timestamptz not null default now(),
+  primary key (artifact_id, verdict)
+);
+create index if not exists artifact_verdicts_updated_at_idx on artifact_verdicts(updated_at desc);
