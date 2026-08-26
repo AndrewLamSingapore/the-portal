@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://the-portal/contracts/experiment-candidate.schema.json",
+  "title": "ExperimentCandidate",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "candidate_id", "source", "title", "question", "evidence_boundary", "status"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "candidate_id": {"type": "string", "pattern": "^PTL-EXP-[A-Z0-9-]+$"},
+    "source": {"const": "the-portal"},
+    "title": {"type": "string", "minLength": 1},
+    "question": {"type": "string", "minLength": 1},
+    "hypothesis": {"type": ["string", "null"]},
+    "node_ids": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "concepts": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "provenance": {"type": "array", "items": {"type": "string"}},
+    "evidence_boundary": {"type": "string", "minLength": 1},
+    "status": {"enum": ["proposed", "accepted", "rejected", "superseded"]},
+    "created_at": {"type": ["string", "null"], "format": "date-time"}
+  }
+}
