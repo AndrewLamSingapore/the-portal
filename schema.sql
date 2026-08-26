@@ -1,6 +1,6 @@
 create table if not exists artifacts (
   id text primary key,
-  schema_version integer not null default 5,
+  schema_version integer not null default 6,
   year integer not null,
   era text not null,
   type text not null,
@@ -20,6 +20,10 @@ create table if not exists artifacts (
   relationships jsonb not null default '[]'::jsonb,
   experiment jsonb not null default '{}'::jsonb,
   connections jsonb not null default '[]'::jsonb,
+  lifecycle jsonb not null default '[]'::jsonb,
+  current_phase text not null default 'EMERGED',
+  recurrence_conditions jsonb not null default '[]'::jsonb,
+  realization_signal text not null default '',
   created_at timestamptz not null default now()
 );
 alter table artifacts add column if not exists evidence_level text not null default 'AI-CURATED';
@@ -27,7 +31,13 @@ alter table artifacts add column if not exists sources jsonb not null default '[
 alter table artifacts add column if not exists relationships jsonb not null default '[]'::jsonb;
 alter table artifacts add column if not exists experiment jsonb not null default '{}'::jsonb;
 alter table artifacts add column if not exists connections jsonb not null default '[]'::jsonb;
+alter table artifacts add column if not exists lifecycle jsonb not null default '[]'::jsonb;
+alter table artifacts add column if not exists current_phase text not null default 'EMERGED';
+alter table artifacts add column if not exists recurrence_conditions jsonb not null default '[]'::jsonb;
+alter table artifacts add column if not exists realization_signal text not null default '';
+alter table artifacts alter column schema_version set default 6;
 create index if not exists artifacts_year_idx on artifacts(year);
 create index if not exists artifacts_status_idx on artifacts(status);
 create index if not exists artifacts_concepts_gin on artifacts using gin(concepts);
 create index if not exists artifacts_evidence_level_idx on artifacts(evidence_level);
+create index if not exists artifacts_current_phase_idx on artifacts(current_phase);

@@ -1,6 +1,8 @@
-# The Portal — 5.0 Architecture
+# The Portal — 6.0 Architecture
 
-Version 5 closes the living loop: a single generation creates an artifact, a testable experiment, optional typed links to existing artifact IDs, and a derived evolution event. Browser-recorded experiment outcomes stay private and only affect that visitor's graph display.
+Version 6 makes imagined-future lifecycles executable. A single generation creates an artifact, a testable experiment, optional typed links, and an evidence-bounded timeline showing how a future emerged, disappeared, returned, failed, partially materialized, or became real.
+
+> The Portal is a continuously evolving model of humanity's imagined futures—tracking how ideas emerge, disappear, return, fail and become real.
 
 ## Product invariant
 
@@ -37,7 +39,18 @@ Browser
 
 ## Canonical artifact
 
-A canonical artifact contains `id`, `era`, `year`, `type`, `title`, `description`, `provenance`, `condition`, `imagined_future`, `problem`, `status`, `modern_descendant`, `concepts[]`, `question`, `mode`, `created_at` and `schema_version`.
+A canonical artifact also carries `lifecycle[]`, `current_phase`, `recurrence_conditions[]`, and `realization_signal`. Each lifecycle event includes a phase, year, description and explicit evidence basis.
+
+## Continuous futures model
+
+The archive deterministically derives four views from canonical artifacts:
+
+- phase counts across `EMERGED`, `DISAPPEARED`, `RETURNED`, `FAILED`, `PARTIALLY_REALIZED` and `REALIZED`;
+- chronological transitions, including the previous and next phase;
+- recurring conditions that may explain why futures return;
+- a realization watchlist whose claims can be checked against observable signals.
+
+The derived model never silently upgrades an inference. An event remains `AI-GENERATED-HYPOTHESIS` until a separate evidence workflow can mark it `SOURCE-SUPPORTED`.
 
 ### Identity
 

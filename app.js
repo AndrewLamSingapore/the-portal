@@ -171,6 +171,24 @@ function renderEvolution() {
   el('evolution').innerHTML = events.length ? events.map(event => `<button type="button" class="evolution-event" data-id="${escapeHtml(event.id)}"><b>${escapeHtml(event.title)}</b><span>${event.new_concepts.length ? `Introduced ${escapeHtml(event.new_concepts.join(', '))}` : 'Extended existing knowledge'}${event.strengthened_concepts.length ? ` · Strengthened ${escapeHtml(event.strengthened_concepts.join(', '))}` : ''}${event.connections_created ? ` · ${event.connections_created} typed connection${event.connections_created === 1 ? '' : 's'}` : ''}</span></button>`).join('') : '<p class="empty">Evolution events begin with Version 5 encounters.</p>'; bindArtifactButtons(el('evolution'));
 }
 
+function renderContinuousModel() {
+  const model = state.archive.continuous_model || {};
+  const phases = ['EMERGED', 'DISAPPEARED', 'RETURNED', 'FAILED', 'PARTIALLY_REALIZED', 'REALIZED'];
+  const liveCounts = Object.fromEntries(phases.map(phase => [phase, 0]));
+  for (const artifact of state.archive.artifacts || []) for (const event of artifact.lifecycle || []) if (event.phase in liveCounts) liveCounts[event.phase] += 1;
+  el('phaseStrip').innerHTML = phases.map(phase => `<div class="phase"><b>${escapeHtml(liveCounts[phase] || model.phases?.[phase] || 0)}</b><span>${escapeHtml(phase.replace('_', ' '))}</span></div>`).join('');
+
+  const transitions = model.transitions || [];
+  el('transitions').innerHTML = transitions.length ? transitions.slice(0, 10).map(event => `<button type="button" class="transition" data-id="${escapeHtml(event.artifact_id)}">
+    <time>${escapeHtml(event.year)}</time><span><b>${escapeHtml(event.from ? `${event.from.replace('_', ' ')} → ${event.to.replace('_', ' ')}` : event.to.replace('_', ' '))}</b>${escapeHtml(event.title)}</span><small>${escapeHtml(event.evidence_basis)}</small>
+  </button>`).join('') : '<p class="empty">Lifecycle transitions appear as Version 6 artifacts enter the archive.</p>';
+  bindArtifactButtons(el('transitions'));
+
+  const watchlist = model.realization_watchlist || [];
+  el('watchlist').innerHTML = watchlist.length ? watchlist.slice(0, 8).map(item => `<button type="button" class="watch" data-id="${escapeHtml(item.id)}"><span>${escapeHtml(item.current_phase?.replace('_', ' ') || 'EMERGED')}</span><b>${escapeHtml(item.title)}</b><small>${escapeHtml(item.signal)}</small></button>`).join('') : '<p class="empty">Unrealized futures with observable realization signals will appear here.</p>';
+  bindArtifactButtons(el('watchlist'));
+}
+
 function deriveNetwork(artifacts) {
   const nodes = artifacts.map(artifact => ({ id: artifact.id, title: artifact.title, year: artifact.year, concepts: artifact.concepts || [] }));
   const edges = [];
@@ -250,6 +268,7 @@ function detailMarkup(artifact) {
   const relationships = (artifact.relationships || []).map(relationship => `<span class="relationship">${escapeHtml(relationship.type)} · ${escapeHtml(relationship.label)}</span>`).join('');
   const connections = (artifact.connections || []).map(connection => `<span class="relationship">${escapeHtml(connection.type)} → ${escapeHtml(connection.target_id)} · ${escapeHtml(connection.reason)}</span>`).join('');
   const experiment = artifact.experiment?.hypothesis ? `<h3>Test this idea</h3>${experimentMarkup({ id: artifact.id, title: artifact.title, experiment: artifact.experiment })}` : '';
+  const lifecycle = (artifact.lifecycle || []).map(event => `<li><time>${escapeHtml(event.year)}</time><span><b>${escapeHtml(event.phase.replace('_', ' '))}</b>${escapeHtml(event.description)}<small>${escapeHtml(event.evidence_basis || 'AI-GENERATED-HYPOTHESIS')}</small></span></li>`).join('');
   return `${evidenceBadge(artifact)}
     <h2 id="drawerTitle">${escapeHtml(artifact.title)}</h2>
     <p class="meta">${escapeHtml(artifact.id)} · ${escapeHtml(artifact.year)} · ${escapeHtml(artifact.status || 'EXPLORING')} · ${escapeHtml(artifact.persistence || 'ARCHIVE')}</p>
@@ -258,6 +277,7 @@ function detailMarkup(artifact) {
     <h3>Encounter / imagined future</h3><p>${escapeHtml(artifact.imagined_future)}</p>
     <h3>Problem addressed</h3><p>${escapeHtml(artifact.problem)}</p>
     <h3>Outcome / modern descendant</h3><p>${escapeHtml(artifact.modern_descendant)}</p>
+    ${lifecycle ? `<h3>Future lifecycle</h3><ol class="lifecycle">${lifecycle}</ol><h3>What could make it return</h3><div>${(artifact.recurrence_conditions || []).map(condition => `<span class="tag">${escapeHtml(condition)}</span>`).join('')}</div><h3>Observable realization signal</h3><p>${escapeHtml(artifact.realization_signal)}</p>` : ''}
     <h3>Concepts</h3><div>${(artifact.concepts || []).map(concept => `<span class="tag">${escapeHtml(concept)}</span>`).join('')}</div>
     ${relationships ? `<h3>Conceptual relationships</h3><div>${relationships}</div>` : ''}
     ${connections ? `<h3>Typed graph connections</h3><div>${connections}</div>` : ''}
@@ -337,6 +357,7 @@ async function loadPortal() {
   renderLenses();
   renderExperiments();
   renderEvolution();
+  renderContinuousModel();
   renderArtifacts();
   renderCabinet();
   drawGraph();
@@ -370,10 +391,14 @@ async function generateEncounter(event) {
     state.archive.evolution = state.archive.evolution || { events: [], open_experiments: [] };
     state.archive.evolution.open_experiments = [{ id: payload.id, title: payload.title, experiment: payload.experiment }, ...(state.archive.evolution.open_experiments || []).filter(item => item.id !== payload.id)].filter(item => item.experiment?.hypothesis).slice(0, 8);
     state.archive.evolution.events = [{ id: payload.id, title: payload.title, new_concepts: payload.concepts || [], strengthened_concepts: [], connections_created: (payload.connections || []).length, experiment: payload.experiment }, ...(state.archive.evolution.events || []).filter(item => item.id !== payload.id)].slice(0, 20);
+    state.archive.continuous_model = state.archive.continuous_model || { phases: {}, transitions: [], realization_watchlist: [] };
+    state.archive.continuous_model.transitions = [...(payload.lifecycle || []).map((event, index, lifecycle) => ({ artifact_id: payload.id, title: payload.title, from: index ? lifecycle[index - 1].phase : null, to: event.phase, year: event.year, evidence_basis: event.evidence_basis })), ...(state.archive.continuous_model.transitions || []).filter(item => item.artifact_id !== payload.id)].sort((a, b) => b.year - a.year).slice(0, 60);
+    if (payload.realization_signal && payload.current_phase !== 'REALIZED') state.archive.continuous_model.realization_watchlist = [{ id: payload.id, title: payload.title, current_phase: payload.current_phase, signal: payload.realization_signal }, ...(state.archive.continuous_model.realization_watchlist || []).filter(item => item.id !== payload.id)].slice(0, 12);
     state.activeLens = null;
     renderLenses();
     renderExperiments();
     renderEvolution();
+    renderContinuousModel();
     renderArtifacts();
     renderCabinet();
     message.textContent = payload.persistence === 'shared'

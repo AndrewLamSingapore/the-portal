@@ -39,12 +39,13 @@ function canonical(artifact, mode, allowedTargetIds = new Set()) {
     ...artifact,
     id: `PTL-${artifact.year}-${fingerprint}`,
     mode,
-    schema_version: 5,
+    schema_version: 6,
     created_at: new Date().toISOString(),
     concepts: [...new Set((artifact.concepts || []).map(normalize).filter(Boolean))],
     // Public generation accepts no source input, so generated objects can never
     // acquire an unverified URL merely because it appeared in model output.
     sources: [],
+    lifecycle: (artifact.lifecycle || []).map(event => ({ ...event, evidence_basis: 'AI-GENERATED-HYPOTHESIS' })).sort((a, b) => a.year - b.year),
     connections: (artifact.connections || []).filter((item, index, all) => allowedTargetIds.has(item.target_id) && all.findIndex(other => other.target_id === item.target_id && other.type === item.type) === index)
   };
 }

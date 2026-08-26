@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#080604">
-  <meta name="description" content="The Portal is a living knowledge graph where encounters become connections, experiments and new ways of seeing.">
+  <meta name="description" content="The Portal is a continuously evolving model of humanity's imagined futures—tracking how ideas emerge, disappear, return, fail and become real.">
   <meta property="og:title" content="The Portal · Living Knowledge System">
   <meta property="og:description" content="Follow encounters as they become connections, experiments and new ways of seeing.">
   <meta property="og:type" content="website">
@@ -20,7 +20,7 @@
   <a class="skip-link" href="#main">Skip to the graph</a>
   <header class="topbar" aria-label="Portal identity">
     <a class="brand" href="/" aria-label="The Portal home">PTL<span>↻</span></a>
-    <span class="edition">LIVING SYSTEM · 5.1</span>
+    <span class="edition">CONTINUOUS FUTURES · 6.0</span>
     <div class="topbar-end">
       <button class="sound-toggle" id="portalSound" type="button" aria-pressed="false" aria-describedby="portalSoundHint">
         <span class="sound-mark" aria-hidden="true"><i></i><i></i><i></i></span>
@@ -37,9 +37,9 @@
 
   <main id="main">
     <header class="hero">
-      <p class="eyebrow">THE LIVING KNOWLEDGE GRAPH</p>
+      <p class="eyebrow">THE CONTINUOUS FUTURES MODEL</p>
       <h1>THE<br>PORTAL</h1>
-      <p class="thesis">Not a record of what has been done. A living map of how encounters become connections, connections become experiments, and experiments create new ways of seeing the world.</p>
+      <p class="thesis">A continuously evolving model of humanity’s imagined futures—tracking how ideas emerge, disappear, return, fail and become real.</p>
       <p class="loop" aria-label="Encounter, connect, experiment, evolve, repeat">
         <span>ENCOUNTER</span><i>→</i><span>CONNECT</span><i>→</i><span>EXPERIMENT</span><i>→</i><span>EVOLVE</span><i>↻</i>
       </p>
@@ -72,6 +72,27 @@
         <button class="primary generate" id="generate" type="submit">GENERATE ONE ENCOUNTER</button>
       </form>
       <p class="curator-state" id="curatorState" role="status" aria-live="polite">Each request creates one structured, graph-ready artifact.</p>
+    </section>
+
+    <section class="section" aria-labelledby="futuresModelTitle">
+      <div class="section-heading">
+        <div>
+          <p class="index">CONTINUOUS MODEL</p>
+          <h2 id="futuresModelTitle">How futures move</h2>
+        </div>
+        <p class="section-note">Lifecycle transitions are hypotheses until their evidence is source-supported. The model preserves uncertainty instead of converting inference into history.</p>
+      </div>
+      <div class="phase-strip" id="phaseStrip" aria-label="Lifecycle phase counts"></div>
+      <div class="model-grid">
+        <div>
+          <h3 class="subheading">Latest transitions</h3>
+          <div class="transition-ledger" id="transitions"></div>
+        </div>
+        <div>
+          <h3 class="subheading">Realization watchlist</h3>
+          <div class="watchlist" id="watchlist"></div>
+        </div>
+      </div>
     </section>
 
     <section class="section" id="graphSection" aria-labelledby="graphTitle">
@@ -153,7 +174,7 @@
   <div class="backdrop" id="backdrop" hidden></div>
 
   <footer>
-    <p>THE PORTAL · ENCOUNTER → CONNECT → EXPERIMENT → EVOLVE ↻</p>
+    <p>THE PORTAL · EMERGE → DISAPPEAR → RETURN → FAIL → BECOME REAL ↻</p>
     <p>Discovery without behavioural capture.</p>
   </footer>
 </body>

@@ -1,6 +1,6 @@
 # The Portal
 
-Version 5 is a living knowledge system: encounters do not merely enter an archive. Each can propose a testable experiment, connect explicitly to earlier artifacts, and leave a transparent evolution event. Personal experiment outcomes remain in the visitor's browser.
+Version 6 is a continuously evolving model of humanity's imagined futures. It tracks how ideas emerge, disappear, return, fail, partially materialize and become real—without hiding the boundary between generated hypotheses and source-supported history.
 
 ## An explorable model of how encounters become connections, experiments and new ways of seeing.
 
