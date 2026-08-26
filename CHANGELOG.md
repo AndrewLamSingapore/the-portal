@@ -1,5 +1,13 @@
 # Changelog
 
+## 6.1.0 — Archive Awakening
+
+- Turns the hero into a layered portal aperture with pointer-responsive depth and a cinematic first-load ignition.
+- Stages graph edges and nodes as a constellation coming online, with an ambient scanning beam inside the graph.
+- Adds tactile depth, moving highlights and magnetic response to archive cards, lenses, experiments and evolution events.
+- Connects motion to intent: entering the graph, maximizing serendipity and generating an encounter now produce distinct visual states.
+- Preserves progressive enhancement, hidden-tab pausing, touch performance and the full reduced-motion fallback.
+
 ## 6.0.0 — Continuous Futures Model
 
 - Makes emergence, disappearance, return, failure, partial realization and realization first-class lifecycle phases.

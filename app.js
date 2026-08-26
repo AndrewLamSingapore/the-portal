@@ -21,6 +21,10 @@ const safeHttpsUrl = value => {
   }
 };
 
+function emitPortalMotion(name, detail = {}) {
+  document.dispatchEvent(new CustomEvent(`portal:${name}`, { detail }));
+}
+
 const PORTAL_SOUND_PREFERENCE = 'portal-sound-v1';
 let portalSoundAllowed = true;
 try { portalSoundAllowed = localStorage.getItem(PORTAL_SOUND_PREFERENCE) !== 'off'; } catch {}
@@ -372,6 +376,7 @@ async function generateEncounter(event) {
   button.disabled = true;
   button.textContent = 'CURATING…';
   el('curatorForm').setAttribute('aria-busy', 'true');
+  emitPortalMotion('encounter-start');
   message.textContent = 'Searching for a distant, structured encounter. This can take up to 45 seconds…';
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 50000);
@@ -406,21 +411,25 @@ async function generateEncounter(event) {
       : cabinetSaved
         ? 'Encounter created and preserved in your private cabinet.'
         : 'Encounter created for this session; private browser storage is unavailable.';
+    emitPortalMotion('encounter-created', { id: payload.id, title: payload.title });
     showArtifact(payload.id, button);
   } catch (error) {
     message.textContent = error.name === 'AbortError' ? 'The curator timed out safely. No incomplete artifact was saved.' : error.message;
+    emitPortalMotion('encounter-failed');
   } finally {
     clearTimeout(timer);
     state.busy = false;
     button.disabled = false;
     button.textContent = 'GENERATE ONE ENCOUNTER';
     el('curatorForm').removeAttribute('aria-busy');
+    emitPortalMotion('encounter-end');
   }
 }
 
 async function maximizeSerendipity(event) {
   const button = event.currentTarget;
   button.disabled = true;
+  emitPortalMotion('serendipity-start');
   try {
     const path = `/api/serendipity${state.activeId ? `?from=${encodeURIComponent(state.activeId)}` : ''}`;
     const response = await fetch(path, { cache: 'no-store' });
@@ -433,6 +442,7 @@ async function maximizeSerendipity(event) {
     else el('status').textContent = 'CREATE AN ENCOUNTER TO BEGIN SERENDIPITY.';
   } finally {
     button.disabled = false;
+    emitPortalMotion('serendipity-end');
   }
 }
 

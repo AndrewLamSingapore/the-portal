@@ -9,12 +9,12 @@ for (const asset of ['/motion.css', '/motion.js']) {
   assert.ok(html.includes(asset), `homepage missing kinetic asset: ${asset}`);
 }
 
-for (const behavior of ['IntersectionObserver', 'MutationObserver', 'visibilitychange', 'prefers-reduced-motion', 'ambient-field', 'motionProgress']) {
+for (const behavior of ['IntersectionObserver', 'MutationObserver', 'visibilitychange', 'prefers-reduced-motion', 'ambient-field', 'motionProgress', 'portal-burst', 'graph-scan', 'portal:encounter-start', 'bindKineticSurface']) {
   assert.ok(app.includes(behavior), `motion layer missing behavior: ${behavior}`);
 }
 
-for (const behavior of ['prefers-reduced-motion', 'animation-play-state: paused', '@keyframes portalOrbit', '@keyframes particleDrift', '.motion-section.is-visible']) {
+for (const behavior of ['prefers-reduced-motion', 'animation-play-state: paused', '@keyframes portalOrbit', '@keyframes particleDrift', '@keyframes apertureIgnition', '@keyframes nodeAwaken', '@keyframes encounterCharge', '.motion-section.is-visible', '.portal-aperture', '.graph-scan']) {
   assert.ok(css.includes(behavior), `motion stylesheet missing safety or visual contract: ${behavior}`);
 }
 
-console.log('PASS: kinetic motion, progressive reveal, tab pause and reduced-motion contracts verified.');
+console.log('PASS: cinematic aperture, kinetic surfaces, graph ignition, action states and motion safety contracts verified.');
