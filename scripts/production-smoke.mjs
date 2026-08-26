@@ -51,7 +51,7 @@ assert.match(motionResult.text, /IntersectionObserver/);
 const version = json(versionResult, '/api/version');
 assert.equal(versionResult.response.status, 200);
 assert.equal(version.product, 'The Portal');
-assert.equal(version.version, '6.0.0');
+assert.equal(version.version, '6.1.0');
 assert.equal(version.schema_version, 6);
 assert.equal(version.experience, 'Continuous Futures Model');
 
@@ -63,13 +63,13 @@ assert.equal(health.archive, true);
 assert.equal(health.generation_configured, true);
 assert.equal(health.evidence_schema, true);
 assert.equal(health.schema_version, 6);
-assert.equal(health.product_version, '6.0.0');
+assert.equal(health.product_version, '6.1.0');
 if (process.env.EXPECTED_REVISION) assert.equal(health.revision, process.env.EXPECTED_REVISION);
 
 const status = json(statusResult, '/api/status');
 assert.equal(statusResult.response.status, 200);
 assert.equal(status.status, 'OPERATIONAL');
-assert.equal(status.product_version, '6.0.0');
+assert.equal(status.product_version, '6.1.0');
 const readiness = json(readinessResult, '/api/readiness');
 assert.equal(readinessResult.response.status, 200);
 assert.equal(readiness.ok, true);

@@ -2,6 +2,8 @@
   --motion-ease: cubic-bezier(.22, 1, .36, 1);
   --motion-ember: rgba(205, 117, 75, .72);
   --motion-paper: rgba(234, 223, 201, .7);
+  --portal-shift-x: 0px;
+  --portal-shift-y: 0px;
 }
 
 body {
@@ -53,6 +55,16 @@ footer {
   animation: particleDrift var(--duration) var(--delay) ease-in-out infinite;
 }
 
+.ambient-particle.particle-1 {
+  background: rgba(134, 185, 178, .64);
+  box-shadow: 0 0 14px rgba(134, 185, 178, .38);
+}
+
+.ambient-particle.particle-2 {
+  background: rgba(205, 178, 126, .78);
+  box-shadow: 0 0 16px rgba(205, 178, 126, .48);
+}
+
 .motion-glow {
   inset: auto;
   width: 30rem;
@@ -64,6 +76,52 @@ footer {
   transition: opacity .6s ease;
   will-change: left, top;
 }
+
+.portal-burst {
+  --burst-color: rgba(205, 178, 126, .72);
+  --burst-scale: 24;
+  position: fixed;
+  z-index: 40;
+  width: 24px;
+  height: 24px;
+  margin: -12px 0 0 -12px;
+  border: 1px solid var(--burst-color);
+  border-radius: 50%;
+  box-shadow: 0 0 24px var(--burst-color), inset 0 0 14px var(--burst-color);
+  pointer-events: none;
+  animation: burstRing 1.15s var(--motion-ease) both;
+}
+
+.portal-burst::before,
+.portal-burst::after {
+  content: "";
+  position: absolute;
+  inset: 50%;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.portal-burst::before {
+  width: 180%;
+  height: 180%;
+  border: 1px dashed var(--burst-color);
+  animation: burstCounterspin 1.15s ease-out both;
+}
+
+.portal-burst::after {
+  width: 12px;
+  height: 12px;
+  background: var(--burst-color);
+  filter: blur(6px);
+  animation: burstFlash .62s ease-out both;
+}
+
+.portal-burst.ignition,
+.portal-burst.entry { --burst-scale: 44; }
+.portal-burst.encounter { --burst-color: rgba(189, 104, 69, .82); --burst-scale: 30; }
+.portal-burst.serendipity { --burst-color: rgba(134, 185, 178, .76); --burst-scale: 34; }
+.portal-burst.success { --burst-color: rgba(205, 178, 126, .92); --burst-scale: 38; }
+.portal-burst.failed { --burst-color: rgba(187, 103, 88, .82); --burst-scale: 20; }
 
 #motionProgress {
   position: fixed;
@@ -107,6 +165,78 @@ footer {
 .hero {
   position: relative;
   isolation: isolate;
+}
+
+.hero > :not(.portal-aperture) {
+  position: relative;
+  z-index: 1;
+}
+
+.portal-aperture {
+  position: absolute;
+  left: 50%;
+  top: 47%;
+  z-index: -1;
+  width: min(76vw, 820px);
+  aspect-ratio: 1;
+  pointer-events: none;
+  transform: translate(-50%, -50%) translate3d(var(--portal-shift-x), var(--portal-shift-y), 0) scale(.9);
+  filter: drop-shadow(0 0 42px rgba(189, 104, 69, .2));
+  opacity: 0;
+  will-change: transform;
+}
+
+.portal-awake .portal-aperture {
+  animation: apertureIgnition 1.55s .08s var(--motion-ease) both;
+}
+
+.portal-ready .portal-aperture {
+  opacity: 1;
+  transform: translate(-50%, -50%) translate3d(var(--portal-shift-x), var(--portal-shift-y), 0) scale(1);
+}
+
+.aperture-ring,
+.aperture-core {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  display: block;
+  aspect-ratio: 1;
+  border-radius: 50%;
+}
+
+.aperture-ring {
+  background: conic-gradient(from 0deg, transparent 0 7%, rgba(189, 104, 69, .74) 10%, transparent 14% 29%, rgba(205, 178, 126, .5) 33%, transparent 38% 61%, rgba(134, 185, 178, .42) 66%, transparent 72% 88%, rgba(234, 223, 201, .5) 92%, transparent 96%);
+  -webkit-mask: radial-gradient(circle, transparent 0 58%, #000 59% 61%, transparent 62% 68%, #000 69% 69.6%, transparent 71%);
+  mask: radial-gradient(circle, transparent 0 58%, #000 59% 61%, transparent 62% 68%, #000 69% 69.6%, transparent 71%);
+  mix-blend-mode: screen;
+}
+
+.ring-outer {
+  width: 100%;
+  opacity: .48;
+  animation: apertureOrbit 32s linear infinite;
+}
+
+.ring-middle {
+  width: 79%;
+  opacity: .66;
+  animation: apertureOrbitReverse 21s linear infinite;
+}
+
+.ring-inner {
+  width: 58%;
+  opacity: .82;
+  animation: apertureOrbit 13s linear infinite;
+}
+
+.aperture-core {
+  width: 32%;
+  background:
+    radial-gradient(circle, rgba(234, 223, 201, .17), rgba(189, 104, 69, .13) 24%, rgba(8, 6, 4, .88) 66%, transparent 70%);
+  transform: translate(-50%, -50%) translate3d(var(--portal-shift-x), var(--portal-shift-y), 0);
+  box-shadow: 0 0 58px rgba(189, 104, 69, .2), inset 0 0 42px rgba(205, 178, 126, .1);
+  animation: apertureCore 5.8s ease-in-out infinite;
 }
 
 .hero::before,
@@ -155,6 +285,20 @@ footer {
 .hero .loop { animation-delay: .64s; }
 .hero .status { animation-delay: .74s; }
 .hero .hero-actions { animation-delay: .84s; }
+
+.portal-entering .portal-aperture {
+  animation: apertureOpen 1.35s var(--motion-ease) both;
+}
+
+.portal-entering .hero h1 {
+  letter-spacing: .145em;
+  text-shadow: 0 0 34px rgba(234, 223, 201, .26), 0 0 82px rgba(189, 104, 69, .36);
+  transition: letter-spacing .8s var(--motion-ease), text-shadow .8s ease;
+}
+
+.portal-entering .hero::after {
+  animation: portalEnterAura 1.35s var(--motion-ease) both;
+}
 
 .loop span {
   animation: loopSignal 8s ease-in-out infinite;
@@ -213,6 +357,10 @@ footer {
 }
 
 .motion-item {
+  --tilt-x: 0deg;
+  --tilt-y: 0deg;
+  --glint-x: 50%;
+  --glint-y: 50%;
   opacity: 0;
   transform: translateY(18px) scale(.985);
   transition:
@@ -228,14 +376,48 @@ footer {
   transform: none;
 }
 
+.card,
+.lens,
+.experiment-card,
+.evolution-event,
+.evidence-grid article,
+.transition,
+.watch,
+.phase {
+  position: relative;
+  overflow: hidden;
+  transform-style: preserve-3d;
+}
+
+.card::before,
+.lens::before,
+.experiment-card::before,
+.evolution-event::before,
+.evidence-grid article::before,
+.transition::before,
+.watch::before,
+.phase::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  pointer-events: none;
+  background: radial-gradient(circle at var(--glint-x) var(--glint-y), rgba(234, 223, 201, .15), transparent 38%);
+  opacity: 0;
+  transition: opacity .32s ease;
+}
+
+.is-kinetic::before {
+  opacity: 1;
+}
+
 .card.motion-item.is-visible:hover,
 .card.motion-item.is-visible:focus-visible,
 .lens.motion-item.is-visible:hover,
 .lens.motion-item.is-visible:focus-visible,
 .experiment-card.motion-item.is-visible:hover,
 .evolution-event.motion-item.is-visible:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 18px 48px rgba(0, 0, 0, .22), inset 0 1px rgba(234, 223, 201, .05);
+  transform: perspective(900px) translateY(-7px) rotateX(var(--tilt-y)) rotateY(var(--tilt-x)) scale(1.012);
+  box-shadow: 0 22px 58px rgba(0, 0, 0, .3), 0 0 34px rgba(189, 104, 69, .065), inset 0 1px rgba(234, 223, 201, .08);
 }
 
 .graph {
@@ -253,13 +435,84 @@ footer {
   animation: graphOrbit 38s linear infinite;
 }
 
+.graph-scan {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 0;
+  width: 72%;
+  height: 1px;
+  transform-origin: left center;
+  background: linear-gradient(90deg, rgba(205, 178, 126, .58), rgba(189, 104, 69, .14) 45%, transparent 78%);
+  box-shadow: 0 0 16px rgba(205, 178, 126, .24);
+  opacity: .38;
+  pointer-events: none;
+  animation: graphScan 13s linear infinite;
+}
+
 .node {
-  animation: nodeSignal 4.6s var(--node-delay, 0s) ease-in-out infinite;
+  z-index: 2;
+  animation:
+    nodeAwaken .72s var(--node-entry-delay, 0ms) var(--motion-ease) both,
+    nodeSignal 4.6s var(--node-delay, 0s) ease-in-out infinite;
 }
 
 .edge {
+  z-index: 1;
   opacity: .3;
-  animation: edgeCurrent 4.8s var(--edge-delay, 0s) ease-in-out infinite;
+  animation:
+    edgeAwaken .9s var(--edge-entry-delay, 0ms) var(--motion-ease) both,
+    edgeCurrent 4.8s var(--edge-delay, 0s) ease-in-out infinite;
+}
+
+.graph-searching .graph {
+  animation: graphSearch .72s var(--motion-ease) both;
+}
+
+.graph-searching .graph-scan {
+  opacity: .82;
+  animation-duration: .9s;
+}
+
+.curator {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+.curator::after {
+  content: "";
+  position: absolute;
+  inset: -35% -15%;
+  z-index: -1;
+  pointer-events: none;
+  background: conic-gradient(from 180deg at 50% 50%, transparent 0 42%, rgba(189, 104, 69, .2) 48%, rgba(205, 178, 126, .11) 52%, transparent 58% 100%);
+  opacity: 0;
+}
+
+.encounter-generating .curator::after {
+  opacity: 1;
+  animation: curatorSweep 2.2s linear infinite;
+}
+
+.encounter-generating .generate {
+  animation: encounterCharge 1.05s ease-in-out infinite;
+}
+
+.encounter-generating .ring-outer { animation-duration: 4.5s; }
+.encounter-generating .ring-middle { animation-duration: 3.2s; }
+.encounter-generating .ring-inner { animation-duration: 2.2s; }
+
+.encounter-created .portal-aperture {
+  filter: drop-shadow(0 0 72px rgba(205, 178, 126, .58));
+}
+
+.drawer.open {
+  animation: drawerArrival .58s var(--motion-ease) both;
+}
+
+.backdrop:not([hidden]) {
+  animation: backdropArrival .34s ease-out both;
 }
 
 .drawer.open .drawer-shell {
@@ -270,6 +523,66 @@ footer {
 .motion-paused *::before,
 .motion-paused *::after {
   animation-play-state: paused !important;
+}
+
+@keyframes apertureIgnition {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) translate3d(var(--portal-shift-x), var(--portal-shift-y), 0) scale(.42) rotate(-12deg);
+    filter: blur(18px) drop-shadow(0 0 0 rgba(189, 104, 69, 0));
+  }
+  52% { opacity: 1; filter: blur(0) drop-shadow(0 0 76px rgba(189, 104, 69, .48)); }
+  76% { transform: translate(-50%, -50%) translate3d(var(--portal-shift-x), var(--portal-shift-y), 0) scale(1.055) rotate(1deg); }
+  100% {
+    opacity: 1;
+    transform: translate(-50%, -50%) translate3d(var(--portal-shift-x), var(--portal-shift-y), 0) scale(1) rotate(0);
+    filter: blur(0) drop-shadow(0 0 42px rgba(189, 104, 69, .2));
+  }
+}
+
+@keyframes apertureOrbit {
+  from { transform: translate(-50%, -50%) translate3d(var(--portal-shift-x), var(--portal-shift-y), 0) rotate(0deg); }
+  to { transform: translate(-50%, -50%) translate3d(var(--portal-shift-x), var(--portal-shift-y), 0) rotate(360deg); }
+}
+
+@keyframes apertureOrbitReverse {
+  from { transform: translate(-50%, -50%) translate3d(var(--portal-shift-x), var(--portal-shift-y), 0) rotate(360deg); }
+  to { transform: translate(-50%, -50%) translate3d(var(--portal-shift-x), var(--portal-shift-y), 0) rotate(0deg); }
+}
+
+@keyframes apertureCore {
+  0%, 100% {
+    transform: translate(-50%, -50%) translate3d(var(--portal-shift-x), var(--portal-shift-y), 0) scale(.9);
+    opacity: .46;
+  }
+  50% {
+    transform: translate(-50%, -50%) translate3d(var(--portal-shift-x), var(--portal-shift-y), 0) scale(1.14);
+    opacity: .92;
+  }
+}
+
+@keyframes apertureOpen {
+  0% { opacity: 1; transform: translate(-50%, -50%) translate3d(var(--portal-shift-x), var(--portal-shift-y), 0) scale(1); }
+  42% { opacity: 1; transform: translate(-50%, -50%) translate3d(var(--portal-shift-x), var(--portal-shift-y), 0) scale(.82) rotate(-4deg); filter: brightness(1.8) blur(0); }
+  68% { opacity: 1; transform: translate(-50%, -50%) translate3d(var(--portal-shift-x), var(--portal-shift-y), 0) scale(1.18) rotate(2deg); filter: brightness(1.35) blur(1px); }
+  100% { opacity: 1; transform: translate(-50%, -50%) translate3d(var(--portal-shift-x), var(--portal-shift-y), 0) scale(1); filter: brightness(1) blur(0); }
+}
+
+@keyframes burstRing {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(.22) rotate(-18deg); }
+  14% { opacity: .96; }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(var(--burst-scale)) rotate(42deg); }
+}
+
+@keyframes burstCounterspin {
+  from { opacity: .86; transform: translate(-50%, -50%) scale(.6) rotate(0); }
+  to { opacity: 0; transform: translate(-50%, -50%) scale(1.5) rotate(-220deg); }
+}
+
+@keyframes burstFlash {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(.4); }
+  20% { opacity: 1; }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(5); }
 }
 
 @keyframes ambientAurora {
@@ -310,6 +623,12 @@ footer {
   50% { transform: translate(-50%, -50%) scale(1.08); opacity: .9; }
 }
 
+@keyframes portalEnterAura {
+  0% { transform: translate(-50%, -50%) scale(.82); opacity: .35; filter: blur(9px); }
+  46% { transform: translate(-50%, -50%) scale(1.34); opacity: 1; filter: blur(4px); }
+  100% { transform: translate(-50%, -50%) scale(.96); opacity: .5; filter: blur(9px); }
+}
+
 @keyframes riseIntoView {
   from { opacity: 0; transform: translateY(18px); filter: blur(5px); }
   to { opacity: 1; transform: none; filter: blur(0); }
@@ -346,6 +665,28 @@ footer {
   to { transform: rotate(360deg) scale(.94); opacity: .35; }
 }
 
+@keyframes graphScan {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes nodeAwaken {
+  0% { opacity: 0; transform: scale(.15); filter: brightness(2.6) blur(3px); }
+  58% { opacity: 1; transform: scale(1.55); filter: brightness(1.7) blur(0); }
+  100% { opacity: 1; transform: scale(1); filter: brightness(1) blur(0); }
+}
+
+@keyframes edgeAwaken {
+  from { clip-path: inset(0 100% 0 0); opacity: 0; }
+  to { clip-path: inset(-8px 0 -8px 0); opacity: .32; }
+}
+
+@keyframes graphSearch {
+  0%, 100% { transform: scale(1); filter: brightness(1); }
+  36% { transform: scale(.985); filter: brightness(1.55) saturate(1.35); }
+  68% { transform: scale(1.012); filter: brightness(1.18) saturate(1.18); }
+}
+
 @keyframes nodeSignal {
   0%, 100% { box-shadow: 0 0 0 0 rgba(208, 173, 132, 0), 0 0 10px rgba(189, 104, 69, .08); }
   48% { box-shadow: 0 0 0 5px rgba(208, 173, 132, .035), 0 0 20px rgba(189, 104, 69, .22); }
@@ -356,6 +697,27 @@ footer {
   50% { opacity: .56; filter: brightness(1.25); }
 }
 
+@keyframes curatorSweep {
+  from { transform: rotate(0deg) scale(.88); }
+  to { transform: rotate(360deg) scale(1.08); }
+}
+
+@keyframes encounterCharge {
+  0%, 100% { box-shadow: 0 0 0 rgba(189, 104, 69, 0), inset 0 0 0 rgba(234, 223, 201, 0); }
+  50% { box-shadow: 0 0 36px rgba(189, 104, 69, .4), inset 0 0 18px rgba(234, 223, 201, .22); }
+}
+
+@keyframes drawerArrival {
+  from { transform: translateY(110%); filter: blur(4px); }
+  72% { transform: translateY(-1.5%); filter: blur(0); }
+  to { transform: translateY(0); filter: blur(0); }
+}
+
+@keyframes backdropArrival {
+  from { opacity: 0; backdrop-filter: blur(0); }
+  to { opacity: 1; backdrop-filter: blur(3px); }
+}
+
 @keyframes drawerContents {
   from { opacity: 0; transform: translateY(16px); }
   to { opacity: 1; transform: none; }
@@ -364,6 +726,7 @@ footer {
 @media (max-width: 760px) {
   body::before { inset: -8rem; filter: blur(24px); }
   .hero::before, .hero::after { width: min(118vw, 620px); }
+  .portal-aperture { width: min(126vw, 680px); top: 45%; }
   .motion-glow { display: none; }
   .motion-section { transform: translateY(22px); }
 }
@@ -372,6 +735,9 @@ footer {
   body::before,
   .ambient-field,
   .motion-glow,
+  .portal-aperture,
+  .portal-burst,
+  .graph-scan,
   #motionProgress,
   .hero::before,
   .hero::after {
