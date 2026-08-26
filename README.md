@@ -1,6 +1,6 @@
 # The Portal
 
-Version 6 is a continuously evolving model of humanity's imagined futures. It tracks how ideas emerge, disappear, return, fail, partially materialize and become real—without hiding the boundary between generated hypotheses and source-supported history.
+Version 6.2 is a continuously evolving model of humanity's imagined futures. It tracks how ideas emerge, disappear, return, fail, partially materialize and become real—without hiding the boundary between generated hypotheses and source-supported history. Its first public ritual, **The Future on Trial**, lets visitors make an anonymous judgment before seeing the room's aggregate verdict.
 
 ## An explorable model of how encounters become connections, experiments and new ways of seeing.
 
@@ -148,6 +148,8 @@ The desired progression is:
 simple → curious → deeper → surprising
 ```
 
+The homepage now offers three explicit doorways: put a future on trial, wander the graph or create an encounter. The daily trial is selected deterministically rather than ranked by popularity. After voting, a visitor sees the anonymous aggregate, can inspect the evidence boundary, share a deep link and continue into a connected case.
+
 Selected encounters can be presented as digital artifacts: an image or object, its provenance, the observation it triggered, the connections it suggests, the unresolved question and any experiment that followed.
 
 ## Design principles
@@ -180,6 +182,8 @@ Before materially increasing public traffic, use durable distributed rate limiti
 |---|---|---|
 | **Local/private** | Canonical server IDs + private browser cabinet | `OPENAI_API_KEY` |
 | **Shared archive** | Durable Postgres persistence, retrieval and concept traversal | `OPENAI_API_KEY` + `DATABASE_URL` |
+
+Public verdicts use aggregate counters only. The server stores no voter identity, account, comment, fingerprint or IP address. A private browser record prevents casual repeat voting from the same browser and controls whether the aggregate is revealed.
 
 The executable database contract is [`schema.sql`](schema.sql).
 

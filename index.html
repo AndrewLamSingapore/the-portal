@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#080604">
   <meta name="description" content="The Portal is a continuously evolving model of humanity's imagined futures—tracking how ideas emerge, disappear, return, fail and become real.">
   <meta property="og:title" content="The Portal · Living Knowledge System">
-  <meta property="og:description" content="Follow encounters as they become connections, experiments and new ways of seeing.">
+  <meta property="og:description" content="Enter a living archive of futures. Decide what failed, what arrived quietly and what was simply too early.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://the-portal-ten.vercel.app/">
   <meta name="twitter:card" content="summary">
@@ -20,7 +20,7 @@
   <a class="skip-link" href="#main">Skip to the graph</a>
   <header class="topbar" aria-label="Portal identity">
     <a class="brand" href="/" aria-label="The Portal home">PTL<span>↻</span></a>
-    <span class="edition">CONTINUOUS FUTURES · 6.1</span>
+    <span class="edition">CONTINUOUS FUTURES · 6.2</span>
     <div class="topbar-end">
       <button class="sound-toggle" id="portalSound" type="button" aria-pressed="false" aria-describedby="portalSoundHint">
         <span class="sound-mark" aria-hidden="true"><i></i><i></i><i></i></span>
@@ -50,12 +50,27 @@
         <span>ENCOUNTER</span><i>→</i><span>CONNECT</span><i>→</i><span>EXPERIMENT</span><i>→</i><span>EVOLVE</span><i>↻</i>
       </p>
       <p class="status" id="status" role="status" aria-live="polite">CONNECTING TO THE GRAPH…</p>
+      <p class="doorway-label">THE ARCHIVE IS LISTENING · CHOOSE YOUR DOORWAY</p>
       <div class="hero-actions">
-        <button class="primary" id="enterGraph" type="button">ENTER THE GRAPH</button>
+        <button class="primary" id="openTrial" type="button">PUT A FUTURE ON TRIAL</button>
+        <button class="secondary" id="enterGraph" type="button">WANDER THE GRAPH</button>
         <button class="secondary" id="openCurator" type="button">CREATE AN ENCOUNTER</button>
       </div>
       <p class="sound-invitation">THE PORTAL THEME AWAKENS ON ENTRY · SOUND CONTROL ABOVE</p>
     </header>
+
+    <section class="section trial" id="futureOnTrial" aria-labelledby="trialTitle">
+      <div class="section-heading">
+        <div>
+          <p class="index">PUBLIC RITUAL · TODAY’S PORTAL</p>
+          <h2 id="trialTitle">The Future on Trial</h2>
+        </div>
+        <p class="section-note">Make your judgment before seeing the room. Public verdicts are anonymous aggregates—not an engagement ranking or behavioural profile.</p>
+      </div>
+      <div class="trial-stage" id="trialStage" aria-live="polite">
+        <p class="empty">Selecting today’s unresolved future…</p>
+      </div>
+    </section>
 
     <section class="section curator" id="curator" aria-labelledby="curatorTitle">
       <div class="section-heading">
