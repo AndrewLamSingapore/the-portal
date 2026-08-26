@@ -31,24 +31,20 @@ jobs:
     if: github.event_name != 'pull_request'
     needs: verify
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 12
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
         with:
           node-version: 22
-      - name: Wait for production deployment
-        if: github.event_name == 'push'
-        run: sleep 45
+          cache: npm
+      - run: npm ci
+      - name: Install smoke-test browser
+        run: npx playwright install --with-deps chromium
       - name: Verify live production
         env:
           PORTAL_URL: https://the-portal-ten.vercel.app
           SMOKE_TIMEOUT_MS: '15000'
+          DEPLOY_TIMEOUT_MS: '240000'
           EXPECTED_REVISION: ${{ github.sha }}
-        run: |
-          for attempt in 1 2 3 4 5; do
-            echo "Production verification attempt $attempt/5"
-            if npm run smoke:production; then exit 0; fi
-            if [ "$attempt" -lt 5 ]; then sleep 30; fi
-          done
-          exit 1
+        run: npm run smoke:production
