@@ -9,7 +9,7 @@ async function get(path) {
 const home = await get('/');
 assert.equal(home.response.status, 200);
 const html = await home.text();
-for (const token of ['THE LIVING KNOWLEDGE GRAPH', 'CREATE AN ENCOUNTER', 'MAXIMIZE SERENDIPITY', 'Questions over manufactured certainty']) {
+for (const token of ['THE CONTINUOUS FUTURES MODEL', 'CREATE AN ENCOUNTER', 'MAXIMIZE SERENDIPITY', 'Questions over manufactured certainty']) {
   assert.ok(html.includes(token));
 }
 const archiveResponse = await get('/api/archive?limit=60');
