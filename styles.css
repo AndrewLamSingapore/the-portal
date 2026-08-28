@@ -1,24 +1,351 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#080604">
-  <meta name="description" content="The Portal is a continuously evolving model of humanity's imagined futures—tracking how ideas emerge, disappear, return, fail and become real.">
-  <meta property="og:title" content="The Portal · Living Knowledge System"><meta property="og:description" content="Enter a living archive of futures. Decide what failed, what arrived quietly and what was simply too early."><meta property="og:type" content="website"><meta property="og:url" content="https://the-portal-ten.vercel.app/"><meta name="twitter:card" content="summary">
-  <title>THE PORTAL · Living Knowledge System</title><link rel="stylesheet" href="/styles.css"><link rel="stylesheet" href="/orientation.css"><link rel="stylesheet" href="/motion.css"><script src="/app.js" defer></script><script src="/motion.js" defer></script>
-</head>
-<body>
-<a class="skip-link" href="#main">Skip to the graph</a>
-<header class="topbar" aria-label="Portal identity"><a class="brand" href="/" aria-label="The Portal home">PTL<span>↻</span></a><span class="edition">CONTINUOUS FUTURES · 6.3</span><div class="topbar-end"><button class="sound-toggle" id="portalSound" type="button" aria-pressed="false" aria-describedby="portalSoundHint"><span class="sound-mark" aria-hidden="true"><i></i><i></i><i></i></span><span id="portalSoundLabel">SOUND READY</span></button><span class="system-state" id="systemState">CHECKING ARCHIVE</span></div></header>
-<audio id="portalTheme" preload="metadata"><source src="/portal-theme.mp3" type="audio/mpeg"></audio><p class="visually-hidden" id="portalSoundHint">The thematic sound begins when you enter the graph. Use this control to play or mute it.</p>
-<main id="main">
-<header class="hero"><div class="portal-aperture" aria-hidden="true"><i class="aperture-ring ring-outer"></i><i class="aperture-ring ring-middle"></i><i class="aperture-ring ring-inner"></i><span class="aperture-core"></span></div><p class="eyebrow">THE CONTINUOUS FUTURES MODEL</p><h1>THE<br>PORTAL</h1><p class="thesis">A continuously evolving model of humanity’s imagined futures—tracking how ideas emerge, disappear, return, fail and become real.</p><div class="orientation orientation-hero"><p><b>WHAT AM I SEEING?</b><span>A living map of imagined futures, their evidence, relationships and changing status.</span></p><p><b>WHY DOES IT MATTER?</b><span>Ideas become legible when you can see what survived, what failed, and what remains unresolved.</span></p><p><b>WHAT CAN I EXPLORE NEXT?</b><span>Judge one future, follow a connection, create an encounter, or enter the observatory.</span></p></div><p class="loop" aria-label="Encounter, connect, experiment, evolve, repeat"><span>ENCOUNTER</span><i>→</i><span>CONNECT</span><i>→</i><span>EXPERIMENT</span><i>→</i><span>EVOLVE</span><i>↻</i></p><p class="status" id="status" role="status" aria-live="polite">CONNECTING TO THE GRAPH…</p><p class="doorway-label">CHOOSE A MEANINGFUL NEXT MOVE</p><div class="hero-actions"><button class="primary" id="openTrial" type="button">PUT A FUTURE ON TRIAL</button><button class="secondary" id="enterGraph" type="button">FOLLOW THE GRAPH</button><button class="secondary" id="openCurator" type="button">CREATE AN ENCOUNTER</button><a class="secondary" href="/living">ENTER THE LIVING OBSERVATORY</a></div><p class="sound-invitation">THE PORTAL THEME AWAKENS ON ENTRY · SOUND CONTROL ABOVE</p></header>
-<section class="section trial" id="futureOnTrial" aria-labelledby="trialTitle"><div class="section-heading"><div><p class="index">PUBLIC RITUAL · TODAY’S PORTAL</p><h2 id="trialTitle">The Future on Trial</h2></div><p class="section-note">Make your judgment before seeing the room. Public verdicts are anonymous aggregates—not an engagement ranking or behavioural profile.</p></div><div class="orientation"><p><b>WHAT AM I SEEING?</b><span>One unresolved future presented as a public question.</span></p><p><b>WHY DOES IT MATTER?</b><span>Your judgment exposes where collective expectations converge or fracture.</span></p><p><b>EXPLORE NEXT</b><span>Choose a verdict, inspect its evidence, then trace the idea into the graph.</span></p></div><div class="trial-stage" id="trialStage" aria-live="polite"><p class="empty">Selecting today’s unresolved future…</p></div></section>
-<section class="section curator" id="curator" aria-labelledby="curatorTitle"><div class="section-heading"><div><p class="index">01 · ENCOUNTER</p><h2 id="curatorTitle">Open an unexpected drawer</h2></div><p class="section-note">AI creates a discovery object—not verified history. New objects keep their evidence boundary visible.</p></div><div class="orientation"><p><b>WHAT AM I SEEING?</b><span>A curator that creates one structured discovery object through a chosen lens.</span></p><p><b>WHY DOES IT MATTER?</b><span>Unexpected encounters widen the search space without disguising generation as fact.</span></p><p><b>EXPLORE NEXT</b><span>Pick a lens, generate an encounter, then inspect its question, evidence boundary and connections.</span></p></div><form class="curator-form" id="curatorForm"><label for="mode">Curator lens</label><select id="mode" name="mode"><option value="wander">Wander · maximize surprise</option><option value="distant">Distant echo · 1750–1939</option><option value="early">Too early · infrastructure was missing</option><option value="failed">Failed future · learn from collapse</option><option value="waiting">Still waiting · not yet ordinary</option><option value="arrived">Arrived · trace the descendant</option></select><button class="primary generate" id="generate" type="submit">GENERATE ONE ENCOUNTER</button></form><p class="curator-state" id="curatorState" role="status" aria-live="polite">Each request creates one structured, graph-ready artifact.</p></section>
-<section class="section" aria-labelledby="futuresModelTitle"><div class="section-heading"><div><p class="index">CONTINUOUS MODEL</p><h2 id="futuresModelTitle">How futures move</h2></div><p class="section-note">Lifecycle transitions are hypotheses until their evidence is source-supported. The model preserves uncertainty instead of converting inference into history.</p></div><div class="orientation"><p><b>WHAT AM I SEEING?</b><span>The current distribution of futures and their latest proposed lifecycle transitions.</span></p><p><b>WHY DOES IT MATTER?</b><span>Movement reveals which possibilities are strengthening, weakening, returning or becoming ordinary.</span></p><p><b>EXPLORE NEXT</b><span>Compare phases, inspect a transition, or open a realization watchlist item.</span></p></div><div class="phase-strip" id="phaseStrip" aria-label="Lifecycle phase counts"></div><div class="model-grid"><div><h3 class="subheading">Latest transitions</h3><div class="transition-ledger" id="transitions"></div></div><div><h3 class="subheading">Realization watchlist</h3><div class="watchlist" id="watchlist"></div></div></div></section>
-<section class="section" id="graphSection" aria-labelledby="graphTitle"><div class="section-heading"><div><p class="index">02 · CONNECT</p><h2 id="graphTitle">The graph</h2></div><p class="section-note">Shared concepts are connective tissue, not proof of causation. Select a node to inspect its evidence and unresolved question.</p></div><div class="orientation"><p><b>WHAT AM I SEEING?</b><span>A conceptual network linking futures through shared themes and relationships.</span></p><p><b>WHY DOES IT MATTER?</b><span>Connections reveal echoes and combinations that isolated archive entries hide.</span></p><p><b>EXPLORE NEXT</b><span>Select a node, inspect why it connects, or maximize serendipity to jump elsewhere.</span></p></div><div class="graph-toolbar"><button class="text-button" id="serendipity" type="button">MAXIMIZE SERENDIPITY</button><button class="text-button" id="resetGraph" type="button">RESET VIEW</button></div><div class="graph" id="graph" role="group" aria-label="Interactive conceptual graph"></div></section>
-<section class="section" aria-labelledby="experimentsTitle"><div class="section-heading"><div><p class="index">03 · EXPERIMENT</p><h2 id="experimentsTitle">Experiments worth running</h2></div><p class="section-note">Every new encounter proposes a small test. Your result remains private to this browser.</p></div><div class="orientation"><p><b>WHAT AM I SEEING?</b><span>Small tests derived from unresolved futures and conceptual constellations.</span></p><p><b>WHY DOES IT MATTER?</b><span>A future becomes more useful when a claim can be challenged instead of merely admired.</span></p><p><b>EXPLORE NEXT</b><span>Open a test, record a private result, or use a constellation to discover related tests.</span></p></div><div class="experiment-grid" id="experiments"></div><h3 class="subheading">Constellations</h3><div class="lenses" id="lenses"></div></section>
-<section class="section" aria-labelledby="evolutionTitle"><div class="section-heading"><div><p class="index">04 · EVOLVE</p><h2 id="evolutionTitle">Evolution ledger</h2></div><p class="section-note">A transparent record of what each encounter introduced, strengthened, and connected.</p></div><div class="orientation"><p><b>WHAT AM I SEEING?</b><span>A provenance trail of how the knowledge model changed over time.</span></p><p><b>WHY DOES IT MATTER?</b><span>You can distinguish genuine evolution from invisible rewriting or manufactured certainty.</span></p><p><b>EXPLORE NEXT</b><span>Inspect a change, follow the affected artifact, or compare it with earlier transitions.</span></p></div><div class="evolution-ledger" id="evolution"></div></section>
-<section class="section" aria-labelledby="artifactsTitle"><div class="section-heading"><div><p class="index">05 · ARCHIVE</p><h2 id="artifactsTitle">Shared archive</h2></div><p class="section-note" id="artifactSummary">Loading the shared archive…</p></div><div class="orientation"><p><b>WHAT AM I SEEING?</b><span>The shared collection of futures, evidence states, questions and conceptual relationships.</span></p><p><b>WHY DOES IT MATTER?</b><span>The archive preserves failed, early and unresolved ideas alongside those that became real.</span></p><p><b>EXPLORE NEXT</b><span>Open an artifact, filter through a constellation, or trace it into the graph and ledger.</span></p></div><div class="grid" id="grid"></div><button class="text-button clear-filter" id="clearFilter" type="button" hidden>SHOW ALL ARTIFACTS</button></section>
-<section class="section cabinet" aria-labelledby="cabinetTitle"><div class="section-heading"><div><p class="index">PRIVATE LAYER</p><h2 id="cabinetTitle">My cabinet</h2></div><p class="section-note">Artifacts created in this browser remain available here. No behavioural profile is built.</p></div><div class="orientation"><p><b>WHAT AM I SEEING?</b><span>Your locally retained encounters from this browser.</span></p><p><b>WHY DOES IT MATTER?</b><span>You can build continuity without turning exploration into behavioural surveillance.</span></p><p><b>EXPLORE NEXT</b><span>Reopen an encounter and continue through its graph, experiment or evidence trail.</span></p></div><div class="grid" id="cabinetGrid"></div></section>
-<section class="section evidence-key" aria-labelledby="evidenceTitle"><p class="index">EVIDENCE KEY</p><h2 id="evidenceTitle">Questions over manufactured certainty</h2><div class="evidence-grid"><article><span class="badge ai">AI-CURATED</span><p>A discovery prompt generated by the curator. Not independently verified history.</p></article><article><span class="badge inference">CONCEPTUAL-INFERENCE</span><p>An interpretive relationship worth examining. Not a claim of causation.</p></article><article><span class="badge verified">HISTORICALLY-VERIFIED</span><p>A curator-reviewed record with a genuine source trail.</p></article></div></section>
-</main><aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="drawerTitle" aria-hidden="true" inert><div class="drawer-shell"><button class="close" id="closeDrawer" type="button">CLOSE <span aria-hidden="true">×</span></button><div id="detail"></div></div></aside><div class="backdrop" id="backdrop" hidden></div><footer><p>THE PORTAL · EMERGE → DISAPPEAR → RETURN → FAIL → BECOME REAL ↻</p><p>Discovery without behavioural capture.</p></footer></body></html>
+:root {
+  --paper: #eadfc9;
+  --paper-soft: #c8b89f;
+  --ink: #17100c;
+  --night: #080604;
+  --ember: #bd6845;
+  --fade: #92785e;
+  --line: rgba(234, 223, 201, .13);
+  --surface: rgba(234, 223, 201, .035);
+  --teal: #86b9b2;
+  --gold: #cdb27e;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  min-width: 280px;
+  background:
+    radial-gradient(circle at 50% -10%, rgba(100, 57, 31, .42), transparent 36rem),
+    linear-gradient(180deg, #0d0906 0, var(--night) 42rem);
+  color: var(--paper);
+  font: 14px/1.6 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+}
+
+button, select { font: inherit; }
+button, select, a { -webkit-tap-highlight-color: transparent; }
+button:focus-visible, select:focus-visible, a:focus-visible {
+  outline: 2px solid var(--paper);
+  outline-offset: 4px;
+}
+
+.skip-link {
+  position: fixed;
+  left: 16px;
+  top: 12px;
+  z-index: 20;
+  transform: translateY(-150%);
+  background: var(--paper);
+  color: var(--ink);
+  padding: 10px 14px;
+}
+.skip-link:focus { transform: none; }
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+.topbar {
+  width: min(1180px, calc(100% - 40px));
+  margin: 0 auto;
+  padding: 20px 0;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  border-bottom: 1px solid var(--line);
+  color: var(--fade);
+  font-size: 10px;
+  letter-spacing: .15em;
+}
+.brand { color: var(--paper); text-decoration: none; font-weight: 700; letter-spacing: .12em; }
+.brand span { color: var(--ember); }
+.topbar-end { justify-self: end; display: flex; align-items: center; gap: 18px; }
+.system-state { justify-self: end; }
+.system-state.operational { color: var(--teal); }
+.system-state.degraded { color: var(--ember); }
+.sound-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 30px;
+  border: 0;
+  background: transparent;
+  color: var(--fade);
+  padding: 4px 0;
+  cursor: pointer;
+  font-size: 9px;
+  letter-spacing: .13em;
+}
+.sound-toggle:hover, .sound-toggle:focus-visible { color: var(--paper); }
+.sound-toggle[aria-pressed="true"] { color: var(--gold); }
+.sound-mark { display: inline-flex; align-items: center; gap: 2px; height: 12px; }
+.sound-mark i { width: 2px; height: 4px; background: currentColor; opacity: .65; transform-origin: center; }
+.sound-toggle.is-playing .sound-mark i { animation: soundSignal .82s ease-in-out infinite alternate; }
+.sound-toggle.is-playing .sound-mark i:nth-child(2) { animation-delay: -.26s; }
+.sound-toggle.is-playing .sound-mark i:nth-child(3) { animation-delay: -.52s; }
+
+main { width: min(1080px, calc(100% - 40px)); margin: 0 auto; }
+.hero { min-height: 78vh; display: grid; place-content: center; text-align: center; padding: 72px 0; }
+.eyebrow, .index { margin: 0; color: var(--ember); font-size: 10px; letter-spacing: .2em; }
+.hero h1 {
+  margin: 22px 0;
+  font: 500 clamp(64px, 13vw, 132px)/.78 Georgia, "Times New Roman", serif;
+  letter-spacing: .12em;
+  text-indent: .12em;
+}
+.thesis { max-width: 760px; margin: 12px auto; color: var(--paper-soft); font: italic clamp(15px, 2.2vw, 19px)/1.8 Georgia, "Times New Roman", serif; }
+.loop { display: flex; justify-content: center; flex-wrap: wrap; gap: 9px; margin: 34px 0 14px; color: var(--ember); font-size: 11px; letter-spacing: .13em; }
+.loop i { color: var(--fade); font-style: normal; }
+.status { min-height: 1.6em; margin: 0; color: var(--fade); font-size: 10px; letter-spacing: .14em; }
+.doorway-label { margin: 25px 0 -12px; color: var(--gold); font-size: 9px; letter-spacing: .16em; }
+.hero-actions { display: flex; justify-content: center; flex-wrap: wrap; gap: 12px; margin-top: 26px; }
+.sound-invitation { margin: 12px 0 0; color: var(--fade); font-size: 8px; letter-spacing: .12em; }
+
+.primary, .secondary, .text-button {
+  border: 1px solid var(--paper);
+  background: var(--paper);
+  color: var(--ink);
+  padding: 13px 18px;
+  cursor: pointer;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .13em;
+  text-decoration: none;
+}
+.secondary { background: transparent; color: var(--paper); border-color: var(--line); }
+.text-button { background: transparent; border-color: var(--line); color: var(--paper-soft); padding: 9px 12px; }
+.primary:hover, .primary:focus-visible { background: #fff6e4; }
+.secondary:hover, .text-button:hover { border-color: var(--fade); color: var(--paper); }
+button:disabled { cursor: wait; opacity: .55; }
+
+.section { border-top: 1px solid var(--line); padding: 48px 0 58px; }
+.section-heading { display: grid; grid-template-columns: minmax(0, 1fr) minmax(260px, 440px); gap: 32px; align-items: end; margin-bottom: 26px; }
+.section h2 { margin: 7px 0 0; font: 400 clamp(28px, 5vw, 48px)/1.1 Georgia, "Times New Roman", serif; }
+.section-note { margin: 0; color: var(--fade); font-size: 11px; }
+
+.curator { background: linear-gradient(135deg, rgba(189, 104, 69, .08), transparent 55%); padding-inline: clamp(0px, 3vw, 34px); }
+.curator-form { display: grid; grid-template-columns: auto minmax(220px, 1fr) auto; gap: 12px; align-items: center; padding: 20px; border: 1px solid var(--line); background: var(--surface); }
+.curator-form label { color: var(--paper-soft); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; }
+.curator-form select { width: 100%; min-height: 44px; border: 1px solid var(--line); border-radius: 0; background: #120d09; color: var(--paper); padding: 0 12px; }
+.curator-state { margin: 12px 0 0; min-height: 1.6em; color: var(--fade); font-size: 10px; }
+
+.trial { position: relative; }
+.trial::before {
+  content: "PUBLIC RECORD";
+  position: absolute;
+  right: 0;
+  top: 53px;
+  color: rgba(189, 104, 69, .22);
+  font: 700 clamp(28px, 6vw, 70px)/1 ui-monospace, monospace;
+  letter-spacing: .06em;
+  pointer-events: none;
+}
+.trial-stage {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1.28fr) minmax(280px, .72fr);
+  min-height: 430px;
+  border: 1px solid rgba(234, 223, 201, .25);
+  background:
+    linear-gradient(90deg, transparent calc(100% - 1px), rgba(234, 223, 201, .025) 1px),
+    linear-gradient(rgba(234, 223, 201, .018) 1px, transparent 1px),
+    #0d0906;
+  background-size: 32px 32px;
+  box-shadow: 0 28px 80px rgba(0, 0, 0, .24);
+}
+.trial-record, .trial-ballot { padding: clamp(24px, 4vw, 46px); }
+.trial-record { border-right: 1px solid var(--line); }
+.trial-kicker { display: flex; flex-wrap: wrap; align-items: center; gap: 9px; color: var(--fade); font-size: 9px; letter-spacing: .1em; }
+.trial-record h3 { max-width: 650px; margin: 26px 0 12px; font: 400 clamp(31px, 5vw, 58px)/1.02 Georgia, "Times New Roman", serif; }
+.trial-description { max-width: 680px; color: var(--paper-soft); font: 15px/1.8 Georgia, "Times New Roman", serif; }
+.trial-question { margin: 30px 0 0; padding: 20px 0 0; border-top: 1px solid var(--line); color: var(--paper); font: italic 18px/1.55 Georgia, "Times New Roman", serif; }
+.trial-question::before { content: "UNRESOLVED QUESTION"; display: block; margin-bottom: 8px; color: var(--ember); font: 9px/1.4 ui-monospace, monospace; letter-spacing: .14em; }
+.trial-ballot { display: flex; flex-direction: column; justify-content: center; background: rgba(234, 223, 201, .025); }
+.trial-ballot h3 { margin: 0 0 8px; font: 400 25px/1.2 Georgia, "Times New Roman", serif; }
+.trial-ballot > p { margin: 0 0 20px; color: var(--fade); font-size: 10px; }
+.verdicts { display: grid; gap: 9px; }
+.verdict-button {
+  display: grid;
+  grid-template-columns: 28px 1fr;
+  gap: 11px;
+  align-items: center;
+  width: 100%;
+  min-height: 58px;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--paper);
+  padding: 12px 14px;
+  text-align: left;
+  cursor: pointer;
+  font-size: 10px;
+  letter-spacing: .09em;
+}
+.verdict-button span { color: var(--ember); font: 400 22px/1 Georgia, serif; }
+.verdict-button:hover, .verdict-button:focus-visible, .verdict-button[aria-pressed="true"] { border-color: var(--gold); background: rgba(205, 178, 126, .08); }
+.trial-state { min-height: 1.5em; margin: 12px 0 0 !important; color: var(--fade); font-size: 9px !important; }
+.trial-results h3 { margin-bottom: 20px; }
+.verdict-result { margin: 0 0 15px; }
+.verdict-result header { display: flex; justify-content: space-between; gap: 14px; margin-bottom: 6px; color: var(--paper-soft); font-size: 9px; letter-spacing: .08em; }
+.verdict-track { height: 8px; border: 1px solid var(--line); background: #080604; }
+.verdict-track i { display: block; height: 100%; min-width: 2px; background: linear-gradient(90deg, var(--ember), var(--gold)); }
+.trial-reading { margin: 22px 0 0; padding: 15px 0; border-block: 1px solid var(--line); color: var(--paper-soft); font: 13px/1.65 Georgia, "Times New Roman", serif; }
+.trial-reading b { color: var(--paper); }
+.trial-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+.trial-actions button { flex: 1; min-width: 125px; }
+.trial-evidence { margin: 18px 0 0; color: var(--fade); font-size: 9px; line-height: 1.6; }
+
+.graph-toolbar { display: flex; justify-content: flex-end; gap: 8px; margin: 0 0 10px; }
+.graph { position: relative; height: 560px; overflow: hidden; border: 1px solid var(--line); background: radial-gradient(circle, #29180e 0, #0b0705 63%); }
+.graph::before { content: ""; position: absolute; inset: 8%; border: 1px solid rgba(234, 223, 201, .035); border-radius: 50%; pointer-events: none; }
+.edge { position: absolute; height: 1px; background: rgba(186, 151, 113, .28); transform-origin: 0 0; pointer-events: none; }
+.node {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: 1px solid #d0ad84;
+  border-radius: 50%;
+  background: #120c08;
+  color: var(--paper);
+  cursor: pointer;
+}
+.node:hover, .node:focus-visible, .node.active { background: var(--ember); border-color: var(--paper); }
+.node span { position: absolute; left: 25px; top: -5px; width: 146px; color: var(--paper-soft); font-size: 9px; line-height: 1.35; text-align: left; pointer-events: none; }
+.graph-empty { margin: 0; padding: 48px; color: var(--fade); }
+
+.lenses, .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; }
+.card, .lens {
+  min-height: 126px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--paper);
+  padding: 16px;
+  text-align: left;
+  cursor: pointer;
+}
+.card:hover, .card:focus-visible, .lens:hover, .lens:focus-visible, .lens[aria-pressed="true"] { border-color: rgba(234, 223, 201, .48); background: rgba(234, 223, 201, .075); }
+.card b, .lens b { display: block; margin: 9px 0; font: 400 17px/1.35 Georgia, "Times New Roman", serif; }
+.card small, .lens small { color: var(--fade); font-size: 9px; }
+.clear-filter { margin-top: 14px; }
+.empty { grid-column: 1 / -1; margin: 0; padding: 22px; border: 1px dashed var(--line); color: var(--fade); }
+
+.badge, .tag, .relationship {
+  display: inline-block;
+  margin: 3px 4px 3px 0;
+  padding: 5px 7px;
+  border: 1px solid rgba(23, 16, 12, .22);
+  font-size: 9px;
+  letter-spacing: .08em;
+}
+.badge { border-color: var(--line); }
+.ai { color: #d99874; }
+.verified { color: var(--teal); }
+.inference { color: var(--gold); }
+.evidence-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.evidence-grid article { border: 1px solid var(--line); padding: 18px; }
+.evidence-grid p { margin-bottom: 0; color: var(--fade); font-size: 10px; }
+
+.drawer { position: fixed; inset: auto 0 0; z-index: 12; max-height: min(82vh, 820px); overflow: auto; background: #e8dcc5; color: var(--ink); box-shadow: 0 -30px 100px rgba(0, 0, 0, .7); transform: translateY(110%); transition: transform .32s ease; }
+.drawer.open { transform: none; }
+.drawer-shell { width: min(900px, calc(100% - 40px)); margin: 0 auto; padding: 30px 0 46px; }
+.close { float: right; border: 1px solid rgba(23, 16, 12, .28); background: transparent; color: var(--ink); padding: 8px 10px; cursor: pointer; }
+.drawer h2 { margin: 16px 0 8px; max-width: 700px; font: 400 clamp(30px, 5vw, 52px)/1.05 Georgia, "Times New Roman", serif; }
+.drawer h3 { margin: 22px 0 6px; font-size: 10px; letter-spacing: .12em; text-transform: uppercase; }
+.drawer p { max-width: 760px; font: 15px/1.75 Georgia, "Times New Roman", serif; color: #49372a; }
+.drawer .meta { color: #7c543c; font: 10px/1.6 ui-monospace, monospace; letter-spacing: .08em; }
+.drawer a { display: block; margin: 7px 0; color: #265a57; overflow-wrap: anywhere; }
+.drawer .tag, .drawer .relationship { border-color: rgba(23, 16, 12, .22); }
+.experiment-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(260px,1fr)); gap: 14px; }
+.experiment-card { border: 1px solid var(--line); padding: 18px; background: rgba(255,255,255,.025); }
+.experiment-card h3 { margin: 8px 0; font: 400 20px/1.25 Georgia,serif; text-transform: none; letter-spacing: 0; }
+.experiment-card p { font-size: 13px; line-height: 1.55; }
+.outcomes { display: flex; flex-wrap: wrap; gap: 6px; margin: 14px 0 8px; }
+.outcomes button { border: 1px solid currentColor; background: transparent; color: inherit; padding: 7px 8px; font: 9px ui-monospace,monospace; }
+.private-result { color: var(--accent); letter-spacing: .08em; }
+.subheading { margin: 34px 0 14px; font: 400 22px Georgia,serif; }
+.evolution-ledger { border-top: 1px solid var(--line); }
+.evolution-event { width: 100%; display: grid; grid-template-columns: minmax(180px,.7fr) 1.3fr; gap: 20px; text-align: left; border: 0; border-bottom: 1px solid var(--line); background: transparent; color: inherit; padding: 15px 0; }
+.evolution-event span { color: var(--muted); font-size: 12px; }
+.phase-strip { display: grid; grid-template-columns: repeat(6, 1fr); border: 1px solid var(--line); }
+.phase { min-width: 0; padding: 18px 12px; border-right: 1px solid var(--line); }
+.phase:last-child { border-right: 0; }
+.phase b { display: block; color: var(--paper); font: 400 28px/1 Georgia, serif; }
+.phase span { display: block; margin-top: 8px; color: var(--fade); font-size: 8px; letter-spacing: .08em; overflow-wrap: anywhere; }
+.model-grid { display: grid; grid-template-columns: 1.35fr .65fr; gap: 28px; }
+.transition-ledger, .watchlist { border-top: 1px solid var(--line); }
+.transition, .watch { width: 100%; display: grid; gap: 12px; align-items: center; border: 0; border-bottom: 1px solid var(--line); background: transparent; color: inherit; padding: 13px 0; text-align: left; cursor: pointer; }
+.transition { grid-template-columns: 52px 1fr auto; }
+.transition time { color: var(--ember); }
+.transition span b { display: block; color: var(--paper); font-size: 10px; letter-spacing: .08em; }
+.transition span { color: var(--paper-soft); font-size: 11px; }
+.transition small, .watch small { color: var(--fade); font-size: 8px; }
+.watch { grid-template-columns: 1fr; gap: 5px; }
+.watch span { color: var(--ember); font-size: 8px; letter-spacing: .1em; }
+.watch b { font: 400 16px/1.3 Georgia, serif; }
+.transition:hover, .watch:hover { background: rgba(234, 223, 201, .04); }
+.lifecycle { list-style: none; padding: 0; border-top: 1px solid rgba(23,16,12,.18); }
+.lifecycle li { display: grid; grid-template-columns: 64px 1fr; gap: 14px; padding: 12px 0; border-bottom: 1px solid rgba(23,16,12,.18); }
+.lifecycle time { color: #9b6042; font: 11px ui-monospace, monospace; }
+.lifecycle span { color: #49372a; font: 14px/1.5 Georgia, serif; }
+.lifecycle b, .lifecycle small { display: block; font: 9px/1.5 ui-monospace, monospace; letter-spacing: .08em; }
+.lifecycle small { color: #7c6a5b; margin-top: 5px; }
+.edge.typed { height: 2px; background: var(--accent); opacity: .75; }
+.edge.result-supported { opacity: 1; height: 3px; }.edge.result-challenged { background: #bb6758; }.edge.result-inconclusive { opacity: .3; }
+.evidence-notice { padding: 12px 14px; border-left: 3px solid #9b6042; background: rgba(155, 96, 66, .08); }
+.backdrop { position: fixed; inset: 0; z-index: 11; background: rgba(0, 0, 0, .62); }
+
+footer { width: min(1080px, calc(100% - 40px)); margin: 0 auto; padding: 26px 0 48px; display: flex; justify-content: space-between; gap: 20px; border-top: 1px solid var(--line); color: var(--fade); font-size: 9px; letter-spacing: .08em; }
+
+@keyframes soundSignal {
+  from { height: 3px; opacity: .45; }
+  to { height: 12px; opacity: 1; }
+}
+
+@media (max-width: 760px) {
+  .topbar { width: calc(100% - 28px); grid-template-columns: 1fr 1fr; }
+  .edition { display: none; }
+  .topbar-end { gap: 12px; }
+  .system-state { display: none; }
+  main, footer { width: calc(100% - 28px); }
+  .hero { min-height: 70vh; padding: 54px 0; }
+  .hero h1 { letter-spacing: .06em; text-indent: .06em; }
+  .section { padding: 38px 0 46px; }
+  .section-heading { grid-template-columns: 1fr; gap: 14px; }
+  .curator-form { grid-template-columns: 1fr; }
+  .generate { width: 100%; }
+  .trial::before { display: none; }
+  .trial-stage { grid-template-columns: 1fr; }
+  .trial-record { border-right: 0; border-bottom: 1px solid var(--line); }
+  .graph { height: 470px; }
+  .node span { width: 105px; font-size: 8px; }
+  .evidence-grid { grid-template-columns: 1fr; }
+  .phase-strip { grid-template-columns: repeat(3, 1fr); }
+  .phase:nth-child(3) { border-right: 0; }
+  .phase:nth-child(-n+3) { border-bottom: 1px solid var(--line); }
+  .model-grid { grid-template-columns: 1fr; }
+  footer { display: block; }
+}
+
+@media (max-width: 420px) {
+  .loop { display: grid; grid-template-columns: 1fr auto; text-align: right; }
+  .loop i:last-child { grid-column: 1 / -1; text-align: center; }
+  .hero-actions, .hero-actions button, .hero-actions a { width: 100%; }
+  .graph-toolbar { justify-content: stretch; }
+  .graph-toolbar button { flex: 1; }
+  .graph { height: 420px; }
+  .drawer-shell { width: calc(100% - 28px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
