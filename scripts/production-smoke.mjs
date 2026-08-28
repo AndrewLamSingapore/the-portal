@@ -5,7 +5,7 @@ const timeout = Number(process.env.SMOKE_TIMEOUT_MS || 15_000);
 
 async function get(path) {
   const response = await fetch(base + path, {
-    headers: { 'user-agent': 'portal-smoke/6.2', 'cache-control': 'no-cache' },
+    headers: { 'user-agent': 'portal-smoke/6.3', 'cache-control': 'no-cache' },
     signal: AbortSignal.timeout(timeout)
   });
   return { response, text: await response.text() };
@@ -27,11 +27,13 @@ for (const token of ['<title>THE PORTAL · Living Knowledge System</title>', 'id
 assert.equal(home.response.headers.get('x-frame-options'), 'DENY');
 assert.match(home.response.headers.get('content-security-policy') || '', /frame-ancestors 'none'/);
 
-const [appResult, styleResult, motionStyleResult, motionResult, versionResult, healthResult, statusResult, readinessResult, manifestResult] = await Promise.all([
+const [appResult, styleResult, motionStyleResult, motionResult, livingPageResult, livingResult, versionResult, healthResult, statusResult, readinessResult, manifestResult] = await Promise.all([
   get('/app.js'),
   get('/styles.css'),
   get('/motion.css'),
   get('/motion.js'),
+  get('/living'),
+  get('/api/living'),
   get('/api/version'),
   get('/api/health'),
   get('/api/status'),
@@ -47,11 +49,19 @@ assert.equal(motionStyleResult.response.status, 200);
 assert.match(motionStyleResult.text, /portalOrbit/);
 assert.equal(motionResult.response.status, 200);
 assert.match(motionResult.text, /IntersectionObserver/);
+assert.equal(livingPageResult.response.status, 200);
+assert.match(livingPageResult.text, /LIVING OBSERVATORY/);
+const living = json(livingResult, '/api/living');
+assert.equal(livingResult.response.status, 200);
+assert.equal(living.version, '6.3.0');
+assert.equal(living.mode, 'LIVING_OBSERVATORY');
+assert.ok(Array.isArray(living.generations) && living.generations.length > 0);
+assert.equal(living.safety.production_source_mutation_allowed, false);
 
 const version = json(versionResult, '/api/version');
 assert.equal(versionResult.response.status, 200);
 assert.equal(version.product, 'The Portal');
-assert.equal(version.version, '6.2.0');
+assert.equal(version.version, '6.3.0');
 assert.equal(version.schema_version, 6);
 assert.equal(version.experience, 'Continuous Futures Model');
 
@@ -64,13 +74,14 @@ assert.equal(health.generation_configured, true);
 assert.equal(health.evidence_schema, true);
 assert.equal(health.public_participation, true);
 assert.equal(health.schema_version, 6);
-assert.equal(health.product_version, '6.2.0');
+assert.equal(health.product_version, '6.3.0');
+assert.equal(health.living_observatory, true);
 if (process.env.EXPECTED_REVISION) assert.equal(health.revision, process.env.EXPECTED_REVISION);
 
 const status = json(statusResult, '/api/status');
 assert.equal(statusResult.response.status, 200);
 assert.equal(status.status, 'OPERATIONAL');
-assert.equal(status.product_version, '6.2.0');
+assert.equal(status.product_version, '6.3.0');
 const readiness = json(readinessResult, '/api/readiness');
 assert.equal(readinessResult.response.status, 200);
 assert.equal(readiness.ok, true);
@@ -112,4 +123,4 @@ assert.equal(trialResult.response.status, 200);
 assert.deepEqual(Object.keys(trial.counts).sort(), ['ARRIVED_QUIETLY', 'FAILED', 'TOO_EARLY']);
 
 assert.ok(archive.evolution && Array.isArray(archive.evolution.events));
-console.log(`PASS: Portal 6.2 production verified end to end (${archive.count} objects, revision ${health.revision || 'unknown'}).`);
+console.log(`PASS: Portal 6.3 production verified end to end (${archive.count} objects, revision ${health.revision || 'unknown'}).`);

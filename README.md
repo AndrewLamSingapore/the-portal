@@ -1,6 +1,6 @@
 # The Portal
 
-Version 6.2 is a continuously evolving model of humanity's imagined futures. It tracks how ideas emerge, disappear, return, fail, partially materialize and become real—without hiding the boundary between generated hypotheses and source-supported history. Its first public ritual, **The Future on Trial**, lets visitors make an anonymous judgment before seeing the room's aggregate verdict.
+Version 6.3 is a continuously evolving model of humanity's imagined futures. It tracks how ideas emerge, disappear, return, fail, partially materialize and become real—without hiding the boundary between generated hypotheses and source-supported history. Its public surfaces combine **The Future on Trial** with a production Living Observatory for bounded evolutionary hypotheses, falsification and fossil memory.
 
 ## An explorable model of how encounters become connections, experiments and new ways of seeing.
 
@@ -113,7 +113,7 @@ machine economies
 
 The final `?` is deliberate. The Portal should expose uncertainty rather than manufacture certainty.
 
-A second path can connect imagined ecosystems and resource-constrained worlds to ecology, sensing, closed systems and **Open Aqua**. The value is not the association itself; the value is whether the association produces a useful question or experiment.
+A second path can connect imagined ecosystems and resource-constrained worlds to ecology, sensing, closed systems and **VELYQUA 维澜**. The value is not the association itself; the value is whether the association produces a useful question or experiment.
 
 ## How the current prototype works
 
@@ -204,7 +204,7 @@ GitHub Actions runs static verification on pushes and pull requests to `main`. P
 
 The Portal is an experimental **BUILD** project inside [Andrew Lam's operations-intelligence portfolio](https://github.com/AndrewLamSingapore).
 
-Where [Open Aqua](https://github.com/AndrewLamSingapore/open-aqua) explores intelligence around a physical living system, The Portal explores intelligence around a cultural and conceptual information system. Both ask:
+Where [VELYQUA 维澜](https://github.com/AndrewLamSingapore/velyqua) explores intelligence around a physical living system, The Portal explores intelligence around a cultural and conceptual information system. Both ask:
 
 > **Can better structure reveal relationships that ordinary observation misses?**
 
@@ -217,6 +217,8 @@ The Portal extends that question one step further:
 Copy `.env.example` for the runtime-variable contract. The Vercel project requires `OPENAI_API_KEY` in protected Production and Preview environment variables. `DATABASE_URL` enables the shared archive. Credentials must never be committed.
 
 Git integration deploys pushes to `main` automatically. The production smoke workflow verifies the exact deployed Git revision, live browser assets, health/readiness, archive, graph, serendipity and historical V2 surface without spending a generation call.
+
+The production Living Observatory is available at `/living`. Its deterministic evolutionary and evidence-probe flows cannot actuate external systems, write production organism state, alter source code or mutate deployments. The model-originated clean-room trial remains an explicitly invoked preview-only experiment.
 
 ---
 

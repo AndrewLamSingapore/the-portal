@@ -119,6 +119,7 @@ main { width: min(1080px, calc(100% - 40px)); margin: 0 auto; }
   font-size: 10px;
   font-weight: 700;
   letter-spacing: .13em;
+  text-decoration: none;
 }
 .secondary { background: transparent; color: var(--paper); border-color: var(--line); }
 .text-button { background: transparent; border-color: var(--line); color: var(--paper-soft); padding: 9px 12px; }
@@ -337,7 +338,7 @@ footer { width: min(1080px, calc(100% - 40px)); margin: 0 auto; padding: 26px 0 
 @media (max-width: 420px) {
   .loop { display: grid; grid-template-columns: 1fr auto; text-align: right; }
   .loop i:last-child { grid-column: 1 / -1; text-align: center; }
-  .hero-actions, .hero-actions button { width: 100%; }
+  .hero-actions, .hero-actions button, .hero-actions a { width: 100%; }
   .graph-toolbar { justify-content: stretch; }
   .graph-toolbar button { flex: 1; }
   .graph { height: 420px; }

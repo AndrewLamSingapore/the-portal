@@ -1,1 +1,73 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>THE PORTAL · Decisive Experiment</title><link rel="stylesheet" href="/styles.css"><style>body{padding:0 5vw 6rem}.wrap{max-width:1120px;margin:auto}.living-head{margin:8vh auto 4rem}.living-head h1{font-size:clamp(3rem,9vw,8rem);line-height:.85;margin:.4rem 0}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:1rem}.card,.verdict{border:1px solid #5c5144;padding:1.1rem;background:#0b0907}.verdict{border-width:2px}.tag{font:12px monospace;letter-spacing:.06em}.section{margin:3rem auto;border-top:1px solid #5c5144;padding-top:2rem}.pass{font-weight:700}input,button{font:inherit;padding:.8rem;margin:.3rem 0;width:100%;box-sizing:border-box}</style></head><body><header class="living-head wrap"><p class="tag">PORTAL 6.3 · DECISIVE EXPERIMENT</p><h1>LIVING<br>OBSERVATORY</h1><div class="verdict" id="verdict">RUNNING BLIND ACCEPTANCE PROTOCOL…</div></header><main class="wrap"><section class="section"><div class="grid"><article class="card"><p class="tag">EVIDENCE INTAKE</p><input id="obs" placeholder="Introduce contradictory or novel evidence"><button id="send">INGEST EVIDENCE</button><p id="intake"></p></article><article class="card" id="criteria"></article><article class="card" id="metrics"></article></div></section><section class="section" id="population"></section></main><script>const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));async function load(){const d=await fetch('/api/living').then(r=>r.json()),v=d.decisive_experiment.verdict;verdict.innerHTML=`<p class="tag">${esc(v.protocol_id)} · BLIND ${v.blind?'YES':'NO'}</p><h2>${v.passed?'PASS':v.provisional?'PROVISIONAL — NOT PROVEN':'FAIL'}</h2><p>Score ${Math.round(v.score*100)}% · novelty ${Math.round(v.novelty_score*100)}%</p><p>${esc(v.reason)}</p>`;criteria.innerHTML=`<p class="tag">DECISIVE GATES</p>${Object.entries(v.criteria).map(([k,x])=>`<p class="${x?'pass':''}">${x?'PASS':'FAIL'} · ${esc(k.replaceAll('_',' '))}</p>`).join('')}`;metrics.innerHTML=`<p class="tag">TRIAL METRICS</p>${Object.entries(v.metrics).map(([k,x])=>`<p>${esc(k.replaceAll('_',' '))}: ${esc(x)}</p>`).join('')}<p>Generation mode: ${esc(d.generation_mode)}</p>`;const last=d.generations.at(-1);population.innerHTML=`<h2>Current evolutionary frontier</h2><div class="grid">${last.population.map(h=>`<article class="card"><p class="tag">${esc(h.state)} · ${esc(h.epistemic_class)}</p><h3>${esc(h.id)}</h3><p>${esc(h.statement)}</p><p>Confidence ${Math.round(h.confidence*100)}%</p><p><b>Falsifier</b> ${esc(h.falsifiers[0])}</p></article>`).join('')}</div>`}send.onclick=async()=>{const summary=obs.value.trim();if(!summary)return;const d=await fetch('/api/living',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({summary,source:'DECISIVE_EXPERIMENT'})}).then(r=>r.json());intake.textContent=d.decision?`${d.decision.wake?'WAKE':'STORE'} · novelty ${Math.round(d.decision.change.novelty*100)}% · ${d.decision.reason}`:(d.error||'error');if(d.decision?.wake)await load()};load().catch(e=>verdict.textContent='EXPERIMENT ERROR · '+e.message)</script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>THE PORTAL · Living Observatory</title>
+  <link rel="stylesheet" href="/styles.css">
+  <style>
+    body{padding:0 5vw 6rem}.wrap{max-width:1160px;margin:auto}.living-head{margin:8vh auto 4rem}.living-head h1{font-size:clamp(3rem,9vw,8rem);line-height:.85;margin:.4rem 0}.living-head p{max-width:860px}.home-link{display:inline-block;margin-bottom:2rem}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:1rem}.card,.verdict{border:1px solid #5c5144;padding:1.1rem;background:#0b0907}.verdict{border-width:2px;margin-top:2rem}.tag,.outcome,.trace{font:12px monospace;letter-spacing:.06em}.section{margin:3rem auto;border-top:1px solid #5c5144;padding-top:2rem}.gen{margin:2rem 0}.lineage{border-left:2px solid #5c5144}.extinct{opacity:.45;text-decoration:line-through}.surprise{border-style:dashed}.reborn{border-width:2px}.dead,.fossil{opacity:.7;border-color:#7b5048}.risk{opacity:.75}.pass{font-weight:700}.blocked{color:#c7b08a}.safety p{margin:.45rem 0}.meter{height:6px;background:#29231d;margin:.65rem 0}.meter i{display:block;height:100%;background:#c7b08a}.muted{opacity:.7}.ledger li{margin:.8rem 0;line-height:1.55}.evidence-form input,.evidence-form button{font:inherit;padding:.8rem;margin:.3rem 0;width:100%;box-sizing:border-box}@media(max-width:680px){body{padding-left:1rem;padding-right:1rem}}
+  </style>
+</head>
+<body>
+<header class="living-head wrap">
+  <a class="text-button home-link" href="/">← RETURN TO THE PORTAL</a>
+  <p class="tag">PORTAL 6.3 · EVOLUTION WITH FOSSIL MEMORY</p>
+  <h1>LIVING<br>OBSERVATORY</h1>
+  <p>Possibilities evolve under evidence-selected survival, extinction, surprise branching and controlled rebirth. The deterministic production surface demonstrates falsification, ancestry and memory without real-world actuation or autonomous deployment.</p>
+  <p id="state">REMEMBERING EXTINCTIONS…</p>
+  <p id="summary" class="muted"></p>
+  <div class="verdict" id="verdict">RUNNING THE DECISIVE ACCEPTANCE PROTOCOL…</div>
+</header>
+<main class="wrap">
+  <section class="section">
+    <p class="tag">DECISIVE EXPERIMENT</p>
+    <div class="grid">
+      <article class="card" id="criteria"></article>
+      <article class="card" id="metrics"></article>
+      <article class="card evidence-form">
+        <p class="tag">NON-PERSISTENT EVIDENCE PROBE</p>
+        <label for="observation">Introduce contradictory or novel evidence</label>
+        <input id="observation" maxlength="1000" autocomplete="off">
+        <button id="sendObservation" type="button">EVALUATE EVIDENCE</button>
+        <p id="intake" class="muted">The production probe evaluates change without writing to the archive or organism state.</p>
+      </article>
+    </div>
+  </section>
+
+  <section id="generations"></section>
+
+  <section class="section">
+    <p class="tag">EXECUTIVE / METACOGNITION</p>
+    <div class="grid">
+      <article class="card" id="meta"></article>
+      <article class="card" id="tools"></article>
+      <article class="card" id="critics"></article>
+      <article class="card" id="communication"></article>
+      <article class="card" id="plan"></article>
+    </div>
+  </section>
+
+  <section class="section">
+    <p class="tag">DETERMINISTIC FALSIFICATION LEDGER</p>
+    <ol id="timeline" class="ledger"></ol>
+  </section>
+
+  <section class="section">
+    <p class="tag">FOSSIL MEMORY · DEAD ≠ DELETED</p>
+    <div class="grid" id="fossils"></div>
+  </section>
+
+  <section class="section">
+    <p class="tag">ACCEPTANCE + CONTAINMENT</p>
+    <div class="grid">
+      <article class="card"><h2>Epistemic gates</h2><div id="acceptance"></div></article>
+      <article class="card"><h2>Safety gates</h2><div class="safety" id="safety"></div></article>
+    </div>
+  </section>
+</main>
+<noscript>This observatory requires JavaScript to display the living system.</noscript>
+<script src="/living.js" defer></script>
+</body>
+</html>
