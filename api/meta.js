@@ -1,12 +1,14 @@
+import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 
-import { db, findArtifacts, getArtifact, hasDatabase } from '../lib/db.js';
+import { db, findArtifacts, getArtifact, getExperimentResult, hasDatabase, saveExperimentResult } from '../lib/db.js';
+import { canonicalExperimentResult, validatePrimeExperimentResult } from '../lib/experiment-result.js';
 
 const PRODUCT_VERSION = '6.3.0';
 const SCHEMA_VERSION = 6;
 const EXPERIENCE = 'Continuous Futures Model';
-const META_ROUTES = new Set(['capabilities', 'evidence', 'manifest', 'metrics', 'readiness', 'status', 'verify', 'version', 'v2']);
+const META_ROUTES = new Set(['capabilities', 'evidence', 'experiment-result', 'manifest', 'metrics', 'readiness', 'status', 'verify', 'version', 'v2']);
 
 function jsonHeaders(res, cache = 'no-store') {
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
@@ -130,6 +132,44 @@ async function handleVerify(req, res) {
   return res.status(200).json({ ok: true, id, evidence_level: 'HISTORICALLY-VERIFIED', source_count: sources.length });
 }
 
+async function handleExperimentResult(req, res) {
+  if (!allow(req, res, 'POST')) return;
+  const expected = process.env.PORTAL_RESULT_TOKEN || '';
+  if (!expected) return res.status(503).json({ error: 'PRIME result authentication is not configured' });
+  const header = String(req.headers?.authorization || '');
+  const supplied = header.toLowerCase().startsWith('bearer ') ? header.slice(7) : '';
+  const left = Buffer.from(expected);
+  const right = Buffer.from(supplied);
+  if (left.length !== right.length || !crypto.timingSafeEqual(left, right)) {
+    return res.status(401).json({ error: 'Invalid integration token' });
+  }
+  if (!hasDatabase()) return res.status(503).json({ error: 'Archive unavailable' });
+
+  let result;
+  try {
+    result = validatePrimeExperimentResult(req.body?.result);
+  } catch (error) {
+    return res.status(422).json({ error: String(error?.message || error).slice(0, 300) });
+  }
+  const existing = await getExperimentResult(result.experiment_id);
+  if (existing) {
+    if (result.result_version < existing.result_version) {
+      return res.status(409).json({ error: 'Stale experiment result version' });
+    }
+    if (result.result_version === existing.result_version) {
+      if (canonicalExperimentResult(existing.result_json) !== canonicalExperimentResult(result)) {
+        return res.status(409).json({ error: 'Result version replay contains conflicting data' });
+      }
+      return res.status(200).json({ accepted: true, result_id: result.result_id, idempotent: true, graph_updated: true });
+    }
+  }
+  const saved = await saveExperimentResult(result);
+  if (Number(saved?.result_version) !== result.result_version || saved?.result_id !== result.result_id) {
+    return res.status(409).json({ error: 'A newer concurrent result already controls this experiment' });
+  }
+  return res.status(200).json({ accepted: true, result_id: result.result_id, idempotent: false, graph_updated: true });
+}
+
 export default async function handler(req, res) {
   const routeValue = Array.isArray(req.query?.route) ? req.query.route[0] : req.query?.route;
   const route = String(routeValue || '');
@@ -185,6 +225,7 @@ export default async function handler(req, res) {
     });
   }
   if (route === 'evidence') return handleEvidence(req, res);
+  if (route === 'experiment-result') return handleExperimentResult(req, res);
   if (route === 'manifest') {
     if (!allow(req, res, 'GET')) return;
     return res.status(200).json({
