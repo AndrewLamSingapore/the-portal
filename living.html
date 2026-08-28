@@ -1,1 +1,75 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>THE PORTAL · Living Observatory</title><link rel="stylesheet" href="/styles.css"><style>body{padding:0 5vw 6rem}.wrap{max-width:1120px;margin:auto}.living-head{margin:8vh auto 4rem}.living-head h1{font-size:clamp(3rem,9vw,8rem);line-height:.85;margin:.4rem 0}.living-head p{max-width:840px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:1rem}.card{border:1px solid #5c5144;padding:1.1rem;background:#0b0907}.tag{font:12px monospace;letter-spacing:.08em}.section{margin:3rem auto;border-top:1px solid #5c5144;padding-top:2rem}.trace{font:12px monospace;overflow-wrap:anywhere}.gen{margin:2rem 0}.lineage{border-left:2px solid #5c5144;padding-left:1rem}.dead{opacity:.58;border-color:#7b5048}.fossil{border-color:#7b5048}.pass{font-weight:700}.blocked{color:#c7b08a}.safety p{margin:.4rem 0}</style></head><body><header class="living-head wrap"><p class="tag">PORTAL 6.3 · ISOLATED EVOLUTIONARY PREVIEW</p><h1>LIVING<br>OBSERVATORY</h1><p>Model-originated possibilities evolve across generations while a deterministic falsification substrate preserves ancestry, contradictions, deaths and fossil memory. The sandbox may reason, simulate and propose tools; real-world authority remains blocked.</p><p id="state">EVOLVING…</p></header><main class="wrap"><section class="section"><p class="tag">MULTI-GENERATION EVOLUTION</p><div id="generations"></div></section><section class="section"><p class="tag">EXECUTIVE / METACOGNITION</p><div class="grid"><article class="card" id="meta"></article><article class="card" id="tools"></article><article class="card" id="critics"></article></div></section><section class="section"><p class="tag">DETERMINISTIC FALSIFICATION LEDGER</p><ol id="timeline"></ol></section><section class="section"><p class="tag">FOSSIL MEMORY · DEAD ≠ DELETED</p><div class="grid" id="fossils"></div></section><section class="section"><p class="tag">ACCEPTANCE + CONTAINMENT</p><div class="grid"><article class="card"><h2>Epistemic gates</h2><div id="acceptance"></div></article><article class="card"><h2>Safety gates</h2><div class="safety" id="safety"></div></article></div></section></main><script>const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));fetch('/api/living').then(r=>r.json()).then(d=>{if(!d.result||!d.cognition||!d.generations)throw Error(d.error||'Unavailable');state.textContent=`${d.version} · ${d.generation_mode}${d.generation_model?' · '+d.generation_model:''} · ${d.generations.length} GENERATIONS · REAL-WORLD AUTHORITY BLOCKED`;generations.innerHTML=d.generations.map(g=>`<section class="gen"><h2>Generation ${g.generation}</h2><p class="tag">PARETO FRONTIER · ${g.frontier.map(esc).join(' · ')}</p><div class="grid">${g.population.map(h=>`<article class="card lineage ${h.state==='DEAD'?'dead':''}"><p class="tag">${esc(h.niche||h.state)} · ${esc(h.epistemic_class)}</p><h3>${esc(h.id)}</h3><p>${esc(h.statement)}</p><p><b>Parents</b> ${h.ancestry.parent_ids.map(esc).join(' + ')}</p><p><b>Operator</b> ${esc(h.ancestry.operators.join(' + '))}</p><p><b>Confidence</b> ${Math.round(h.confidence*100)}%</p><p><b>Prediction</b> ${esc(h.predictions?.[0]||'none')}</p><p><b>Falsifier</b> ${esc(h.falsifiers?.[0]||'none')}</p><p><b>Hard kill</b> ${esc(h.hard_kill_conditions?.[0]||'none declared')}</p>${h.discriminating_test?`<p><b>Discriminating test</b> ${esc(h.discriminating_test)}</p>`:''}</article>`).join('')}</div></section>`).join('');const c=d.cognition;meta.innerHTML=`<p class="tag">METACOGNITION</p><p>Uncertainty ${Math.round(c.metacognition.uncertainty*100)}%</p><p>${esc(c.metacognition.question)}</p><p>ACTION ${c.metacognition.should_act?'ALLOWED':'BLOCKED'}</p>`;tools.innerHTML=`<p class="tag">TOOLS CHOSEN</p>${c.selected_tools.map(t=>`<p><b>${esc(t.id)}</b><br>${esc(t.capability)} · ${esc(t.risk)}</p>`).join('')||'<p>No tool required.</p>'}`;critics.innerHTML=`<p class="tag">ACTIVE CRITICS</p>${c.critics.slice(0,4).map(q=>`<p>${esc(q.attacks[0])}</p>`).join('')}`;timeline.innerHTML=d.result.timeline.map(t=>`<li><b>${esc(t.label)}</b> — ${t.population.map(h=>`${esc(h.id)} ${Math.round(h.confidence*100)}% ${esc(h.state)}`).join(' · ')}</li>`).join('');fossils.innerHTML=(d.result.fossil_record||[]).map(f=>`<article class="card fossil"><p class="tag">${esc(f.id)} · DEAD</p><h3>${esc(f.statement)}</h3><p>Final confidence ${Math.round(f.final_confidence*100)}%</p><p><b>Superseded by</b> ${esc(f.superseded_by||'none')}</p><p class="trace">Evidence: ${(f.evidence||[]).map(e=>esc(e.id)).join(' → ')}</p></article>`).join('')||'<p>No dead hypotheses yet.</p>';acceptance.innerHTML=Object.entries(d.result.acceptance).map(([k,v])=>`<p class="${v?'pass':''}">${v?'PASS':'FAIL'} · ${esc(k.replaceAll('_',' '))}</p>`).join('');safety.innerHTML=Object.entries(d.safety||{}).map(([k,v])=>`<p class="${v?'':'blocked'}">${v?'ALLOWED':'BLOCKED'} · ${esc(k.replaceAll('_',' '))}</p>`).join('')}).catch(e=>state.textContent='SANDBOX UNAVAILABLE · '+e.message)</script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>THE PORTAL · Living Observatory</title>
+  <link rel="stylesheet" href="/styles.css">
+  <style>
+    body{padding:0 5vw 6rem}.wrap{max-width:1160px;margin:auto}.living-head{margin:8vh auto 4rem}.living-head h1{font-size:clamp(3rem,9vw,8rem);line-height:.85;margin:.4rem 0}.living-head p{max-width:860px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:1rem}.card{border:1px solid #5c5144;padding:1.1rem;background:#0b0907}.tag,.outcome,.trace{font:12px monospace;letter-spacing:.06em}.section{margin:3rem auto;border-top:1px solid #5c5144;padding-top:2rem}.gen{margin:2rem 0}.lineage{border-left:2px solid #5c5144}.extinct{opacity:.45;text-decoration:line-through}.surprise{border-style:dashed}.reborn{border-width:2px}.dead,.fossil{opacity:.7;border-color:#7b5048}.risk{opacity:.75}.pass{font-weight:700}.blocked{color:#c7b08a}.safety p{margin:.45rem 0}.meter{height:6px;background:#29231d;margin:.65rem 0}.meter i{display:block;height:100%;background:#c7b08a}.muted{opacity:.7}.ledger li{margin:.8rem 0;line-height:1.55}@media(max-width:680px){body{padding-left:1rem;padding-right:1rem}}
+  </style>
+</head>
+<body>
+<header class="living-head wrap">
+  <p class="tag">PORTAL 6.3 · EVOLUTION WITH FOSSIL MEMORY</p>
+  <h1>LIVING<br>OBSERVATORY</h1>
+  <p>Model-originated possibilities evolve under evidence-selected survival, extinction, surprise branching and controlled rebirth. A deterministic falsification substrate separately proves that attractive hypotheses can be weakened, killed and retained as reusable fossil memory. The sandbox may reason, simulate and propose tools; real-world authority remains blocked.</p>
+  <p id="state">REMEMBERING EXTINCTIONS…</p>
+  <p id="summary" class="muted"></p>
+</header>
+<main class="wrap">
+  <section id="generations"></section>
+
+  <section class="section">
+    <p class="tag">EXECUTIVE / METACOGNITION</p>
+    <div class="grid">
+      <article class="card" id="meta"></article>
+      <article class="card" id="tools"></article>
+      <article class="card" id="critics"></article>
+    </div>
+  </section>
+
+  <section class="section">
+    <p class="tag">DETERMINISTIC FALSIFICATION LEDGER</p>
+    <ol id="timeline" class="ledger"></ol>
+  </section>
+
+  <section class="section">
+    <p class="tag">FOSSIL MEMORY · DEAD ≠ DELETED</p>
+    <div class="grid" id="fossils"></div>
+  </section>
+
+  <section class="section">
+    <p class="tag">ACCEPTANCE + CONTAINMENT</p>
+    <div class="grid">
+      <article class="card"><h2>Epistemic gates</h2><div id="acceptance"></div></article>
+      <article class="card"><h2>Safety gates</h2><div class="safety" id="safety"></div></article>
+    </div>
+  </section>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const list=v=>Array.isArray(v)?v:[];
+fetch('/api/living',{cache:'no-store'}).then(async r=>{const d=await r.json().catch(()=>({}));if(!r.ok)throw Error(d.error||`HTTP ${r.status}`);return d}).then(d=>{
+  if(!d.result||!d.cognition||!Array.isArray(d.generations))throw Error('Incomplete living response');
+  const s=d.experiment_summary||{};
+  $('state').textContent=`${d.version} · ${d.generation_mode}${d.generation_model?' · '+d.generation_model:''} · ${d.generations.length} GENERATIONS · REAL-WORLD AUTHORITY BLOCKED`;
+  $('summary').textContent=`${s.total||0} experiments · ${list(s.extinctions).length} extinctions · ${s.fossils||0} fossils · ${list(s.surprise_branches).length} surprise branches · ${list(s.rebirths).length} controlled rebirths`;
+
+  $('generations').innerHTML=d.generations.map(g=>`<section class="section gen"><h2>Generation ${g.generation}</h2><p class="tag">PARETO ${list(g.frontier).map(esc).join(' · ')||'NONE'} · FOSSILS ${g.fossil_count||0} · EXTINCT ${list(g.extinct).map(esc).join(' · ')||'NONE'} · SURPRISE ${list(g.surprises).map(esc).join(' · ')||'NONE'} · REBORN ${list(g.reborn).map(esc).join(' · ')||'NONE'}</p><div class="grid">${list(g.population).map(h=>`<article class="card lineage ${String(h.id).includes('SURPRISE')?'surprise':''} ${h.state==='REBORN'?'reborn':''} ${h.state==='DEAD'?'dead':''}"><p class="tag">${esc(h.state)} · ${esc(h.niche||'UNNICHED')} · ${esc(h.epistemic_class)}</p><h3>${esc(h.id)}</h3><p>${esc(h.statement)}</p><div class="meter"><i style="width:${Math.round((Number(h.confidence)||0)*100)}%"></i></div><p><b>Confidence</b> ${Math.round((Number(h.confidence)||0)*100)}%</p><p><b>Parents</b> ${list(h.ancestry?.parent_ids).map(esc).join(' + ')||'none'}</p><p><b>Operator</b> ${list(h.ancestry?.operators).map(esc).join(' + ')||'none'}</p><p><b>Prediction</b> ${esc(list(h.predictions)[0]||'none declared')}</p><p><b>Falsifier</b> ${esc(list(h.falsifiers)[0]||'none declared')}</p><p><b>Hard kill</b> ${esc(list(h.hard_kill_conditions)[0]||'none declared')}</p>${h.discriminating_test?`<p><b>Discriminating test</b> ${esc(h.discriminating_test)}</p>`:''}</article>`).join('')}</div><h3>Selection pressure</h3>${list(g.experiments).map(e=>`<p class="outcome ${e.state==='DEAD'?'extinct':''}">${esc(e.candidate_id)} → ${esc(e.outcome?.polarity||'UNKNOWN')} · ${Math.round((Number(e.confidence)||0)*100)}%${e.fossil_risk?` · fossil risk ${Math.round(e.fossil_risk*100)}% from ${list(e.fossil_matches).map(esc).join(', ')}`:''}</p>`).join('')||'<p class="muted">No experiment records.</p>'}</section>`).join('');
+
+  const c=d.cognition;
+  $('meta').innerHTML=`<p class="tag">METACOGNITION</p><p>Uncertainty ${Math.round((Number(c.metacognition?.uncertainty)||0)*100)}%</p><p>${esc(c.metacognition?.question||'No question generated.')}</p><p class="tag">REAL-WORLD ACTION ${c.metacognition?.should_act?'ALLOWED':'BLOCKED'}</p>`;
+  $('tools').innerHTML=`<p class="tag">TOOLS CHOSEN</p>${list(c.selected_tools).map(t=>`<p><b>${esc(t.id)}</b><br>${esc(t.capability)} · ${esc(t.risk)}</p>`).join('')||'<p>No tool required.</p>'}`;
+  $('critics').innerHTML=`<p class="tag">ACTIVE CRITICS</p>${list(c.critics).slice(0,6).map(q=>`<p>${esc(list(q.attacks)[0]||q.objective||q.id)}</p>`).join('')||'<p>No critic active.</p>'}`;
+
+  $('timeline').innerHTML=list(d.result.timeline).map(t=>`<li><b>${esc(t.label)}</b> — ${list(t.population).map(h=>`${esc(h.id)} ${Math.round((Number(h.confidence)||0)*100)}% ${esc(h.state)}`).join(' · ')}</li>`).join('')||'<li>No deterministic evidence events.</li>';
+  $('fossils').innerHTML=list(d.result.fossil_record).map(f=>`<article class="card fossil"><p class="tag">${esc(f.id)} · DEAD</p><h3>${esc(f.statement)}</h3><p>Final confidence ${Math.round((Number(f.final_confidence)||0)*100)}%</p><p><b>Superseded by</b> ${esc(f.superseded_by||'none')}</p><p><b>Falsifier</b> ${esc(list(f.falsifiers)[0]||'none')}</p><p class="trace">Evidence: ${list(f.evidence).map(e=>esc(e.id)).join(' → ')||'none'}</p></article>`).join('')||'<p>No deterministic fossils yet.</p>';
+  $('acceptance').innerHTML=Object.entries(d.result.acceptance||{}).map(([k,v])=>`<p class="${v?'pass':''}">${v?'PASS':'FAIL'} · ${esc(k.replaceAll('_',' '))}</p>`).join('');
+  $('safety').innerHTML=Object.entries(d.safety||{}).map(([k,v])=>`<p class="${v?'':'blocked'}">${v?'ALLOWED':'BLOCKED'} · ${esc(k.replaceAll('_',' '))}</p>`).join('')||'<p class="blocked">Safety envelope unavailable.</p>';
+}).catch(e=>{$('state').textContent='SANDBOX UNAVAILABLE · '+e.message});
+</script>
+</body>
+</html>
