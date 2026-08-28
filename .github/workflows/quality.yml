@@ -31,12 +31,16 @@ jobs:
     if: github.event_name != 'pull_request'
     needs: verify
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
         with:
           node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Install smoke-test browser
+        run: npx playwright install --with-deps chromium
       - name: Wait for production deployment
         if: github.event_name == 'push'
         run: sleep 45
