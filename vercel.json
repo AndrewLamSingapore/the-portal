@@ -31,6 +31,10 @@
       "destination": "/api/meta?route=metrics"
     },
     {
+      "source": "/api/prime-experiment",
+      "destination": "/api/meta?route=prime-experiment"
+    },
+    {
       "source": "/api/readiness",
       "destination": "/api/meta?route=readiness"
     },
