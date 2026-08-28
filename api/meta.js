@@ -3,9 +3,9 @@ import path from 'node:path';
 
 import { db, findArtifacts, getArtifact, hasDatabase } from '../lib/db.js';
 
-const PRODUCT_VERSION = '5.1.0';
-const SCHEMA_VERSION = 5;
-const EXPERIENCE = 'Living Knowledge System';
+const PRODUCT_VERSION = '6.3.0';
+const SCHEMA_VERSION = 6;
+const EXPERIENCE = 'Continuous Futures Model';
 const META_ROUTES = new Set(['capabilities', 'evidence', 'manifest', 'metrics', 'readiness', 'status', 'verify', 'version', 'v2']);
 
 function jsonHeaders(res, cache = 'no-store') {
@@ -33,7 +33,14 @@ async function evidenceSchemaReady() {
   const sql = db();
   const rows = await sql`select column_name from information_schema.columns where table_schema='public' and table_name='artifacts'`;
   const columns = new Set(rows.map(row => row.column_name));
-  return ['evidence_level', 'sources', 'relationships', 'experiment', 'connections'].every(column => columns.has(column));
+  return ['evidence_level', 'sources', 'relationships', 'experiment', 'connections', 'lifecycle', 'current_phase', 'recurrence_conditions', 'realization_signal'].every(column => columns.has(column));
+}
+
+async function publicParticipationReady() {
+  if (!hasDatabase()) return false;
+  const sql = db();
+  const rows = await sql`select to_regclass('public.artifact_verdicts') as verdicts`;
+  return Boolean(rows[0]?.verdicts);
 }
 
 async function handleEvidence(req, res) {
@@ -75,7 +82,8 @@ async function handleReadiness(req, res) {
       database,
       generation: Boolean(process.env.OPENAI_API_KEY),
       archive: artifacts.length > 0,
-      evidence_schema: database ? await evidenceSchemaReady() : false
+      evidence_schema: database ? await evidenceSchemaReady() : false,
+      public_participation: database ? await publicParticipationReady() : false
     };
     const ok = Object.values(checks).every(Boolean);
     return res.status(ok ? 200 : 503).json({ ok, product_version: PRODUCT_VERSION, schema_version: SCHEMA_VERSION, checks });
@@ -89,7 +97,7 @@ async function handleStatus(req, res) {
   try {
     const database = hasDatabase();
     const artifacts = database ? await findArtifacts({ limit: 1 }) : [];
-    const operational = database && artifacts.length > 0 && await evidenceSchemaReady();
+    const operational = database && artifacts.length > 0 && await evidenceSchemaReady() && await publicParticipationReady();
     return res.status(operational ? 200 : 503).json({
       status: operational ? 'OPERATIONAL' : 'DEGRADED',
       archive: database && artifacts.length > 0,
@@ -157,12 +165,20 @@ export default async function handler(req, res) {
         testable_experiments: true,
         typed_connections: true,
         evolution_ledger: true,
+        continuous_futures_model: true,
+        lifecycle_transitions: true,
+        realization_watchlist: true,
         serendipity_engine: true,
         curated_exhibitions: true,
         ai_curator: true,
         private_cabinet: true,
+        anonymous_public_trials: true,
         accessible_dialog: true,
         production_monitoring: true,
+        living_observatory: true,
+        evolutionary_hypotheses: true,
+        falsification_memory: true,
+        decisive_experiment: true,
         domain_ready: true
       },
       external_commitments: { custom_domain_purchase: false }
@@ -175,7 +191,7 @@ export default async function handler(req, res) {
       product_version: PRODUCT_VERSION,
       schema_version: SCHEMA_VERSION,
       experience: EXPERIENCE,
-      capabilities: ['evidence-layer', 'source-trails', 'temporal-graph', 'artifact-relationships', 'testable-experiments', 'typed-connections', 'evolution-ledger', 'serendipity-engine', 'curated-exhibitions', 'ai-curator', 'private-cabinet', 'accessibility-baseline', 'production-monitoring', 'domain-ready'],
+      capabilities: ['evidence-layer', 'source-trails', 'temporal-graph', 'artifact-relationships', 'testable-experiments', 'typed-connections', 'evolution-ledger', 'continuous-futures-model', 'lifecycle-transitions', 'realization-watchlist', 'serendipity-engine', 'curated-exhibitions', 'ai-curator', 'private-cabinet', 'anonymous-public-trials', 'accessibility-baseline', 'production-monitoring', 'domain-ready'],
       evidence_states: ['AI-CURATED', 'CONCEPTUAL-INFERENCE', 'HISTORICALLY-VERIFIED']
     });
   }

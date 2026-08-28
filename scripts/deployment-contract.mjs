@@ -12,5 +12,6 @@ for (const route of expectedRewrites) {
   assert.match(rewrites.get(route) || '', /^\/api\/meta\?route=/, `missing consolidated rewrite for ${route}`);
 }
 assert.equal(config.functions?.['api/artifact.js']?.maxDuration, 60);
+assert.equal(config.functions?.['api/living.js']?.maxDuration, 60);
 
 console.log(`PASS: deployment contract verified (${functions.length}/12 Vercel Functions).`);

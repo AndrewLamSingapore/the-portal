@@ -20,7 +20,11 @@ const artifact = {
   sources: [],
   relationships: [{ type: 'ECHOED_BY', label: 'Modern uncertainty visualization.' }],
   experiment: { hypothesis: 'Visible uncertainty improves deliberation.', method: 'Show one decision with and without confidence ranges.', success_signal: 'Participants ask more clarifying questions.', failure_signal: 'Discussion quality does not change.' },
-  connections: []
+  connections: [],
+  lifecycle: [{ phase: 'EMERGED', year: 1927, description: 'The imagined future first appeared.', evidence_basis: 'AI-GENERATED-HYPOTHESIS' }],
+  current_phase: 'EMERGED',
+  recurrence_conditions: ['Institutions adopt explicit uncertainty measures.'],
+  realization_signal: 'Public decisions routinely publish calibrated uncertainty.'
 };
 
 function response(body) {

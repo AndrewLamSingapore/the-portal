@@ -1,6 +1,8 @@
-# The Portal — 5.0 Architecture
+# The Portal — 6.2 Architecture
 
-Version 5 closes the living loop: a single generation creates an artifact, a testable experiment, optional typed links to existing artifact IDs, and a derived evolution event. Browser-recorded experiment outcomes stay private and only affect that visitor's graph display.
+Version 6 makes imagined-future lifecycles executable. A single generation creates an artifact, a testable experiment, optional typed links, and an evidence-bounded timeline showing how a future emerged, disappeared, returned, failed, partially materialized, or became real.
+
+> The Portal is a continuously evolving model of humanity's imagined futures—tracking how ideas emerge, disappear, return, fail and become real.
 
 ## Product invariant
 
@@ -8,7 +10,7 @@ The Portal is not a feed. No popularity ranking, engagement optimisation or beha
 
 ## System layers
 
-1. **Experience** — archive-first browser UI, curator modes, private cabinet and concept traversal.
+1. **Experience** — archive-first browser UI, anonymous public trials, curator modes, private cabinet and concept traversal.
 2. **Curator** — server-side structured AI generation with explicit outcome classification and conceptual lineage.
 3. **Archive** — stable artifact identifiers, normalized records, provenance and timestamps.
 4. **Graph** — artifacts connect through concepts, eras, outcomes and conceptual descendants.
@@ -32,12 +34,25 @@ Browser
   │              local cabinet              Postgres archive
   │                                          (when configured)
   │
-  └── GET /api/archive ──> retrieval / concept traversal / observatory
+  ├── GET /api/archive ──> retrieval / concept traversal / observatory
+  │
+  └── GET/POST /api/trial ──> aggregate public verdict counters
 ```
 
 ## Canonical artifact
 
-A canonical artifact contains `id`, `era`, `year`, `type`, `title`, `description`, `provenance`, `condition`, `imagined_future`, `problem`, `status`, `modern_descendant`, `concepts[]`, `question`, `mode`, `created_at` and `schema_version`.
+A canonical artifact also carries `lifecycle[]`, `current_phase`, `recurrence_conditions[]`, and `realization_signal`. Each lifecycle event includes a phase, year, description and explicit evidence basis.
+
+## Continuous futures model
+
+The archive deterministically derives four views from canonical artifacts:
+
+- phase counts across `EMERGED`, `DISAPPEARED`, `RETURNED`, `FAILED`, `PARTIALLY_REALIZED` and `REALIZED`;
+- chronological transitions, including the previous and next phase;
+- recurring conditions that may explain why futures return;
+- a realization watchlist whose claims can be checked against observable signals.
+
+The derived model never silently upgrades an inference. An event remains `AI-GENERATED-HYPOTHESIS` until a separate evidence workflow can mark it `SOURCE-SUPPORTED`.
 
 ### Identity
 
@@ -64,8 +79,14 @@ When `DATABASE_URL` is present:
 - `GET /api/archive?status=...` filters outcomes
 - the archive endpoint returns collection-level constellation, status, era and date-range summaries
 - `/api/health` verifies database/archive availability
+- `GET /api/trial?id=...` returns three aggregate verdict counters
+- `POST /api/trial` atomically increments one permitted verdict
 
 The browser experience degrades to the local tier rather than making database availability a prerequisite for generation.
+
+### Anonymous public participation
+
+`artifact_verdicts` stores one aggregate counter per artifact and verdict. It does not store visitor IDs, accounts, comments, IP addresses or fingerprints. The browser privately remembers that it voted, reveals the room only after that vote and uses the record to prevent casual repeat submissions. This is deliberately lightweight participation, not identity-grade election integrity.
 
 ## Database schema
 
@@ -95,6 +116,10 @@ Supported queries:
 ### `GET /api/health`
 
 Reports whether durable archive infrastructure is configured and queryable. A missing database intentionally returns an unavailable state rather than pretending shared persistence exists.
+
+### `GET /api/trial` and `POST /api/trial`
+
+`GET ?id=<artifact-id>` returns aggregate counts for `FAILED`, `TOO_EARLY` and `ARRIVED_QUIETLY`. `POST` accepts one canonical `artifact_id` and one permitted `verdict`, validates that the artifact exists, and increments the corresponding counter atomically. The route is `no-store` and applies a lightweight per-instance abuse ceiling without persisting network identifiers.
 
 ## Security boundary
 

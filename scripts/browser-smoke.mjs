@@ -20,6 +20,10 @@ try {
     }
   });
 
+  if (process.env.VERCEL_SHARE_URL) {
+    await page.goto(process.env.VERCEL_SHARE_URL, { waitUntil: 'domcontentloaded', timeout });
+  }
+
   const response = await page.goto(base + '/', { waitUntil: 'domcontentloaded', timeout });
   assert.equal(response?.status(), 200, 'browser navigation did not return HTTP 200');
   await page.waitForFunction(() => {

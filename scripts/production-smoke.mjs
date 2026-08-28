@@ -2,11 +2,10 @@ import assert from 'node:assert/strict';
 
 const base = (process.env.PORTAL_URL || 'https://the-portal-ten.vercel.app').replace(/\/$/, '');
 const timeout = Number(process.env.SMOKE_TIMEOUT_MS || 15_000);
-const deployTimeout = Number(process.env.DEPLOY_TIMEOUT_MS || 240_000);
 
 async function get(path) {
   const response = await fetch(base + path, {
-    headers: { 'user-agent': 'portal-smoke/5.1', 'cache-control': 'no-cache' },
+    headers: { 'user-agent': 'portal-smoke/6.3', 'cache-control': 'no-cache' },
     signal: AbortSignal.timeout(timeout)
   });
   return { response, text: await response.text() };
@@ -20,39 +19,21 @@ function json(result, path) {
   }
 }
 
-async function waitForDeployment() {
-  const deadline = Date.now() + deployTimeout;
-  let lastState = 'not reachable';
-  while (Date.now() < deadline) {
-    try {
-      const result = await get('/api/health');
-      const health = json(result, '/api/health');
-      lastState = `HTTP ${result.response.status}, revision ${health.revision || 'unknown'}`;
-      const revisionReady = !process.env.EXPECTED_REVISION || health.revision === process.env.EXPECTED_REVISION;
-      if (result.response.status === 200 && health.ok === true && revisionReady) return;
-    } catch (error) {
-      lastState = error?.message || String(error);
-    }
-    await new Promise(resolve => setTimeout(resolve, 10_000));
-  }
-  assert.fail(`deployment did not become ready within ${deployTimeout}ms (${lastState})`);
-}
-
-await waitForDeployment();
-
 const home = await get('/');
 assert.equal(home.response.status, 200);
-for (const token of ['<title>THE PORTAL · Living Knowledge System</title>', 'id="curatorForm"', 'id="graph"', 'id="lenses"', 'id="experiments"', 'id="evolution"', 'id="cabinetGrid"', '/motion.css', '/motion.js']) {
+for (const token of ['<title>THE PORTAL · Living Knowledge System</title>', 'id="futureOnTrial"', 'id="trialStage"', 'id="curatorForm"', 'id="phaseStrip"', 'id="transitions"', 'id="watchlist"', 'id="graph"', 'id="lenses"', 'id="experiments"', 'id="evolution"', 'id="cabinetGrid"', '/motion.css', '/motion.js']) {
   assert.ok(home.text.includes(token), `homepage missing ${token}`);
 }
 assert.equal(home.response.headers.get('x-frame-options'), 'DENY');
 assert.match(home.response.headers.get('content-security-policy') || '', /frame-ancestors 'none'/);
 
-const [appResult, styleResult, motionStyleResult, motionResult, versionResult, healthResult, statusResult, readinessResult, manifestResult] = await Promise.all([
+const [appResult, styleResult, motionStyleResult, motionResult, livingPageResult, livingResult, versionResult, healthResult, statusResult, readinessResult, manifestResult] = await Promise.all([
   get('/app.js'),
   get('/styles.css'),
   get('/motion.css'),
   get('/motion.js'),
+  get('/living'),
+  get('/api/living'),
   get('/api/version'),
   get('/api/health'),
   get('/api/status'),
@@ -68,13 +49,21 @@ assert.equal(motionStyleResult.response.status, 200);
 assert.match(motionStyleResult.text, /portalOrbit/);
 assert.equal(motionResult.response.status, 200);
 assert.match(motionResult.text, /IntersectionObserver/);
+assert.equal(livingPageResult.response.status, 200);
+assert.match(livingPageResult.text, /LIVING OBSERVATORY/);
+const living = json(livingResult, '/api/living');
+assert.equal(livingResult.response.status, 200);
+assert.equal(living.version, '6.3.0');
+assert.equal(living.mode, 'LIVING_OBSERVATORY');
+assert.ok(Array.isArray(living.generations) && living.generations.length > 0);
+assert.equal(living.safety.production_source_mutation_allowed, false);
 
 const version = json(versionResult, '/api/version');
 assert.equal(versionResult.response.status, 200);
 assert.equal(version.product, 'The Portal');
-assert.equal(version.version, '5.1.0');
-assert.equal(version.schema_version, 5);
-assert.equal(version.experience, 'Living Knowledge System');
+assert.equal(version.version, '6.3.0');
+assert.equal(version.schema_version, 6);
+assert.equal(version.experience, 'Continuous Futures Model');
 
 const health = json(healthResult, '/api/health');
 assert.equal(healthResult.response.status, 200);
@@ -83,20 +72,22 @@ assert.equal(health.database, true);
 assert.equal(health.archive, true);
 assert.equal(health.generation_configured, true);
 assert.equal(health.evidence_schema, true);
-assert.equal(health.schema_version, 5);
-assert.equal(health.product_version, '5.1.0');
+assert.equal(health.public_participation, true);
+assert.equal(health.schema_version, 6);
+assert.equal(health.product_version, '6.3.0');
+assert.equal(health.living_observatory, true);
 if (process.env.EXPECTED_REVISION) assert.equal(health.revision, process.env.EXPECTED_REVISION);
 
 const status = json(statusResult, '/api/status');
 assert.equal(statusResult.response.status, 200);
 assert.equal(status.status, 'OPERATIONAL');
-assert.equal(status.product_version, '5.1.0');
+assert.equal(status.product_version, '6.3.0');
 const readiness = json(readinessResult, '/api/readiness');
 assert.equal(readinessResult.response.status, 200);
 assert.equal(readiness.ok, true);
 const manifest = json(manifestResult, '/api/manifest');
 assert.equal(manifestResult.response.status, 200);
-assert.equal(manifest.experience, 'Living Knowledge System');
+assert.equal(manifest.experience, 'Continuous Futures Model');
 
 const archiveResult = await get('/api/archive?limit=5');
 const archive = json(archiveResult, '/api/archive');
@@ -104,14 +95,16 @@ assert.equal(archiveResult.response.status, 200);
 assert.ok(archive.artifacts.length > 0);
 assert.ok(Array.isArray(archive.temporal_graph?.nodes));
 assert.ok(Array.isArray(archive.exhibitions));
+assert.ok(archive.continuous_model && Array.isArray(archive.continuous_model.transitions));
 const first = archive.artifacts[0];
 assert.match(first.id, /^PTL-\d{4}-[A-F0-9]{10}$/);
 
-const [artifactResult, graphResult, serendipityResult, historicalResult] = await Promise.all([
+const [artifactResult, graphResult, serendipityResult, historicalResult, trialResult] = await Promise.all([
   get('/api/archive?id=' + encodeURIComponent(first.id)),
   get('/api/graph'),
   get('/api/serendipity?from=' + encodeURIComponent(first.id)),
-  get('/api/v2')
+  get('/api/v2'),
+  get('/api/trial?id=' + encodeURIComponent(first.id))
 ]);
 const artifact = json(artifactResult, '/api/archive?id');
 assert.equal(artifactResult.response.status, 200);
@@ -125,6 +118,9 @@ assert.equal(serendipityResult.response.status, 200);
 assert.ok(serendipity.id && serendipity.id !== first.id);
 assert.equal(historicalResult.response.status, 200);
 assert.match(historicalResult.text, /Evidence &amp; Ancestry|Evidence & Ancestry/);
+const trial = json(trialResult, '/api/trial?id');
+assert.equal(trialResult.response.status, 200);
+assert.deepEqual(Object.keys(trial.counts).sort(), ['ARRIVED_QUIETLY', 'FAILED', 'TOO_EARLY']);
 
 assert.ok(archive.evolution && Array.isArray(archive.evolution.events));
-console.log(`PASS: Portal 5.1 production verified end to end (${archive.count} objects, revision ${health.revision || 'unknown'}).`);
+console.log(`PASS: Portal 6.3 production verified end to end (${archive.count} objects, revision ${health.revision || 'unknown'}).`);

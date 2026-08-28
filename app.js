@@ -4,8 +4,16 @@ const state = {
   activeId: null,
   activeLens: null,
   lastTrigger: null,
-  busy: false
+  busy: false,
+  trial: { artifact: null, counts: null, busy: false, message: '' }
 };
+
+const TRIAL_VERDICTS = [
+  { id: 'FAILED', label: 'IT FAILED', mark: '×' },
+  { id: 'TOO_EARLY', label: 'IT WAS TOO EARLY', mark: '◷' },
+  { id: 'ARRIVED_QUIETLY', label: 'IT ARRIVED QUIETLY', mark: '○' }
+];
+const TRIAL_STORAGE_KEY = 'portal-trial-verdicts-v1';
 
 const el = id => document.getElementById(id);
 const evidenceClass = level => level === 'HISTORICALLY-VERIFIED' ? 'verified' : level === 'CONCEPTUAL-INFERENCE' ? 'inference' : 'ai';
@@ -20,6 +28,10 @@ const safeHttpsUrl = value => {
     return '';
   }
 };
+
+function emitPortalMotion(name, detail = {}) {
+  document.dispatchEvent(new CustomEvent(`portal:${name}`, { detail }));
+}
 
 const PORTAL_SOUND_PREFERENCE = 'portal-sound-v1';
 let portalSoundAllowed = true;
@@ -82,6 +94,189 @@ function writeCabinet(artifact) {
   } catch {
     return false;
   }
+}
+
+function readTrialVotes() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(TRIAL_STORAGE_KEY) || '{}');
+    return saved && typeof saved === 'object' && !Array.isArray(saved) ? saved : {};
+  } catch {
+    return {};
+  }
+}
+
+function rememberTrialVote(id, verdict) {
+  try {
+    localStorage.setItem(TRIAL_STORAGE_KEY, JSON.stringify({ ...readTrialVotes(), [id]: verdict }));
+  } catch {}
+}
+
+function utcDayNumber() {
+  const now = new Date();
+  return Math.floor(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()) / 86400000);
+}
+
+function selectTrialArtifact(preferredId) {
+  const artifacts = state.archive.artifacts || [];
+  if (!artifacts.length) return null;
+  const requested = preferredId || new URLSearchParams(location.search).get('trial');
+  return artifacts.find(artifact => artifact.id === requested) || artifacts[utcDayNumber() % artifacts.length];
+}
+
+function normalizeTrialCounts(payload = {}) {
+  const source = payload.counts || payload;
+  return Object.fromEntries(TRIAL_VERDICTS.map(({ id }) => [id, Math.max(0, Number(source[id]) || 0)]));
+}
+
+function trialEvidenceText(artifact) {
+  const sources = (artifact.sources || []).filter(source => safeHttpsUrl(source.url));
+  if (artifact.evidence_level === 'HISTORICALLY-VERIFIED' && sources.length) return `Historically verified · ${sources.length} visible source${sources.length === 1 ? '' : 's'}.`;
+  if (sources.length) return `${escapeHtml(artifact.evidence_level || 'AI-CURATED')} · ${sources.length} source lead${sources.length === 1 ? '' : 's'} attached for independent review.`;
+  return `${escapeHtml(artifact.evidence_level || 'AI-CURATED')} · No independent source trail is attached. Judge this as a discovery prompt, not historical authority.`;
+}
+
+function trialResultMarkup(counts, selected) {
+  const total = TRIAL_VERDICTS.reduce((sum, verdict) => sum + counts[verdict.id], 0);
+  const populated = TRIAL_VERDICTS.filter(verdict => counts[verdict.id] > 0).sort((a, b) => counts[b.id] - counts[a.id]);
+  const leading = populated[0];
+  const minority = populated.length > 1 ? populated[populated.length - 1] : null;
+  const reading = total === 0
+    ? 'You opened the public record. The room has not formed a view yet.'
+    : minority
+      ? `<b>The room leans “${escapeHtml(leading.label.toLowerCase())}.”</b> The minority reading—“${escapeHtml(minority.label.toLowerCase())}”—keeps the case unresolved.`
+      : `<b>The first public reading is “${escapeHtml(leading.label.toLowerCase())}.”</b> Dissent has not formed yet.`;
+  return `<div class="trial-results">
+    <h3>The room has answered</h3>
+    ${TRIAL_VERDICTS.map(verdict => {
+      const percent = total ? Math.round((counts[verdict.id] / total) * 100) : 0;
+      return `<div class="verdict-result"><header><span>${escapeHtml(verdict.label)}${selected === verdict.id ? ' · YOUR VERDICT' : ''}</span><b>${percent}%</b></header><div class="verdict-track" aria-label="${escapeHtml(verdict.label)}: ${percent} percent"><i style="width:${percent}%"></i></div></div>`;
+    }).join('')}
+    <p class="trial-reading">${reading}</p>
+    <div class="trial-actions">
+      <button class="text-button" id="shareTrial" type="button">SHARE THIS VERDICT</button>
+      <button class="text-button" id="nextTrial" type="button">OPEN A CONNECTED CASE</button>
+    </div>
+    <p class="trial-state" id="trialState" role="status">${escapeHtml(state.trial.message || `${total} anonymous public verdict${total === 1 ? '' : 's'} recorded.`)}</p>
+  </div>`;
+}
+
+function trialBallotMarkup(artifact) {
+  const selected = readTrialVotes()[artifact.id];
+  return `<div class="trial-ballot"><h3>What happened to this future?</h3><p>Choose once. The public distribution is revealed after your verdict.</p><div class="verdicts" role="group" aria-label="Choose a verdict">
+    ${TRIAL_VERDICTS.map(verdict => `<button class="verdict-button" type="button" data-verdict="${verdict.id}" aria-pressed="${selected === verdict.id}"${state.trial.busy || selected ? ' disabled' : ''}><span aria-hidden="true">${verdict.mark}</span>${verdict.label}</button>`).join('')}
+  </div><p class="trial-state" id="trialState" role="status">${escapeHtml(state.trial.message || 'No sign-in. No public profile. One private browser record.')}</p></div>`;
+}
+
+function renderTrial() {
+  const stage = el('trialStage');
+  const artifact = state.trial.artifact;
+  if (!artifact) {
+    stage.innerHTML = '<p class="empty">The public trial will open when the shared archive is available.</p>';
+    return;
+  }
+  const selected = readTrialVotes()[artifact.id];
+  const ballot = selected && state.trial.counts
+    ? `<div class="trial-ballot">${trialResultMarkup(state.trial.counts, selected)}</div>`
+    : trialBallotMarkup(artifact);
+  stage.innerHTML = `<article class="trial-record">
+      <div class="trial-kicker">${evidenceBadge(artifact)}<span>${escapeHtml(artifact.id)} · ${escapeHtml(artifact.year)} · ${escapeHtml(artifact.current_phase?.replace('_', ' ') || artifact.status || 'UNRESOLVED')}</span></div>
+      <h3>${escapeHtml(artifact.title)}</h3>
+      <p class="trial-description">${escapeHtml(artifact.imagined_future || artifact.description)}</p>
+      <p class="trial-question">${escapeHtml(artifact.unresolved_question || artifact.question || 'Did this future fail—or did we stop looking for it?')}</p>
+      <div class="trial-actions"><button class="text-button" id="inspectTrial" type="button">INSPECT THE EVIDENCE</button></div>
+      <p class="trial-evidence">${trialEvidenceText(artifact)}</p>
+    </article>${ballot}`;
+  stage.querySelectorAll('[data-verdict]').forEach(button => button.addEventListener('click', () => castTrialVerdict(button.dataset.verdict)));
+  el('inspectTrial')?.addEventListener('click', event => showArtifact(artifact.id, event.currentTarget));
+  el('shareTrial')?.addEventListener('click', shareTrialVerdict);
+  el('nextTrial')?.addEventListener('click', openConnectedTrial);
+}
+
+async function loadTrialVerdicts(preferredId) {
+  const artifact = selectTrialArtifact(preferredId);
+  state.trial = { artifact, counts: null, busy: false, message: '' };
+  renderTrial();
+  if (!artifact) return;
+  try {
+    const response = await fetch(`/api/trial?id=${encodeURIComponent(artifact.id)}`, { cache: 'no-store' });
+    if (!response.ok) throw new Error();
+    state.trial.counts = normalizeTrialCounts(await response.json());
+    renderTrial();
+  } catch {
+    state.trial.message = 'Public verdicts are temporarily unavailable. The evidence remains open for inspection.';
+    renderTrial();
+  }
+}
+
+async function castTrialVerdict(verdict) {
+  const artifact = state.trial.artifact;
+  if (!artifact || state.trial.busy || !TRIAL_VERDICTS.some(item => item.id === verdict)) return;
+  if (readTrialVotes()[artifact.id]) return;
+  state.trial.busy = true;
+  state.trial.message = 'RECORDING YOUR ANONYMOUS VERDICT…';
+  renderTrial();
+  try {
+    const response = await fetch('/api/trial', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ artifact_id: artifact.id, verdict })
+    });
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(payload.error || 'The public record could not accept this verdict.');
+    rememberTrialVote(artifact.id, verdict);
+    state.trial.counts = normalizeTrialCounts(payload);
+    state.trial.message = 'Verdict recorded. You are seeing the anonymous public distribution.';
+    emitPortalMotion('trial-verdict', { id: artifact.id, verdict });
+  } catch (error) {
+    state.trial.message = error.message;
+  } finally {
+    state.trial.busy = false;
+    renderTrial();
+  }
+}
+
+async function shareTrialVerdict() {
+  const artifact = state.trial.artifact;
+  if (!artifact) return;
+  const selectedId = readTrialVotes()[artifact.id];
+  const selected = TRIAL_VERDICTS.find(verdict => verdict.id === selectedId);
+  const url = new URL(location.href);
+  url.searchParams.set('trial', artifact.id);
+  url.hash = 'futureOnTrial';
+  const text = selected
+    ? `I put “${artifact.title}” on trial. My verdict: ${selected.label.toLowerCase()}. What is yours?`
+    : `Was “${artifact.title}” a failed future—or simply too early? Put it on trial.`;
+  try {
+    if (navigator.share) await navigator.share({ title: 'The Future on Trial · The Portal', text, url: url.href });
+    else {
+      await navigator.clipboard.writeText(`${text} ${url.href}`);
+      state.trial.message = 'Share text and doorway copied.';
+      renderTrial();
+    }
+  } catch (error) {
+    if (error.name !== 'AbortError') {
+      state.trial.message = 'Sharing is unavailable in this browser.';
+      renderTrial();
+    }
+  }
+}
+
+function openConnectedTrial() {
+  const current = state.trial.artifact;
+  if (!current) return;
+  const connectedIds = (state.network.edges || []).flatMap(edge => edge.from === current.id ? [edge.to] : edge.to === current.id ? [edge.from] : []);
+  const candidates = (state.archive.artifacts || []).filter(artifact => artifact.id !== current.id);
+  const next = candidates.find(artifact => connectedIds.includes(artifact.id)) || candidates[0];
+  if (!next) {
+    state.trial.message = 'No connected public case is available yet.';
+    renderTrial();
+    return;
+  }
+  const url = new URL(location.href);
+  url.searchParams.set('trial', next.id);
+  url.hash = 'futureOnTrial';
+  history.replaceState({}, '', url);
+  loadTrialVerdicts(next.id);
 }
 
 function allArtifacts() {
@@ -171,6 +366,24 @@ function renderEvolution() {
   el('evolution').innerHTML = events.length ? events.map(event => `<button type="button" class="evolution-event" data-id="${escapeHtml(event.id)}"><b>${escapeHtml(event.title)}</b><span>${event.new_concepts.length ? `Introduced ${escapeHtml(event.new_concepts.join(', '))}` : 'Extended existing knowledge'}${event.strengthened_concepts.length ? ` · Strengthened ${escapeHtml(event.strengthened_concepts.join(', '))}` : ''}${event.connections_created ? ` · ${event.connections_created} typed connection${event.connections_created === 1 ? '' : 's'}` : ''}</span></button>`).join('') : '<p class="empty">Evolution events begin with Version 5 encounters.</p>'; bindArtifactButtons(el('evolution'));
 }
 
+function renderContinuousModel() {
+  const model = state.archive.continuous_model || {};
+  const phases = ['EMERGED', 'DISAPPEARED', 'RETURNED', 'FAILED', 'PARTIALLY_REALIZED', 'REALIZED'];
+  const liveCounts = Object.fromEntries(phases.map(phase => [phase, 0]));
+  for (const artifact of state.archive.artifacts || []) for (const event of artifact.lifecycle || []) if (event.phase in liveCounts) liveCounts[event.phase] += 1;
+  el('phaseStrip').innerHTML = phases.map(phase => `<div class="phase"><b>${escapeHtml(liveCounts[phase] || model.phases?.[phase] || 0)}</b><span>${escapeHtml(phase.replace('_', ' '))}</span></div>`).join('');
+
+  const transitions = model.transitions || [];
+  el('transitions').innerHTML = transitions.length ? transitions.slice(0, 10).map(event => `<button type="button" class="transition" data-id="${escapeHtml(event.artifact_id)}">
+    <time>${escapeHtml(event.year)}</time><span><b>${escapeHtml(event.from ? `${event.from.replace('_', ' ')} → ${event.to.replace('_', ' ')}` : event.to.replace('_', ' '))}</b>${escapeHtml(event.title)}</span><small>${escapeHtml(event.evidence_basis)}</small>
+  </button>`).join('') : '<p class="empty">Lifecycle transitions appear as Version 6 artifacts enter the archive.</p>';
+  bindArtifactButtons(el('transitions'));
+
+  const watchlist = model.realization_watchlist || [];
+  el('watchlist').innerHTML = watchlist.length ? watchlist.slice(0, 8).map(item => `<button type="button" class="watch" data-id="${escapeHtml(item.id)}"><span>${escapeHtml(item.current_phase?.replace('_', ' ') || 'EMERGED')}</span><b>${escapeHtml(item.title)}</b><small>${escapeHtml(item.signal)}</small></button>`).join('') : '<p class="empty">Unrealized futures with observable realization signals will appear here.</p>';
+  bindArtifactButtons(el('watchlist'));
+}
+
 function deriveNetwork(artifacts) {
   const nodes = artifacts.map(artifact => ({ id: artifact.id, title: artifact.title, year: artifact.year, concepts: artifact.concepts || [] }));
   const edges = [];
@@ -250,6 +463,7 @@ function detailMarkup(artifact) {
   const relationships = (artifact.relationships || []).map(relationship => `<span class="relationship">${escapeHtml(relationship.type)} · ${escapeHtml(relationship.label)}</span>`).join('');
   const connections = (artifact.connections || []).map(connection => `<span class="relationship">${escapeHtml(connection.type)} → ${escapeHtml(connection.target_id)} · ${escapeHtml(connection.reason)}</span>`).join('');
   const experiment = artifact.experiment?.hypothesis ? `<h3>Test this idea</h3>${experimentMarkup({ id: artifact.id, title: artifact.title, experiment: artifact.experiment })}` : '';
+  const lifecycle = (artifact.lifecycle || []).map(event => `<li><time>${escapeHtml(event.year)}</time><span><b>${escapeHtml(event.phase.replace('_', ' '))}</b>${escapeHtml(event.description)}<small>${escapeHtml(event.evidence_basis || 'AI-GENERATED-HYPOTHESIS')}</small></span></li>`).join('');
   return `${evidenceBadge(artifact)}
     <h2 id="drawerTitle">${escapeHtml(artifact.title)}</h2>
     <p class="meta">${escapeHtml(artifact.id)} · ${escapeHtml(artifact.year)} · ${escapeHtml(artifact.status || 'EXPLORING')} · ${escapeHtml(artifact.persistence || 'ARCHIVE')}</p>
@@ -258,6 +472,7 @@ function detailMarkup(artifact) {
     <h3>Encounter / imagined future</h3><p>${escapeHtml(artifact.imagined_future)}</p>
     <h3>Problem addressed</h3><p>${escapeHtml(artifact.problem)}</p>
     <h3>Outcome / modern descendant</h3><p>${escapeHtml(artifact.modern_descendant)}</p>
+    ${lifecycle ? `<h3>Future lifecycle</h3><ol class="lifecycle">${lifecycle}</ol><h3>What could make it return</h3><div>${(artifact.recurrence_conditions || []).map(condition => `<span class="tag">${escapeHtml(condition)}</span>`).join('')}</div><h3>Observable realization signal</h3><p>${escapeHtml(artifact.realization_signal)}</p>` : ''}
     <h3>Concepts</h3><div>${(artifact.concepts || []).map(concept => `<span class="tag">${escapeHtml(concept)}</span>`).join('')}</div>
     ${relationships ? `<h3>Conceptual relationships</h3><div>${relationships}</div>` : ''}
     ${connections ? `<h3>Typed graph connections</h3><div>${connections}</div>` : ''}
@@ -337,9 +552,11 @@ async function loadPortal() {
   renderLenses();
   renderExperiments();
   renderEvolution();
+  renderContinuousModel();
   renderArtifacts();
   renderCabinet();
   drawGraph();
+  await loadTrialVerdicts();
 }
 
 async function generateEncounter(event) {
@@ -351,6 +568,7 @@ async function generateEncounter(event) {
   button.disabled = true;
   button.textContent = 'CURATING…';
   el('curatorForm').setAttribute('aria-busy', 'true');
+  emitPortalMotion('encounter-start');
   message.textContent = 'Searching for a distant, structured encounter. This can take up to 45 seconds…';
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 50000);
@@ -370,10 +588,14 @@ async function generateEncounter(event) {
     state.archive.evolution = state.archive.evolution || { events: [], open_experiments: [] };
     state.archive.evolution.open_experiments = [{ id: payload.id, title: payload.title, experiment: payload.experiment }, ...(state.archive.evolution.open_experiments || []).filter(item => item.id !== payload.id)].filter(item => item.experiment?.hypothesis).slice(0, 8);
     state.archive.evolution.events = [{ id: payload.id, title: payload.title, new_concepts: payload.concepts || [], strengthened_concepts: [], connections_created: (payload.connections || []).length, experiment: payload.experiment }, ...(state.archive.evolution.events || []).filter(item => item.id !== payload.id)].slice(0, 20);
+    state.archive.continuous_model = state.archive.continuous_model || { phases: {}, transitions: [], realization_watchlist: [] };
+    state.archive.continuous_model.transitions = [...(payload.lifecycle || []).map((event, index, lifecycle) => ({ artifact_id: payload.id, title: payload.title, from: index ? lifecycle[index - 1].phase : null, to: event.phase, year: event.year, evidence_basis: event.evidence_basis })), ...(state.archive.continuous_model.transitions || []).filter(item => item.artifact_id !== payload.id)].sort((a, b) => b.year - a.year).slice(0, 60);
+    if (payload.realization_signal && payload.current_phase !== 'REALIZED') state.archive.continuous_model.realization_watchlist = [{ id: payload.id, title: payload.title, current_phase: payload.current_phase, signal: payload.realization_signal }, ...(state.archive.continuous_model.realization_watchlist || []).filter(item => item.id !== payload.id)].slice(0, 12);
     state.activeLens = null;
     renderLenses();
     renderExperiments();
     renderEvolution();
+    renderContinuousModel();
     renderArtifacts();
     renderCabinet();
     message.textContent = payload.persistence === 'shared'
@@ -381,21 +603,25 @@ async function generateEncounter(event) {
       : cabinetSaved
         ? 'Encounter created and preserved in your private cabinet.'
         : 'Encounter created for this session; private browser storage is unavailable.';
+    emitPortalMotion('encounter-created', { id: payload.id, title: payload.title });
     showArtifact(payload.id, button);
   } catch (error) {
     message.textContent = error.name === 'AbortError' ? 'The curator timed out safely. No incomplete artifact was saved.' : error.message;
+    emitPortalMotion('encounter-failed');
   } finally {
     clearTimeout(timer);
     state.busy = false;
     button.disabled = false;
     button.textContent = 'GENERATE ONE ENCOUNTER';
     el('curatorForm').removeAttribute('aria-busy');
+    emitPortalMotion('encounter-end');
   }
 }
 
 async function maximizeSerendipity(event) {
   const button = event.currentTarget;
   button.disabled = true;
+  emitPortalMotion('serendipity-start');
   try {
     const path = `/api/serendipity${state.activeId ? `?from=${encodeURIComponent(state.activeId)}` : ''}`;
     const response = await fetch(path, { cache: 'no-store' });
@@ -408,6 +634,7 @@ async function maximizeSerendipity(event) {
     else el('status').textContent = 'CREATE AN ENCOUNTER TO BEGIN SERENDIPITY.';
   } finally {
     button.disabled = false;
+    emitPortalMotion('serendipity-end');
   }
 }
 
@@ -418,6 +645,11 @@ el('portalTheme').addEventListener('error', () => {
   portalSoundAllowed = false;
   updatePortalSoundControl('SOUND UNAVAILABLE');
   el('portalSound').disabled = true;
+});
+el('openTrial').addEventListener('click', () => {
+  playPortalTheme({ restart: true });
+  el('futureOnTrial').scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+  setTimeout(() => el('trialStage').querySelector('button')?.focus({ preventScroll: true }), 450);
 });
 el('enterGraph').addEventListener('click', () => {
   playPortalTheme({ restart: true });
@@ -468,4 +700,5 @@ loadPortal().catch(() => {
   renderArtifacts();
   renderCabinet();
   drawGraph();
+  loadTrialVerdicts();
 });

@@ -1,6 +1,6 @@
 # The Portal
 
-Version 5 is a living knowledge system: encounters do not merely enter an archive. Each can propose a testable experiment, connect explicitly to earlier artifacts, and leave a transparent evolution event. Personal experiment outcomes remain in the visitor's browser.
+Version 6.3 is a continuously evolving model of humanity's imagined futures. It tracks how ideas emerge, disappear, return, fail, partially materialize and become real—without hiding the boundary between generated hypotheses and source-supported history. Its public surfaces combine **The Future on Trial** with a production Living Observatory for bounded evolutionary hypotheses, falsification and fossil memory.
 
 ## An explorable model of how encounters become connections, experiments and new ways of seeing.
 
@@ -113,7 +113,7 @@ machine economies
 
 The final `?` is deliberate. The Portal should expose uncertainty rather than manufacture certainty.
 
-A second path can connect imagined ecosystems and resource-constrained worlds to ecology, sensing, closed systems and **Open Aqua**. The value is not the association itself; the value is whether the association produces a useful question or experiment.
+A second path can connect imagined ecosystems and resource-constrained worlds to ecology, sensing, closed systems and **VELYQUA 维澜**. The value is not the association itself; the value is whether the association produces a useful question or experiment.
 
 ## How the current prototype works
 
@@ -148,6 +148,8 @@ The desired progression is:
 simple → curious → deeper → surprising
 ```
 
+The homepage now offers three explicit doorways: put a future on trial, wander the graph or create an encounter. The daily trial is selected deterministically rather than ranked by popularity. After voting, a visitor sees the anonymous aggregate, can inspect the evidence boundary, share a deep link and continue into a connected case.
+
 Selected encounters can be presented as digital artifacts: an image or object, its provenance, the observation it triggered, the connections it suggests, the unresolved question and any experiment that followed.
 
 ## Design principles
@@ -181,6 +183,8 @@ Before materially increasing public traffic, use durable distributed rate limiti
 | **Local/private** | Canonical server IDs + private browser cabinet | `OPENAI_API_KEY` |
 | **Shared archive** | Durable Postgres persistence, retrieval and concept traversal | `OPENAI_API_KEY` + `DATABASE_URL` |
 
+Public verdicts use aggregate counters only. The server stores no voter identity, account, comment, fingerprint or IP address. A private browser record prevents casual repeat voting from the same browser and controls whether the aggregate is revealed.
+
 The executable database contract is [`schema.sql`](schema.sql).
 
 ## Quality and production verification
@@ -192,15 +196,15 @@ npm run smoke:production
 
 `verify` syntax-checks the browser, server/API and production-smoke modules; checks accessibility, evidence and security contracts; and prevents the Vercel function count from exceeding the Hobby deployment ceiling.
 
-`smoke:production` verifies the live public system end-to-end without generating a new AI artifact: homepage availability, database/archive health, AI-generation configuration, non-empty shared archive, canonical artifact IDs, retrieval of a known persisted artifact, and real Chromium initialization to a bounded online/fallback state.
+`smoke:production` verifies the live public system end-to-end without generating a new AI artifact: homepage availability, database/archive health, AI-generation configuration, non-empty Shared Stacks, canonical artifact IDs and retrieval of a known persisted artifact.
 
-GitHub Actions runs static verification on pushes and pull requests to `main`. Production smoke verification polls until the exact pushed revision is healthy, then runs the HTTP and browser gates. It can also be launched manually and runs daily as an independent production-health check. No application secrets are required by the smoke job or printed to its logs.
+GitHub Actions runs static verification on pushes and pull requests to `main`. Production smoke verification runs after pushes to `main`, can be launched manually, and also runs daily as an independent production-health check. No application secrets are required by the smoke job.
 
 ## Portfolio role
 
 The Portal is an experimental **BUILD** project inside [Andrew Lam's operations-intelligence portfolio](https://github.com/AndrewLamSingapore).
 
-Where [Open Aqua](https://github.com/AndrewLamSingapore/open-aqua) explores intelligence around a physical living system, The Portal explores intelligence around a cultural and conceptual information system. Both ask:
+Where [VELYQUA 维澜](https://github.com/AndrewLamSingapore/velyqua) explores intelligence around a physical living system, The Portal explores intelligence around a cultural and conceptual information system. Both ask:
 
 > **Can better structure reveal relationships that ordinary observation misses?**
 
@@ -213,6 +217,8 @@ The Portal extends that question one step further:
 Copy `.env.example` for the runtime-variable contract. The Vercel project requires `OPENAI_API_KEY` in protected Production and Preview environment variables. `DATABASE_URL` enables the shared archive. Credentials must never be committed.
 
 Git integration deploys pushes to `main` automatically. The production smoke workflow verifies the exact deployed Git revision, live browser assets, health/readiness, archive, graph, serendipity and historical V2 surface without spending a generation call.
+
+The production Living Observatory is available at `/living`. Its deterministic evolutionary and evidence-probe flows cannot actuate external systems, write production organism state, alter source code or mutate deployments. The model-originated clean-room trial remains an explicitly invoked preview-only experiment.
 
 ---
 
