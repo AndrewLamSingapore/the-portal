@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://the-portal/contracts/living-hypothesis.schema.json",
+  "title": "Portal 6.3 Living Hypothesis Genome",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "generation", "statement", "epistemic_class", "state", "ancestry", "evidence", "assumptions", "predictions", "falsifiers", "fitness", "confidence", "history"],
+  "properties": {
+    "id": {"type": "string", "pattern": "^HYP-[A-Z0-9-]+$"},
+    "generation": {"type": "integer", "minimum": 0},
+    "statement": {"type": "string", "minLength": 1, "maxLength": 4000},
+    "epistemic_class": {"enum": ["OBSERVED", "SOURCE_SUPPORTED", "INFERRED", "EXTRAPOLATED", "SPECULATIVE", "COUNTERFACTUAL", "UNKNOWN_LAW", "CONSTRUCTED"]},
+    "state": {"enum": ["EMERGING", "LIVING", "CONTESTED", "DORMANT", "DEAD", "REBORN"]},
+    "ancestry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["parent_ids", "operators"],
+      "properties": {
+        "parent_ids": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+        "operators": {"type": "array", "items": {"enum": ["ORIGIN", "MUTATION", "CROSSOVER", "CAUSAL_INVERSION", "COUNTERFACTUAL", "ANALOGY", "ADVERSARIAL", "REBIRTH"]}, "minItems": 1}
+      }
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "polarity", "basis", "summary"],
+        "properties": {
+          "id": {"type": "string"},
+          "polarity": {"enum": ["SUPPORTS", "CONTRADICTS", "NEUTRAL"]},
+          "basis": {"enum": ["OBSERVATION", "SOURCE", "TOOL_RESULT", "SIMULATION", "INFERENCE"]},
+          "summary": {"type": "string", "minLength": 1},
+          "observed_at": {"type": ["string", "null"], "format": "date-time"}
+        }
+      }
+    },
+    "assumptions": {"type": "array", "items": {"type": "string"}},
+    "predictions": {"type": "array", "items": {"type": "string"}},
+    "falsifiers": {"type": "array", "items": {"type": "string"}, "minItems": 1},
+    "hard_kill_conditions": {"type": "array", "items": {"type": "string"}},
+    "fitness": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["accuracy", "evidence", "novelty", "utility", "robustness", "efficiency", "calibration", "constraint_compliance"],
+      "properties": {
+        "accuracy": {"type": "number", "minimum": 0, "maximum": 1},
+        "evidence": {"type": "number", "minimum": 0, "maximum": 1},
+        "novelty": {"type": "number", "minimum": 0, "maximum": 1},
+        "utility": {"type": "number", "minimum": 0, "maximum": 1},
+        "robustness": {"type": "number", "minimum": 0, "maximum": 1},
+        "efficiency": {"type": "number", "minimum": 0, "maximum": 1},
+        "calibration": {"type": "number", "minimum": 0, "maximum": 1},
+        "constraint_compliance": {"type": "number", "minimum": 0, "maximum": 1}
+      }
+    },
+    "confidence": {"type": "number", "minimum": 0, "maximum": 1},
+    "superseded_by": {"type": ["string", "null"]},
+    "history": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["at", "event", "confidence"],
+        "properties": {
+          "at": {"type": "string", "format": "date-time"},
+          "event": {"type": "string"},
+          "confidence": {"type": "number", "minimum": 0, "maximum": 1}
+        }
+      }
+    }
+  }
+}

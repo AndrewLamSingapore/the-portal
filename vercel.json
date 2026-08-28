@@ -4,6 +4,9 @@
   "functions": {
     "api/artifact.js": {
       "maxDuration": 60
+    },
+    "api/living.js": {
+      "maxDuration": 60
     }
   },
   "rewrites": [
