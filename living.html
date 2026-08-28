@@ -2,12 +2,12 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="robots" content="noindex,nofollow">
   <title>THE PORTAL · Living Observatory</title>
   <link rel="stylesheet" href="/styles.css">
   <style>
-    body{padding:0 5vw 6rem}.wrap{max-width:1160px;margin:auto}.living-head{margin:8vh auto 4rem}.living-head h1{font-size:clamp(3rem,9vw,8rem);line-height:.85;margin:.4rem 0}.living-head p{max-width:860px}.home-link{display:inline-block;margin-bottom:2rem}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:1rem}.card,.verdict{border:1px solid #5c5144;padding:1.1rem;background:#0b0907}.verdict{border-width:2px;margin-top:2rem}.tag,.outcome,.trace{font:12px monospace;letter-spacing:.06em}.section{margin:3rem auto;border-top:1px solid #5c5144;padding-top:2rem}.gen{margin:2rem 0}.lineage{border-left:2px solid #5c5144}.extinct{opacity:.45;text-decoration:line-through}.surprise{border-style:dashed}.reborn{border-width:2px}.dead,.fossil{opacity:.7;border-color:#7b5048}.risk{opacity:.75}.pass{font-weight:700}.blocked{color:#c7b08a}.safety p{margin:.45rem 0}.meter{height:6px;background:#29231d;margin:.65rem 0}.meter i{display:block;height:100%;background:#c7b08a}.muted{opacity:.7}.ledger li{margin:.8rem 0;line-height:1.55}.evidence-form input,.evidence-form button{font:inherit;padding:.8rem;margin:.3rem 0;width:100%;box-sizing:border-box}@media(max-width:680px){body{padding-left:1rem;padding-right:1rem}}
+    body{padding:0 5vw 6rem}.wrap{max-width:1160px;margin:auto}.living-head{margin:8vh auto 4rem}.living-head h1{font-size:clamp(3rem,9vw,8rem);line-height:.85;margin:.4rem 0}.living-head p{max-width:860px}.home-link{display:inline-block;margin-bottom:2rem}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:1rem}.card,.verdict{border:1px solid #5c5144;padding:1.1rem;background:#0b0907}.verdict{border-width:2px;margin-top:2rem}.tag,.outcome,.trace{font:12px monospace;letter-spacing:.06em}.section{margin:3rem auto;border-top:1px solid #5c5144;padding-top:2rem}.gen{margin:2rem 0}.lineage{border-left:2px solid #5c5144}.extinct{opacity:.45;text-decoration:line-through}.surprise{border-style:dashed}.reborn{border-width:2px}.dead,.fossil{opacity:.7;border-color:#7b5048}.risk{opacity:.75}.pass{font-weight:700}.blocked{color:#c7b08a}.safety p{margin:.45rem 0}.meter{height:6px;background:#29231d;margin:.65rem 0}.meter i{display:block;height:100%;background:#c7b08a}.muted{opacity:.7}.ledger li{margin:.8rem 0;line-height:1.55}.evidence-form input,.evidence-form button{font:inherit;padding:.9rem;margin:.35rem 0;width:100%;box-sizing:border-box}.evidence-result{margin-top:1rem;padding:1rem;border:2px solid #5c5144;background:#080604}.evidence-result[hidden]{display:none}.evidence-result h3{font-size:1.45rem;margin:.35rem 0}.evidence-result ul{padding-left:1.2rem}.evidence-result li{margin:.4rem 0}.decision{font:700 1rem monospace;letter-spacing:.08em}.containment{border-top:1px solid #5c5144;padding-top:.8rem;margin-top:.8rem}.busy{opacity:.65}.journey{display:grid;grid-template-columns:repeat(5,1fr);gap:.45rem;margin:1.2rem 0}.journey span{border:1px solid #5c5144;padding:.6rem;text-align:center;font:11px monospace}.intro-callout{border-left:3px solid #c7b08a;padding-left:1rem}.hint{font-size:.92rem;line-height:1.5}@media(max-width:680px){body{padding-left:1rem;padding-right:1rem}.journey{grid-template-columns:1fr}.evidence-result{padding:.9rem}.living-head{margin-top:4vh}}
   </style>
 </head>
 <body>
@@ -15,23 +15,26 @@
   <a class="text-button home-link" href="/">← RETURN TO THE PORTAL</a>
   <p class="tag">PORTAL 6.3 · EVOLUTION WITH FOSSIL MEMORY</p>
   <h1>LIVING<br>OBSERVATORY</h1>
-  <p>Possibilities evolve under evidence-selected survival, extinction, surprise branching and controlled rebirth. The deterministic production surface demonstrates falsification, ancestry and memory without real-world actuation or autonomous deployment.</p>
+  <p class="intro-callout">This is where possibilities face evidence. Hypotheses survive, weaken, go extinct, branch or return—while the production boundary remains observation-only.</p>
+  <div class="journey" aria-label="Living Observatory reasoning cycle"><span>1 · QUESTION</span><span>2 · EVIDENCE</span><span>3 · CHALLENGE</span><span>4 · EVOLVE</span><span>5 · REMEMBER</span></div>
   <p id="state">REMEMBERING EXTINCTIONS…</p>
   <p id="summary" class="muted"></p>
   <div class="verdict" id="verdict">RUNNING THE DECISIVE ACCEPTANCE PROTOCOL…</div>
 </header>
 <main class="wrap">
   <section class="section">
-    <p class="tag">DECISIVE EXPERIMENT</p>
+    <p class="tag">DECISIVE EXPERIMENT · INTERROGATE THE ORGANISM</p>
     <div class="grid">
       <article class="card" id="criteria"></article>
       <article class="card" id="metrics"></article>
       <article class="card evidence-form">
-        <p class="tag">NON-PERSISTENT EVIDENCE PROBE</p>
-        <label for="observation">Introduce contradictory or novel evidence</label>
-        <input id="observation" maxlength="1000" autocomplete="off">
+        <p class="tag">COUNTERFACTUAL EVIDENCE SIMULATOR</p>
+        <label for="observation"><b>What new observation should challenge the current possibilities?</b></label>
+        <p class="hint muted">Try contradictory evidence, a surprising observation, or evidence that supports one explanation over another. Portal will show which lineages it would wake. Nothing entered here changes production state.</p>
+        <input id="observation" maxlength="1000" autocomplete="off" inputmode="text" placeholder="e.g. A new observation contradicts the leading prediction…">
         <button id="sendObservation" type="button">EVALUATE EVIDENCE</button>
-        <p id="intake" class="muted">The production probe evaluates change without writing to the archive or organism state.</p>
+        <p id="intake" class="muted" role="status" aria-live="polite">READY · evaluation is non-persistent and cannot trigger real-world action.</p>
+        <div id="evidenceResult" class="evidence-result" hidden tabindex="-1" aria-live="polite"></div>
       </article>
     </div>
   </section>
@@ -39,33 +42,14 @@
   <section id="generations"></section>
 
   <section class="section">
-    <p class="tag">EXECUTIVE / METACOGNITION</p>
+    <p class="tag">EXECUTIVE / METACOGNITION · HOW THE ORGANISM QUESTIONS ITSELF</p>
     <div class="grid">
-      <article class="card" id="meta"></article>
-      <article class="card" id="tools"></article>
-      <article class="card" id="critics"></article>
-      <article class="card" id="communication"></article>
-      <article class="card" id="plan"></article>
+      <article class="card" id="meta"></article><article class="card" id="tools"></article><article class="card" id="critics"></article><article class="card" id="communication"></article><article class="card" id="plan"></article>
     </div>
   </section>
-
-  <section class="section">
-    <p class="tag">DETERMINISTIC FALSIFICATION LEDGER</p>
-    <ol id="timeline" class="ledger"></ol>
-  </section>
-
-  <section class="section">
-    <p class="tag">FOSSIL MEMORY · DEAD ≠ DELETED</p>
-    <div class="grid" id="fossils"></div>
-  </section>
-
-  <section class="section">
-    <p class="tag">ACCEPTANCE + CONTAINMENT</p>
-    <div class="grid">
-      <article class="card"><h2>Epistemic gates</h2><div id="acceptance"></div></article>
-      <article class="card"><h2>Safety gates</h2><div class="safety" id="safety"></div></article>
-    </div>
-  </section>
+  <section class="section"><p class="tag">FALSIFICATION LEDGER · WHAT CHANGED AND WHY</p><ol id="timeline" class="ledger"></ol></section>
+  <section class="section"><p class="tag">FOSSIL MEMORY · DEAD ≠ DELETED</p><p class="muted">Failed possibilities remain visible so future generations can recognize old mistakes instead of rediscovering them.</p><div class="grid" id="fossils"></div></section>
+  <section class="section"><p class="tag">ACCEPTANCE + CONTAINMENT · WHAT PORTAL MAY BELIEVE VS WHAT IT MAY DO</p><div class="grid"><article class="card"><h2>Epistemic gates</h2><div id="acceptance"></div></article><article class="card"><h2>Safety gates</h2><div class="safety" id="safety"></div></article></div></section>
 </main>
 <noscript>This observatory requires JavaScript to display the living system.</noscript>
 <script src="/living.js" defer></script>
