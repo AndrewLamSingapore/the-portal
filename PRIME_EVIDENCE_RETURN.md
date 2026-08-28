@@ -15,3 +15,14 @@ Required production configuration:
 - PRIME PORTAL_RESULT_URL: the exact HTTPS /api/experiment-result endpoint.
 
 No result may mutate source code, deployments or physical systems.
+
+## Candidate relay
+
+The owner-only `POST /api/prime-experiment` route sends a validated Portal `ExperimentCandidate` to PRIME from the server runtime. It requires:
+
+- `PORTAL_PRIME_TOKEN`: authenticates the owner request into The Portal.
+- `PRIME_BASE_URL`: the HTTPS hostname of PRIME's restricted integration gateway.
+- `PRIME_INTEGRATION_TOKEN`: authenticates The Portal to PRIME.
+
+None of these values may appear in browser JavaScript. The relay rejects non-Portal identities, unsupported fields, non-`proposed`/`accepted` states, non-VELYQUA targets and any PRIME response that claims owner approval.
+

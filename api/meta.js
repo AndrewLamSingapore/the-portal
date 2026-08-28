@@ -4,11 +4,12 @@ import path from 'node:path';
 
 import { db, findArtifacts, getArtifact, getExperimentResult, hasDatabase, saveExperimentResult } from '../lib/db.js';
 import { canonicalExperimentResult, validatePrimeExperimentResult } from '../lib/experiment-result.js';
+import { validateExperimentCandidate, validatePrimeRelayResponse } from '../lib/experiment-candidate.js';
 
 const PRODUCT_VERSION = '6.3.0';
 const SCHEMA_VERSION = 6;
 const EXPERIENCE = 'Continuous Futures Model';
-const META_ROUTES = new Set(['capabilities', 'evidence', 'experiment-result', 'manifest', 'metrics', 'readiness', 'status', 'verify', 'version', 'v2']);
+const META_ROUTES = new Set(['capabilities', 'evidence', 'experiment-result', 'manifest', 'metrics', 'prime-experiment', 'readiness', 'status', 'verify', 'version', 'v2']);
 
 function jsonHeaders(res, cache = 'no-store') {
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
@@ -132,6 +133,64 @@ async function handleVerify(req, res) {
   return res.status(200).json({ ok: true, id, evidence_level: 'HISTORICALLY-VERIFIED', source_count: sources.length });
 }
 
+function bearerMatches(req, expected) {
+  const header = String(req.headers?.authorization || '');
+  const supplied = header.toLowerCase().startsWith('bearer ') ? header.slice(7) : '';
+  const left = Buffer.from(expected);
+  const right = Buffer.from(supplied);
+  return Boolean(expected) && left.length === right.length && crypto.timingSafeEqual(left, right);
+}
+
+async function handlePrimeExperiment(req, res) {
+  if (!allow(req, res, 'POST')) return;
+  const ownerToken = process.env.PORTAL_PRIME_TOKEN || '';
+  if (!ownerToken) return res.status(503).json({ error: 'Portal PRIME relay authentication is not configured' });
+  if (!bearerMatches(req, ownerToken)) return res.status(401).json({ error: 'Invalid relay token' });
+
+  const baseUrl = String(process.env.PRIME_BASE_URL || '').trim().replace(/\/$/, '');
+  const primeToken = process.env.PRIME_INTEGRATION_TOKEN || '';
+  if (!isHttps(baseUrl) || !primeToken) {
+    return res.status(503).json({ error: 'PRIME relay destination is not configured' });
+  }
+
+  let candidate;
+  try {
+    candidate = validateExperimentCandidate(req.body?.candidate);
+  } catch (error) {
+    return res.status(422).json({ error: String(error?.message || error).slice(0, 300) });
+  }
+
+  try {
+    const upstream = await fetch(`${baseUrl}/api/integrations/portal/experiments`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${primeToken}`
+      },
+      body: JSON.stringify({ candidate }),
+      signal: AbortSignal.timeout(8000)
+    });
+    if (!upstream.ok) {
+      return res.status(502).json({
+        error: 'PRIME rejected the candidate relay',
+        upstream_status: upstream.status
+      });
+    }
+    const response = validatePrimeRelayResponse(await upstream.json(), candidate);
+    return res.status(200).json({
+      accepted: true,
+      candidate_id: candidate.candidate_id,
+      experiment_spec: response.experiment_spec,
+      idempotent: response.idempotent === true
+    });
+  } catch (error) {
+    return res.status(502).json({
+      error: 'PRIME relay failed',
+      detail: String(error?.message || error).slice(0, 200)
+    });
+  }
+}
+
 async function handleExperimentResult(req, res) {
   if (!allow(req, res, 'POST')) return;
   const expected = process.env.PORTAL_RESULT_TOKEN || '';
@@ -226,6 +285,7 @@ export default async function handler(req, res) {
   }
   if (route === 'evidence') return handleEvidence(req, res);
   if (route === 'experiment-result') return handleExperimentResult(req, res);
+  if (route === 'prime-experiment') return handlePrimeExperiment(req, res);
   if (route === 'manifest') {
     if (!allow(req, res, 'GET')) return;
     return res.status(200).json({
