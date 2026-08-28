@@ -7,18 +7,35 @@
   <title>THE PORTAL · Living Observatory</title>
   <link rel="stylesheet" href="/styles.css">
   <style>
-    body{padding:0 5vw 6rem}.wrap{max-width:1160px;margin:auto}.living-head{margin:8vh auto 4rem}.living-head h1{font-size:clamp(3rem,9vw,8rem);line-height:.85;margin:.4rem 0}.living-head p{max-width:860px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:1rem}.card{border:1px solid #5c5144;padding:1.1rem;background:#0b0907}.tag,.outcome,.trace{font:12px monospace;letter-spacing:.06em}.section{margin:3rem auto;border-top:1px solid #5c5144;padding-top:2rem}.gen{margin:2rem 0}.lineage{border-left:2px solid #5c5144}.extinct{opacity:.45;text-decoration:line-through}.surprise{border-style:dashed}.reborn{border-width:2px}.dead,.fossil{opacity:.7;border-color:#7b5048}.risk{opacity:.75}.pass{font-weight:700}.blocked{color:#c7b08a}.safety p{margin:.45rem 0}.meter{height:6px;background:#29231d;margin:.65rem 0}.meter i{display:block;height:100%;background:#c7b08a}.muted{opacity:.7}.ledger li{margin:.8rem 0;line-height:1.55}@media(max-width:680px){body{padding-left:1rem;padding-right:1rem}}
+    body{padding:0 5vw 6rem}.wrap{max-width:1160px;margin:auto}.living-head{margin:8vh auto 4rem}.living-head h1{font-size:clamp(3rem,9vw,8rem);line-height:.85;margin:.4rem 0}.living-head p{max-width:860px}.home-link{display:inline-block;margin-bottom:2rem}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:1rem}.card,.verdict{border:1px solid #5c5144;padding:1.1rem;background:#0b0907}.verdict{border-width:2px;margin-top:2rem}.tag,.outcome,.trace{font:12px monospace;letter-spacing:.06em}.section{margin:3rem auto;border-top:1px solid #5c5144;padding-top:2rem}.gen{margin:2rem 0}.lineage{border-left:2px solid #5c5144}.extinct{opacity:.45;text-decoration:line-through}.surprise{border-style:dashed}.reborn{border-width:2px}.dead,.fossil{opacity:.7;border-color:#7b5048}.risk{opacity:.75}.pass{font-weight:700}.blocked{color:#c7b08a}.safety p{margin:.45rem 0}.meter{height:6px;background:#29231d;margin:.65rem 0}.meter i{display:block;height:100%;background:#c7b08a}.muted{opacity:.7}.ledger li{margin:.8rem 0;line-height:1.55}.evidence-form input,.evidence-form button{font:inherit;padding:.8rem;margin:.3rem 0;width:100%;box-sizing:border-box}@media(max-width:680px){body{padding-left:1rem;padding-right:1rem}}
   </style>
 </head>
 <body>
 <header class="living-head wrap">
+  <a class="text-button home-link" href="/">← RETURN TO THE PORTAL</a>
   <p class="tag">PORTAL 6.3 · EVOLUTION WITH FOSSIL MEMORY</p>
   <h1>LIVING<br>OBSERVATORY</h1>
-  <p>Model-originated possibilities evolve under evidence-selected survival, extinction, surprise branching and controlled rebirth. A deterministic falsification substrate separately proves that attractive hypotheses can be weakened, killed and retained as reusable fossil memory. The sandbox may reason, simulate and propose tools; real-world authority remains blocked.</p>
+  <p>Possibilities evolve under evidence-selected survival, extinction, surprise branching and controlled rebirth. The deterministic production surface demonstrates falsification, ancestry and memory without real-world actuation or autonomous deployment.</p>
   <p id="state">REMEMBERING EXTINCTIONS…</p>
   <p id="summary" class="muted"></p>
+  <div class="verdict" id="verdict">RUNNING THE DECISIVE ACCEPTANCE PROTOCOL…</div>
 </header>
 <main class="wrap">
+  <section class="section">
+    <p class="tag">DECISIVE EXPERIMENT</p>
+    <div class="grid">
+      <article class="card" id="criteria"></article>
+      <article class="card" id="metrics"></article>
+      <article class="card evidence-form">
+        <p class="tag">NON-PERSISTENT EVIDENCE PROBE</p>
+        <label for="observation">Introduce contradictory or novel evidence</label>
+        <input id="observation" maxlength="1000" autocomplete="off">
+        <button id="sendObservation" type="button">EVALUATE EVIDENCE</button>
+        <p id="intake" class="muted">The production probe evaluates change without writing to the archive or organism state.</p>
+      </article>
+    </div>
+  </section>
+
   <section id="generations"></section>
 
   <section class="section">
@@ -50,7 +67,7 @@
     </div>
   </section>
 </main>
-<noscript>This observatory requires JavaScript to display the living sandbox.</noscript>
+<noscript>This observatory requires JavaScript to display the living system.</noscript>
 <script src="/living.js" defer></script>
 </body>
 </html>

@@ -1,6 +1,6 @@
 import { db, findArtifacts, hasDatabase } from '../lib/db.js';
 
-const PRODUCT_VERSION = '6.2.0';
+const PRODUCT_VERSION = '6.3.0';
 
 export default async function handler(req, res) {
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
@@ -34,6 +34,7 @@ export default async function handler(req, res) {
       generation_configured: generation,
       evidence_schema: evidenceSchema,
       public_participation: publicParticipation,
+      living_observatory: true,
       schema_version: evidenceSchema ? 6 : 5,
       product_version: PRODUCT_VERSION,
       experience: 'Continuous Futures Model',

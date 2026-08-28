@@ -1,8 +1,8 @@
-# Portal 6.3 — First Implementation Plan
+# Portal 6.3 — Production Implementation Plan
 
-## PR 1: evolutionary substrate and contracts
+## Production release state
 
-Goal: establish reviewable foundations without changing production behavior.
+Portal 6.3 is approved for production promotion. The Living Observatory is a bounded public surface; real-world actuation, autonomous source/deployment mutation and production organism-state writes remain blocked.
 
 ### Deliverables
 - Living Intelligence master blueprint.
@@ -10,11 +10,11 @@ Goal: establish reviewable foundations without changing production behavior.
 - Deterministic in-memory ECE primitives: dominance/Pareto frontier, diversity preservation, confidence update and lifecycle transition guards.
 - Seeded sandbox fixture with hidden relationships and later contradictions.
 - Contract tests proving ancestry/falsifier requirements and contradiction-driven weakening/death.
-- Feature flag boundary (`PORTAL_LIVING_SANDBOX`) default-off.
+- Production Living Observatory plus an optional feature flag for non-Vercel environments.
 - No production DB migration and no autonomous source/deployment mutation.
 
 ### Phase 2
-Introduce durable sandbox persistence as additive tables only: `living_hypotheses`, `living_evidence`, `living_lineage`, `living_observations`, `living_runs`, `living_tool_events`. Production archive remains authoritative for v6.2 artifacts.
+Introduce durable sandbox persistence as additive tables only: `living_runs`, `living_events` and `living_fossils`. The production artifact archive remains authoritative for versioned artifacts.
 
 ### Phase 3
 Add tool registry/execution envelopes with budgets, permissions, provenance and result verification. Tool results become evidence records, never unlabelled facts.
@@ -30,8 +30,8 @@ Expose a sandbox Observatory UI: living hypotheses, ancestry graph, confidence h
 
 ## Acceptance gates
 1. `npm run verify` remains green.
-2. Existing v6.2 API contracts remain unchanged unless explicitly versioned.
-3. Main is untouched until review/merge approval.
+2. Existing artifact/archive API contracts remain unchanged unless explicitly versioned.
+3. The exact reconciled head must pass review and release verification before promotion.
 4. Sandbox is deterministic under a fixed seed.
 5. Contradictory evidence can lower confidence and trigger a valid DEAD transition.
 6. No DEAD hypothesis can silently return to LIVING; rebirth requires a recorded REBORN event and new evidence.
@@ -41,4 +41,4 @@ Expose a sandbox Observatory UI: living hypotheses, ancestry graph, confidence h
 10. A later unattended benchmark must demonstrate novel, defensible, falsifiable discovery rather than merely fluent output.
 
 ## Deployment strategy
-Push only `portal-6.3-living`. Use Vercel's Git preview deployment for the branch/PR. Validate preview and CI before any consideration of production promotion. Never deploy this PR directly to production and never merge automatically.
+Validate the reconciled Portal 6.3 head in preview and CI, merge only that exact green head, allow the Git-linked production deployment, and run the exact-revision production smoke gate. Keep clean-room model origination preview-only and keep the production Observatory read-only.

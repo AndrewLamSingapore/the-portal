@@ -1,5 +1,13 @@
 # Changelog
 
+## 6.3.0 — Living Observatory
+
+- Promotes the bounded Living Observatory to the production experience.
+- Adds evidence-selected evolutionary generations, explicit ancestry, falsifiers, hard-kill inheritance, fossil memory, surprise branches and controlled rebirth.
+- Adds a decisive experiment report that refuses to label deterministic fallback as proof of independent intelligence.
+- Adds a non-persistent production evidence probe and keeps model-originated clean-room execution preview-only.
+- Preserves real-world actuation, production organism-state writes, source mutation and deployment mutation as blocked capabilities.
+
 ## 6.2.0 — The Future on Trial
 
 - Replaces the ambiguous single entrance with three clear public doorways: trial, graph and encounter.

@@ -3,7 +3,7 @@ import path from 'node:path';
 
 import { db, findArtifacts, getArtifact, hasDatabase } from '../lib/db.js';
 
-const PRODUCT_VERSION = '6.2.0';
+const PRODUCT_VERSION = '6.3.0';
 const SCHEMA_VERSION = 6;
 const EXPERIENCE = 'Continuous Futures Model';
 const META_ROUTES = new Set(['capabilities', 'evidence', 'manifest', 'metrics', 'readiness', 'status', 'verify', 'version', 'v2']);
@@ -175,6 +175,10 @@ export default async function handler(req, res) {
         anonymous_public_trials: true,
         accessible_dialog: true,
         production_monitoring: true,
+        living_observatory: true,
+        evolutionary_hypotheses: true,
+        falsification_memory: true,
+        decisive_experiment: true,
         domain_ready: true
       },
       external_commitments: { custom_domain_purchase: false }

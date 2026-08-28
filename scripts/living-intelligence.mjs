@@ -79,6 +79,7 @@ const livingApi = fs.readFileSync('api/living.js', 'utf8');
 assert.match(observatory, /<script src="\/living\.js" defer><\/script>/);
 assert.doesNotMatch(observatory, /<script>(?:.|\n)*?<\/script>/, 'CSP blocks inline scripts');
 assert.equal(deployment.functions?.['api/living.js']?.maxDuration, 60);
-assert.ok(livingApi.includes("PORTAL_LIVING_MODEL_ENABLED==='1'"), 'model origination must be explicit opt-in');
+assert.ok(livingApi.includes("process.env.VERCEL_ENV !== 'preview'"), 'model-originated clean-room trials must remain preview-only');
+assert.ok(livingApi.includes('production_database_writes_allowed: false'), 'the production Observatory must remain read-only');
 
 console.log('Portal 6.3 living intelligence, memory, tool, replan, communication, CSP and multigeneration gates: PASS');
