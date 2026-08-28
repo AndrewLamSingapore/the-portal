@@ -23,10 +23,10 @@ export default async function handler(req,res){
   const initial=generated?.candidates?.length?generated.candidates:result.population.map((x,i)=>({...x,id:`HYP-G1-${String(i+1).padStart(2,'0')}`,generation:1}));
   const generations=runGenerations(initial,4),finalPopulation=generations.at(-1)?.population||initial;
   for(const h of finalPopulation)memory.remember({id:`MEM-LINEAGE-${h.id}`,layer:'EPISTEMIC',content:{hypothesis:h.id,ancestry:h.ancestry,fitness:h.fitness,state:h.state,evidence:h.evidence}});
-  const cognition=runExecutiveCycle({goal:'Use fossil failures, experimental outcomes and changed assumptions to challenge survivors and controlled rebirths.',population:finalPopulation,memory});
+  const cognition=runExecutiveCycle({goal:'Use fossil failures, experimental outcomes and changed assumptions to challenge survivors and controlled rebirths.',population:finalPopulation,history:result.population,memory});
   const experiment_summary={total:generations.reduce((n,g)=>n+g.experiments.length,0),extinctions:generations.flatMap(g=>g.extinct),surprise_branches:generations.flatMap(g=>g.surprises),rebirths:generations.flatMap(g=>g.reborn),fossils:Math.max(0,...generations.map(g=>g.fossil_count||0)),evidence_selected:true,fossil_inheritance:true};
   return res.status(200).json({
-    product:'The Portal',version:'6.3.0-preview.9',mode:'SANDBOX',
+    product:'The Portal',version:'6.3.0-preview.10',mode:'SANDBOX',
     readiness:cognition.readiness,decisive_gate:cognition.decisive_gate,acceptance:{...result.acceptance,...cognition.acceptance},
     generation_mode:generated?'MODEL_ORIGINATED':modelEnabled?'MODEL_FAILED_FALLBACK':'MODEL_DISABLED_FALLBACK',generation_model:generated?.model||null,generation_error,
     safety:{actuation_allowed:false,production_mutation_allowed:false,production_database_writes_allowed:false,deployment_mutation_allowed:false},

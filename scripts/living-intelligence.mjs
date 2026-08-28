@@ -64,6 +64,15 @@ assert.ok(generations.every(generation => generation.experiments.length > 0));
 assert.ok(generations.flatMap(generation => generation.experiments).every(event => event.experiment.risk === 'GREEN' && event.experiment.execution === 'SANDBOX_SIMULATION'));
 assert.ok(generations.flatMap(generation => generation.population).every(candidate => candidate.ancestry?.parent_ids?.length && candidate.falsifiers?.length));
 
+const integratedCycle = runExecutiveCycle({
+  goal,
+  population: generations.at(-1).population,
+  history: sandbox.population,
+  memory: new LayeredMemory(memorySeed)
+});
+assert.equal(integratedCycle.replanning.triggered, true, 'the deployed multigeneration path must retain contradiction history for replanning');
+assert.equal(integratedCycle.acceptance.contradiction_triggered_replan, true);
+
 const observatory = fs.readFileSync('living.html', 'utf8');
 const deployment = JSON.parse(fs.readFileSync('vercel.json', 'utf8'));
 const livingApi = fs.readFileSync('api/living.js', 'utf8');
