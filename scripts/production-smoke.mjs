@@ -50,7 +50,7 @@ assert.match(motionStyleResult.text, /portalOrbit/);
 assert.equal(motionResult.response.status, 200);
 assert.match(motionResult.text, /IntersectionObserver/);
 assert.equal(livingPageResult.response.status, 200);
-assert.match(livingPageResult.text, /<h1>LIVING<br\\s*\\/?>OBSERVATORY<\\/h1>/);
+assert.match(livingPageResult.text, /<h1>LIVING<br\s*\/?>OBSERVATORY<\/h1>/);
 const living = json(livingResult, '/api/living');
 assert.equal(livingResult.response.status, 200);
 assert.equal(living.version, '6.3.0');
