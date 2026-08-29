@@ -6,7 +6,7 @@ import { db, findArtifacts, getArtifact, getExperimentResult, hasDatabase, saveE
 import { canonicalExperimentResult, validatePrimeExperimentResult } from '../lib/experiment-result.js';
 import { validateExperimentCandidate, validatePrimeRelayResponse } from '../lib/experiment-candidate.js';
 
-const PRODUCT_VERSION = '6.3.0';
+const PRODUCT_VERSION = '6.3.1';
 const SCHEMA_VERSION = 6;
 const EXPERIENCE = 'Continuous Futures Model';
 const META_ROUTES = new Set(['capabilities', 'evidence', 'experiment-result', 'manifest', 'metrics', 'prime-experiment', 'readiness', 'status', 'verify', 'version', 'v2']);
