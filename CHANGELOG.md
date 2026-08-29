@@ -1,5 +1,13 @@
 # Changelog
 
+## 6.3.1 — Scientific Acceptance
+
+- Makes a declared prospective falsifier kill its hypothesis instead of merely reducing confidence.
+- Requires evidence comparison whenever more than one hypothesis is under consideration and verifies at least three bounded green tools.
+- Adds an observation-only model-origin audit with no inherited hypotheses, fossils, memory or seed statements.
+- Persists clean-room acceptance evidence and replay-verifies it before production may report the novelty gates as passed.
+- Pins Vercel Functions to Node.js 22 to remove the Node.js 24 `url.parse()` runtime deprecation emitted by the current Neon driver.
+
 ## 6.3.0 — Living Observatory
 
 - Promotes the bounded Living Observatory to the production experience.

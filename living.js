@@ -14,7 +14,10 @@ function renderDecisiveExperiment(data) {
   const verdict = data.decisive_experiment?.verdict;
   if (!verdict) throw new Error('Decisive experiment result unavailable');
   const label = verdict.passed ? 'PASS' : verdict.provisional ? 'PROVISIONAL — NOT PROVEN' : 'FAIL';
-  $('verdict').innerHTML = `<p class="tag">CURRENT EPISTEMIC VERDICT · ${esc(verdict.protocol_id)} · BLIND ${verdict.blind ? 'YES' : 'NO'}</p><h2>${label}</h2><p>Score ${pct(verdict.score)}% · novelty ${pct(verdict.novelty_score)}%</p><p>${esc(verdict.reason)}</p><p class="muted">This verdict describes evidence quality, not permission for real-world action.</p>`;
+  const source = data.decisive_experiment?.acceptance_source === 'REPLAY_VERIFIED_CLEANROOM_CERTIFICATE'
+    ? 'REPLAY-VERIFIED CLEAN-ROOM CERTIFICATE'
+    : 'CURRENT DETERMINISTIC OBSERVATORY';
+  $('verdict').innerHTML = `<p class="tag">CURRENT EPISTEMIC VERDICT · ${esc(verdict.protocol_id)} · BLIND ${verdict.blind ? 'YES' : 'NO'}</p><h2>${label}</h2><p>Score ${pct(verdict.score)}% · novelty ${pct(verdict.novelty_score)}%</p><p><b>Evidence source</b> ${source}</p><p>${esc(verdict.reason)}</p><p class="muted">This verdict describes evidence quality, not permission for real-world action.</p>`;
   $('criteria').innerHTML = `<p class="tag">WHAT MUST BE TRUE</p>${Object.entries(verdict.criteria || {}).map(([key,value]) => `<p class="${value?'pass':'blocked'}">${value?'PASS':'PENDING'} · ${esc(key.replaceAll('_',' '))}</p>`).join('')}`;
   $('metrics').innerHTML = `<p class="tag">WHAT THE TRIAL SAW</p>${Object.entries(verdict.metrics || {}).map(([key,value]) => `<p>${esc(key.replaceAll('_',' '))}: <b>${esc(value)}</b></p>`).join('')}<p>Generation mode: <b>${esc(data.generation_mode)}</b></p>`;
 }

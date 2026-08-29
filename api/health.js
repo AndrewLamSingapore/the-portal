@@ -1,6 +1,6 @@
 import { db, findArtifacts, hasDatabase } from '../lib/db.js';
 
-const PRODUCT_VERSION = '6.3.0';
+const PRODUCT_VERSION = '6.3.1';
 
 export default async function handler(req, res) {
   res.setHeader('Content-Type', 'application/json; charset=utf-8');

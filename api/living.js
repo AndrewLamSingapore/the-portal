@@ -5,8 +5,9 @@ import { generateHypothesisPopulation } from '../lib/hypothesis-generation.js';
 import { LayeredMemory, runExecutiveCycle, TOOL_REGISTRY } from '../lib/living-intelligence.js';
 import { runLivingSandbox, SANDBOX_SEED } from '../lib/living-sandbox.js';
 import { runGenerations } from '../lib/multigeneration.js';
+import { recoverNoveltyCertificate } from '../lib/novelty-benchmark.js';
 
-const PRODUCT_VERSION = '6.3.0';
+const PRODUCT_VERSION = '6.3.1';
 const CLEANROOM = 'PORTAL-63-CLEANROOM-20260828-A';
 
 function isLivingEnabled() {
@@ -47,6 +48,7 @@ async function runCleanroom(req, res) {
   const memory = new LayeredMemory(seed.observations.map(item => ({
     id: item.id,
     layer: 'EPISODIC',
+    kind: 'CLEANROOM_INPUT_OBSERVATION',
     content: item,
     strength: .5
   })));
@@ -73,11 +75,23 @@ async function runCleanroom(req, res) {
     population: generated.candidates,
     memory
   });
+  const originAudit = {
+    observation_only: true,
+    seed_statement_leakage: false,
+    prompt_seed_statements: 0,
+    inherited_population: false,
+    inherited_fossils: false,
+    inherited_hypotheses: false,
+    inherited_memory: false,
+    trigger: 'UNATTENDED_OBSERVATION_PROTOCOL',
+    model: generated.model
+  };
   const trial = runDecisiveExperiment({
     initial: generated.candidates,
     cognition,
     observations: seed.observations,
-    generationMode: 'MODEL_ORIGINATED'
+    generationMode: 'MODEL_ORIGINATED',
+    originAudit
   });
   const runId = `${CLEANROOM}-${Date.now()}`;
 
@@ -90,6 +104,8 @@ async function runCleanroom(req, res) {
       state: {
         clean_room: true,
         contamination_source: null,
+        generation_mode: 'MODEL_ORIGINATED',
+        origin_audit: originAudit,
         initial_population: generated.candidates,
         final_population: trial.generations.at(-1)?.population || [],
         verdict: trial.verdict
@@ -149,7 +165,10 @@ async function readLiving(req, res) {
   if (req.query?.trial === 'cleanroom') return runCleanroom(req, res);
 
   const result = runLivingSandbox(SANDBOX_SEED);
-  const prior = hasDatabase() ? await loadLatestLivingRun(SANDBOX_SEED.id) : null;
+  const [prior, benchmarkRun] = hasDatabase()
+    ? await Promise.all([loadLatestLivingRun(SANDBOX_SEED.id), loadLatestLivingRun(CLEANROOM)])
+    : [null, null];
+  const noveltyBenchmark = recoverNoveltyCertificate(benchmarkRun, result.observations);
   const memory = new LayeredMemory(memorySeed(result, prior));
   const initial = prior?.state?.population?.length ? prior.state.population : result.population;
   const generations = runGenerations(initial, 4);
@@ -173,14 +192,19 @@ async function readLiving(req, res) {
     goal: 'Use fossil failures, experimental outcomes and changed assumptions to challenge survivors and controlled rebirths.',
     population: finalPopulation,
     history: result.population,
-    memory
+    memory,
+    noveltyBenchmark
   });
   const decisive = runDecisiveExperiment({
     initial,
     cognition,
     observations: result.observations,
-    generationMode: 'DETERMINISTIC_FALLBACK'
+    generationMode: 'DETERMINISTIC_FALLBACK',
+    history: result.population
   });
+  const certifiedVerdict = noveltyBenchmark?.passed && benchmarkRun?.state?.verdict?.passed
+    ? benchmarkRun.state.verdict
+    : decisive.verdict;
   const experimentSummary = {
     total: generations.reduce((count, generation) => count + generation.experiments.length, 0),
     extinctions: generations.flatMap(generation => generation.extinct),
@@ -201,7 +225,12 @@ async function readLiving(req, res) {
     generations,
     experiment_summary: experimentSummary,
     cognition,
-    decisive_experiment: { protocol: decisive.protocol, verdict: decisive.verdict },
+    decisive_experiment: {
+      protocol: decisive.protocol,
+      verdict: certifiedVerdict,
+      acceptance_source: noveltyBenchmark?.passed ? 'REPLAY_VERIFIED_CLEANROOM_CERTIFICATE' : 'CURRENT_DETERMINISTIC_OBSERVATORY'
+    },
+    novelty_benchmark: noveltyBenchmark,
     tool_registry: TOOL_REGISTRY,
     safety: {
       actuation_allowed: false,

@@ -1,4 +1,4 @@
-# Portal 6.3 release gate
+# Portal 6.3.1 release gate
 
 The release gate now covers structured experiments, typed connections, deterministic evolution events, and backward compatibility with earlier artifacts.
 
@@ -15,5 +15,7 @@ A production release is acceptable only when:
 9. A newly persisted encounter appears in the archive and graph without a CDN-staleness window.
 10. `/living` and `/api/living` load in production, preserve falsifiers and hard-kill inheritance, and report source, database and deployment mutation permissions as blocked.
 11. Model-originated clean-room execution remains preview-only and explicitly invoked.
+12. Scientific acceptance is reported only from a replay-verifiable clean-room certificate whose observation-only origin audit and decisive protocol both pass.
+13. The deployed runtime uses Node.js 22.x and emits no `DEP0169` `url.parse()` warning.
 
 A dedicated domain remains a separate owner branding and financial decision.
