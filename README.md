@@ -113,8 +113,6 @@ machine economies
 
 The final `?` is deliberate. The Portal should expose uncertainty rather than manufacture certainty.
 
-A second path can connect imagined ecosystems and resource-constrained worlds to ecology, sensing, closed systems and **VELYQUA 维澜**. The value is not the association itself; the value is whether the association produces a useful question or experiment.
-
 ## How the current prototype works
 
 ```text
@@ -204,9 +202,7 @@ GitHub Actions runs static verification on pushes and pull requests to `main`. P
 
 The Portal is an experimental **BUILD** project inside [Andrew Lam's operations-intelligence portfolio](https://github.com/AndrewLamSingapore).
 
-Where [VELYQUA 维澜](https://github.com/AndrewLamSingapore/velyqua) explores intelligence around a physical living system, The Portal explores intelligence around a cultural and conceptual information system. Both ask:
-
-> **Can better structure reveal relationships that ordinary observation misses?**
+Its role is to turn encounters and conceptual relationships into bounded questions and experiments while keeping provenance and uncertainty visible.
 
 The Portal extends that question one step further:
 
