@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 import { db, findArtifacts, getArtifact, getExperimentResult, hasDatabase, saveExperimentResult } from '../lib/db.js';
-import { canonicalExperimentResult, validatePrimeExperimentResult } from '../lib/experiment-result.js';
+import { acceptExperimentResult } from '../lib/experiment-result-service.js';
 import { validateExperimentCandidate, validatePrimeRelayResponse } from '../lib/experiment-candidate.js';
 
 const PRODUCT_VERSION = '6.3.1';
@@ -46,6 +46,13 @@ async function publicParticipationReady() {
   return Boolean(rows[0]?.verdicts);
 }
 
+async function experimentResultSchemaReady() {
+  if (!hasDatabase()) return false;
+  const sql = db();
+  const rows = await sql`select to_regclass('public.experiment_results') as results`;
+  return Boolean(rows[0]?.results);
+}
+
 async function handleEvidence(req, res) {
   if (!allow(req, res, 'GET')) return;
   if (!hasDatabase()) return res.status(503).json({ error: 'Archive unavailable' });
@@ -86,7 +93,9 @@ async function handleReadiness(req, res) {
       generation: Boolean(process.env.OPENAI_API_KEY),
       archive: artifacts.length > 0,
       evidence_schema: database ? await evidenceSchemaReady() : false,
-      public_participation: database ? await publicParticipationReady() : false
+      public_participation: database ? await publicParticipationReady() : false,
+      experiment_result_schema: database ? await experimentResultSchemaReady() : false,
+      authenticated_result_writing: Boolean(process.env.PORTAL_RESULT_TOKEN)
     };
     const ok = Object.values(checks).every(Boolean);
     return res.status(ok ? 200 : 503).json({ ok, product_version: PRODUCT_VERSION, schema_version: SCHEMA_VERSION, checks });
@@ -100,7 +109,8 @@ async function handleStatus(req, res) {
   try {
     const database = hasDatabase();
     const artifacts = database ? await findArtifacts({ limit: 1 }) : [];
-    const operational = database && artifacts.length > 0 && await evidenceSchemaReady() && await publicParticipationReady();
+    const operational = database && artifacts.length > 0 && await evidenceSchemaReady() && await publicParticipationReady()
+      && await experimentResultSchemaReady() && Boolean(process.env.PORTAL_RESULT_TOKEN);
     return res.status(operational ? 200 : 503).json({
       status: operational ? 'OPERATIONAL' : 'DEGRADED',
       archive: database && artifacts.length > 0,
@@ -204,29 +214,13 @@ async function handleExperimentResult(req, res) {
   }
   if (!hasDatabase()) return res.status(503).json({ error: 'Archive unavailable' });
 
-  let result;
-  try {
-    result = validatePrimeExperimentResult(req.body?.result);
-  } catch (error) {
-    return res.status(422).json({ error: String(error?.message || error).slice(0, 300) });
-  }
-  const existing = await getExperimentResult(result.experiment_id);
-  if (existing) {
-    if (result.result_version < existing.result_version) {
-      return res.status(409).json({ error: 'Stale experiment result version' });
-    }
-    if (result.result_version === existing.result_version) {
-      if (canonicalExperimentResult(existing.result_json) !== canonicalExperimentResult(result)) {
-        return res.status(409).json({ error: 'Result version replay contains conflicting data' });
-      }
-      return res.status(200).json({ accepted: true, result_id: result.result_id, idempotent: true, graph_updated: true });
-    }
-  }
-  const saved = await saveExperimentResult(result);
-  if (Number(saved?.result_version) !== result.result_version || saved?.result_id !== result.result_id) {
-    return res.status(409).json({ error: 'A newer concurrent result already controls this experiment' });
-  }
-  return res.status(200).json({ accepted: true, result_id: result.result_id, idempotent: false, graph_updated: true });
+  const outcome = await acceptExperimentResult({
+    authorization: req.headers?.authorization,
+    expectedToken: process.env.PORTAL_RESULT_TOKEN,
+    payload: req.body,
+    store: { get: getExperimentResult, save: saveExperimentResult }
+  });
+  return res.status(outcome.status).json(outcome.body);
 }
 
 export default async function handler(req, res) {

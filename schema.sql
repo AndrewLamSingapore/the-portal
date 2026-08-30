@@ -10,6 +10,20 @@ create table if not exists artifact_verdicts (
 );
 create index if not exists artifact_verdicts_updated_at_idx on artifact_verdicts(updated_at desc);
 
+-- Authenticated, versioned PRIME evidence returned to the Portal graph.
+create table if not exists experiment_results (
+  experiment_id text primary key,
+  result_id text not null unique,
+  candidate_id text not null,
+  result_version integer not null check (result_version > 0),
+  status text not null,
+  conclusion text not null,
+  result_json jsonb not null,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+create index if not exists experiment_results_updated_at_idx on experiment_results(updated_at desc);
+
 -- Portal 6.3 sandbox-only durable organism state. Additive and isolated from v6.2 artifacts.
 create table if not exists living_runs (id text primary key, sandbox_key text not null, status text not null default 'ACTIVE', generation integer not null default 0, state jsonb not null default '{}'::jsonb, unfinished_questions jsonb not null default '[]'::jsonb, created_at timestamptz not null default now(), updated_at timestamptz not null default now());
 create index if not exists living_runs_sandbox_updated_idx on living_runs(sandbox_key,updated_at desc);

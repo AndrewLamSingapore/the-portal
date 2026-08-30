@@ -13,7 +13,8 @@
     "experiment:decisive": "node scripts/decisive-experiment.mjs",
     "smoke:production": "node scripts/production-smoke.mjs && node scripts/browser-smoke.mjs",
     "smoke:browser": "node scripts/browser-smoke.mjs",
-    "smoke:v2": "node scripts/v2-smoke.mjs"
+    "smoke:v2": "node scripts/v2-smoke.mjs",
+    "synthetic:result": "node scripts/authenticated-result-loop.mjs"
   },
   "devDependencies": {
     "playwright": "1.55.0"

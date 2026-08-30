@@ -23,16 +23,19 @@ export default async function handler(req, res) {
   }
   try {
     const sql = db();
-    const [artifacts, columns, participation] = await Promise.all([
+    const [artifacts, columns, participation, resultSchema] = await Promise.all([
       findArtifacts({ limit: 1 }),
       sql`select column_name from information_schema.columns where table_schema='public' and table_name='artifacts'`,
-      sql`select to_regclass('public.artifact_verdicts') as verdicts`
+      sql`select to_regclass('public.artifact_verdicts') as verdicts`,
+      sql`select to_regclass('public.experiment_results') as results`
     ]);
     const availableColumns = new Set(columns.map(row => row.column_name));
     const evidenceSchema = ['evidence_level', 'sources', 'relationships', 'experiment', 'connections', 'lifecycle', 'current_phase', 'recurrence_conditions', 'realization_signal'].every(column => availableColumns.has(column));
     const publicParticipation = Boolean(participation[0]?.verdicts);
+    const experimentResultSchema = Boolean(resultSchema[0]?.results);
+    const authenticatedResultWriting = Boolean(process.env.PORTAL_RESULT_TOKEN);
     const archive = artifacts.length > 0;
-    const ok = archive && generation && evidenceSchema && publicParticipation;
+    const ok = archive && generation && evidenceSchema && publicParticipation && experimentResultSchema && authenticatedResultWriting;
     return res.status(ok ? 200 : 503).json({
       ok,
       database: true,
@@ -40,6 +43,8 @@ export default async function handler(req, res) {
       generation_configured: generation,
       evidence_schema: evidenceSchema,
       public_participation: publicParticipation,
+      experiment_result_schema: experimentResultSchema,
+      authenticated_result_writing: authenticatedResultWriting,
       living_observatory: true,
       schema_version: evidenceSchema ? 6 : 5,
       product_version: PRODUCT_VERSION,

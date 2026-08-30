@@ -26,6 +26,7 @@ jobs:
         with:
           node-version: 22
       - run: npm run verify
+      - run: npm run synthetic:result
 
   production-smoke:
     if: github.event_name != 'pull_request'

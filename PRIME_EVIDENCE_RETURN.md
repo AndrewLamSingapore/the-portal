@@ -16,6 +16,8 @@ Required production configuration:
 
 No result may mutate source code, deployments or physical systems.
 
+The release gate now executes a complete non-physical synthetic loop: invalid authentication is rejected, a valid result is written, an exact replay is idempotent, a conflicting replay is rejected, the stored result is read back, and an `EXPERIMENT_EVIDENCE` graph edge is derived. Production readiness requires both the durable `experiment_results` schema and `PORTAL_RESULT_TOKEN` configuration.
+
 ## Candidate relay
 
 The owner-only `POST /api/prime-experiment` route sends a validated Portal `ExperimentCandidate` to PRIME from the server runtime. It requires:
@@ -25,4 +27,3 @@ The owner-only `POST /api/prime-experiment` route sends a validated Portal `Expe
 - `PRIME_INTEGRATION_TOKEN`: authenticates The Portal to PRIME.
 
 None of these values may appear in browser JavaScript. The relay rejects non-Portal identities, unsupported fields, non-`proposed`/`accepted` states, non-VELYQUA targets and any PRIME response that claims owner approval.
-
