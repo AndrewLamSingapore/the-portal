@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://shared-design-language.local/event-envelope-v1.schema.json",
+  "title": "Shared Design Language Event Envelope v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["tenant_id", "event_type", "source", "payload", "correlation_id", "occurred_at", "schema_version"],
+  "properties": {
+    "tenant_id": { "type": "string", "minLength": 1 },
+    "event_type": { "type": "string", "minLength": 1 },
+    "source": { "type": "string", "minLength": 1 },
+    "payload": { "type": "object" },
+    "correlation_id": { "type": "string", "minLength": 1 },
+    "occurred_at": { "type": "string", "format": "date-time" },
+    "schema_version": { "const": "1.0" }
+  }
+}
