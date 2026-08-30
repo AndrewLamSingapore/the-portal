@@ -1,0 +1,27 @@
+name: Grounding Query
+
+on:
+  pull_request:
+    paths:
+      - 'api/graph.js'
+      - 'lib/grounding.js'
+      - 'scripts/grounding-query-contract.mjs'
+      - '.github/workflows/grounding-query.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'api/graph.js'
+      - 'lib/grounding.js'
+      - 'scripts/grounding-query-contract.mjs'
+      - '.github/workflows/grounding-query.yml'
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --check api/graph.js && node --check lib/grounding.js && node --check scripts/grounding-query-contract.mjs
+      - run: node scripts/grounding-query-contract.mjs
