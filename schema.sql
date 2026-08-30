@@ -77,3 +77,10 @@ create table if not exists spine_audit_log (
 );
 create index if not exists spine_audit_tenant_created_idx on spine_audit_log(tenant_id,created_at desc);
 create index if not exists spine_audit_correlation_idx on spine_audit_log(tenant_id,correlation_id);
+create table if not exists ecosystem_events (
+  id bigserial primary key,
+  event_name text not null check(event_name in ('ecosystem_link_clicked','ecosystem_referral_received')),
+  properties jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default now()
+);
+create index if not exists ecosystem_events_name_created_idx on ecosystem_events(event_name,created_at desc);

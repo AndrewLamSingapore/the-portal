@@ -14,6 +14,7 @@
     { "source": "/api/autonomy/latest", "destination": "/api/health?route=autonomy-latest" },
     { "source": "/api/capabilities", "destination": "/api/meta?route=capabilities" },
     { "source": "/api/evidence", "destination": "/api/meta?route=evidence" },
+    { "source": "/api/ecosystem-event", "destination": "/api/meta?route=ecosystem-event" },
     { "source": "/api/experiment-result", "destination": "/api/meta?route=experiment-result" },
     { "source": "/api/manifest", "destination": "/api/meta?route=manifest" },
     { "source": "/api/metrics", "destination": "/api/meta?route=metrics" },

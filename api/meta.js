@@ -9,7 +9,7 @@ import { validateExperimentCandidate, validatePrimeRelayResponse } from '../lib/
 const PRODUCT_VERSION = '6.3.1';
 const SCHEMA_VERSION = 6;
 const EXPERIENCE = 'Continuous Futures Model';
-const META_ROUTES = new Set(['capabilities', 'evidence', 'experiment-result', 'manifest', 'metrics', 'prime-experiment', 'readiness', 'status', 'verify', 'version', 'v2']);
+const META_ROUTES = new Set(['capabilities', 'ecosystem-event', 'evidence', 'experiment-result', 'manifest', 'metrics', 'prime-experiment', 'readiness', 'status', 'verify', 'version', 'v2']);
 
 function jsonHeaders(res, cache = 'no-store') {
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
@@ -81,6 +81,20 @@ async function handleMetrics(req, res) {
     oldest: artifacts.length ? Math.min(...artifacts.map(item => item.year)) : null,
     newest: artifacts.length ? Math.max(...artifacts.map(item => item.year)) : null
   });
+}
+
+async function handleEcosystemEvent(req, res) {
+  if (!allow(req, res, 'POST')) return;
+  if (!hasDatabase()) return res.status(202).json({ accepted: true, durable: false });
+  const event = String(req.body?.event || '');
+  if (!['ecosystem_link_clicked', 'ecosystem_referral_received'].includes(event)) return res.status(400).json({ error: 'Invalid event' });
+  const raw = req.body?.properties && typeof req.body.properties === 'object' ? req.body.properties : {};
+  const permitted = ['app', 'destination', 'placement', 'source', 'medium', 'campaign'];
+  const properties = Object.fromEntries(permitted.filter(key => typeof raw[key] === 'string').map(key => [key, raw[key].slice(0, 100)]));
+  const sql = db();
+  await sql`create table if not exists ecosystem_events(id bigserial primary key,event_name text not null,properties jsonb not null default '{}'::jsonb,created_at timestamptz not null default now())`;
+  await sql`insert into ecosystem_events(event_name,properties) values(${event},${JSON.stringify(properties)}::jsonb)`;
+  return res.status(202).json({ accepted: true, durable: true });
 }
 
 async function handleReadiness(req, res) {
@@ -277,6 +291,7 @@ export default async function handler(req, res) {
       external_commitments: { custom_domain_purchase: false }
     });
   }
+  if (route === 'ecosystem-event') return handleEcosystemEvent(req, res);
   if (route === 'evidence') return handleEvidence(req, res);
   if (route === 'experiment-result') return handleExperimentResult(req, res);
   if (route === 'prime-experiment') return handlePrimeExperiment(req, res);
