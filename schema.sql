@@ -17,3 +17,49 @@ create table if not exists living_events (id bigserial primary key, run_id text 
 create index if not exists living_events_run_generation_idx on living_events(run_id,generation,id);
 create table if not exists living_fossils (id text primary key, run_id text not null references living_runs(id) on delete cascade, hypothesis_id text not null, generation integer not null, payload jsonb not null, created_at timestamptz not null default now());
 create index if not exists living_fossils_run_idx on living_fossils(run_id,generation);
+
+-- Stable Spine v1. Personal JARVIS is a single implicit tenant, but tenant_id remains explicit for SDL conformance.
+create table if not exists spine_trust_registry (
+  tenant_id text not null,
+  action_type text not null,
+  policy_state text not null check (policy_state in ('AUTO','BOUNDED_AUTO','GATED','PROHIBITED')),
+  trust_score numeric not null default 0 check (trust_score between 0 and 1),
+  clean_successes bigint not null default 0 check (clean_successes >= 0),
+  failures bigint not null default 0 check (failures >= 0),
+  platform_locked boolean not null default false,
+  metadata jsonb not null default '{}'::jsonb,
+  updated_at timestamptz not null default now(),
+  primary key (tenant_id, action_type)
+);
+create table if not exists spine_events (
+  id text primary key,
+  tenant_id text not null,
+  correlation_id text not null,
+  event_type text not null,
+  aggregate_type text not null,
+  aggregate_id text not null,
+  payload jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default now()
+);
+create index if not exists spine_events_tenant_created_idx on spine_events(tenant_id,created_at desc);
+create index if not exists spine_events_correlation_idx on spine_events(tenant_id,correlation_id);
+create table if not exists spine_audit_log (
+  id bigserial primary key,
+  tenant_id text not null,
+  correlation_id text not null,
+  idempotency_key text not null,
+  action_type text not null,
+  actor_type text not null,
+  actor_id text not null,
+  policy_state text not null,
+  policy_reason text not null,
+  execution_status text not null default 'NOT_EXECUTED',
+  verification_status text not null default 'PENDING',
+  outcome_status text not null default 'PENDING',
+  envelope jsonb not null,
+  decision_record jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default now(),
+  unique(tenant_id,idempotency_key)
+);
+create index if not exists spine_audit_tenant_created_idx on spine_audit_log(tenant_id,created_at desc);
+create index if not exists spine_audit_correlation_idx on spine_audit_log(tenant_id,correlation_id);
