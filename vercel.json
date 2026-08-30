@@ -3,13 +3,14 @@
   "cleanUrls": true,
   "functions": {
     "api/artifact.js": { "maxDuration": 60 },
-    "api/living.js": { "maxDuration": 60 },
-    "api/autonomy.js": { "maxDuration": 60 }
+    "api/living.js": { "maxDuration": 60 }
   },
   "crons": [
     { "path": "/api/autonomy", "schedule": "17 1 * * *" }
   ],
   "rewrites": [
+    { "source": "/api/autonomy", "destination": "/api/spine?route=autonomy" },
+    { "source": "/api/autonomy/latest", "destination": "/api/spine?route=autonomy-latest" },
     { "source": "/api/capabilities", "destination": "/api/meta?route=capabilities" },
     { "source": "/api/evidence", "destination": "/api/meta?route=evidence" },
     { "source": "/api/experiment-result", "destination": "/api/meta?route=experiment-result" },
