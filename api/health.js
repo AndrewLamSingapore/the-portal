@@ -1,10 +1,16 @@
 import { db, findArtifacts, hasDatabase } from '../lib/db.js';
+import { handlePortalSpine } from '../lib/spine-endpoint.js';
 
 const PRODUCT_VERSION = '6.3.1';
 
 export default async function handler(req, res) {
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
   res.setHeader('Cache-Control', 'no-store');
+  const route = String(req.query?.route || 'health');
+  if (['spine', 'autonomy', 'autonomy-latest'].includes(route)) {
+    return handlePortalSpine(req, res, route);
+  }
+  if (route !== 'health') return res.status(404).json({ ok: false, error: 'Route not found' });
   if (req.method !== 'GET') {
     res.setHeader('Allow', 'GET');
     return res.status(405).json({ ok: false, error: 'Method not allowed' });
