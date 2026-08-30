@@ -1,5 +1,6 @@
 import { findArtifacts, hasDatabase, listExperimentResults } from '../lib/db.js';
 import { attachExperimentResults } from '../lib/experiment-result.js';
+import { filterKnowledgeGraph } from '../lib/grounding.js';
 import { buildKnowledgeGraph } from '../lib/knowledge.js';
 
 export default async function handler(req, res) {
@@ -14,5 +15,8 @@ export default async function handler(req, res) {
     findArtifacts({ limit: 60 }),
     listExperimentResults(60)
   ]);
-  return res.status(200).json(attachExperimentResults(buildKnowledgeGraph(artifacts), results));
+  const graph = attachExperimentResults(buildKnowledgeGraph(artifacts), results);
+  const query = String(req.query?.q || '').trim();
+  if (!query) return res.status(200).json(graph);
+  return res.status(200).json(filterKnowledgeGraph(graph, query, req.query?.limit));
 }
