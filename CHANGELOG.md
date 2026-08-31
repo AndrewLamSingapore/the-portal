@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased — Three Worlds Atmosphere
+
+- Reframes the three primary doorways as distinct worlds: The Tribunal, The Constellation and The Cabinet.
+- Adds world-reactive light, threshold motion, peripheral field markings and a restrained exhibition vignette without changing the evidence model or core flows.
+- Keeps the Living Observatory visible as a deeper threshold beyond the three homepage worlds.
+- Preserves keyboard operation, reduced-motion behavior, mobile layout and every existing Portal capability.
+
 ## 6.3.1 — Scientific Acceptance
 
 - Makes a declared prospective falsifier kill its hypothesis instead of merely reducing confidence.

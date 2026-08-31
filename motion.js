@@ -222,6 +222,32 @@
     });
   }
 
+  function bindWorldAtmospheres() {
+    const thresholds = [...document.querySelectorAll('.world-threshold[data-world]')];
+    let committedWorld = '';
+    const clearWorld = threshold => {
+      if (threshold.matches(':hover,:focus-visible')) return;
+      if (committedWorld) root.dataset.portalWorld = committedWorld;
+      else if (root.dataset.portalWorld === threshold.dataset.world) delete root.dataset.portalWorld;
+    };
+    thresholds.forEach(threshold => {
+      const wakeWorld = () => { root.dataset.portalWorld = threshold.dataset.world; };
+      threshold.addEventListener('pointerenter', wakeWorld, { passive: true });
+      threshold.addEventListener('focus', wakeWorld);
+      threshold.addEventListener('pointerleave', () => clearWorld(threshold), { passive: true });
+      threshold.addEventListener('blur', () => clearWorld(threshold));
+      threshold.addEventListener('click', () => {
+        committedWorld = threshold.dataset.world;
+        root.dataset.portalWorld = committedWorld;
+        threshold.classList.remove('world-awake');
+        void threshold.offsetWidth;
+        threshold.classList.add('world-awake');
+        portalBurst(threshold, threshold.dataset.world === 'graph' ? 'serendipity' : threshold.dataset.world === 'trial' ? 'encounter' : 'success');
+        setTimeout(() => threshold.classList.remove('world-awake'), 920);
+      });
+    });
+  }
+
   revealObserver = 'IntersectionObserver' in window
     ? new IntersectionObserver(entries => {
       entries.forEach(entry => {
@@ -238,6 +264,7 @@
   createProgress();
   createPointerGlow();
   bindActionMotion();
+  bindWorldAtmospheres();
 
   requestAnimationFrame(() => {
     root.classList.add('portal-awake');
