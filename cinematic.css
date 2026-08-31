@@ -20,3 +20,17 @@ body.cinematic-locked{overflow:hidden}
 .cinematic-replay:hover,.cinematic-replay:focus-visible{color:var(--paper,#eadfc9)}
 @media(max-width:760px){.cinematic-aperture{width:88vw}.cinematic-copy{height:180px}.cinematic-index{left:14px;bottom:max(14px,env(safe-area-inset-bottom))}.cinematic-replay{grid-column:1/-1;justify-self:end}}
 @media(prefers-reduced-motion:reduce){.portal-cinematic,.portal-cinematic::before,.cinematic-aperture,.cinematic-line,.cinematic-title{transition:none!important}.portal-cinematic::before{transform:none}.cinematic-aperture{transform:scale(.9);opacity:.32}}
+
+/* Premium cinematic effects */
+.portal-cinematic::after{content:"";position:absolute;z-index:4;inset:0;pointer-events:none;box-shadow:inset 0 50vh #020202,inset 0 -50vh #020202}
+.portal-cinematic.is-running::after{animation:portalBars 11s cubic-bezier(.16,.78,.2,1) both}
+.portal-cinematic.is-running{animation:portalPulse 11s ease both}
+.cinematic-copy{z-index:2}
+.cinematic-aperture{z-index:1}
+.cinematic-noise{z-index:3}
+.cinematic-skip,.cinematic-index{z-index:6}
+.portal-cinematic.is-running .cinematic-aperture::after{animation:portalCore 11s ease both}
+@keyframes portalBars{0%{box-shadow:inset 0 50vh #020202,inset 0 -50vh #020202}10%,83%{box-shadow:inset 0 7vh #020202,inset 0 -7vh #020202}100%{box-shadow:inset 0 12vh #020202,inset 0 -12vh #020202}}
+@keyframes portalPulse{0%{background:#020202}7%{background:#160b07}16%,74%{background:#050403}78%{background:#1d0e08}100%{background:#050403}}
+@keyframes portalCore{0%,18%{box-shadow:0 0 0 rgba(178,89,47,0)}44%{box-shadow:0 0 120px rgba(217,161,111,.58)}76%{box-shadow:0 0 220px rgba(217,161,111,.72)}100%{box-shadow:0 0 70px rgba(178,89,47,.3)}}
+@media(prefers-reduced-motion:reduce){.portal-cinematic.is-running,.portal-cinematic.is-running::after,.portal-cinematic.is-running .cinematic-aperture::after{animation:none!important}.portal-cinematic::after{box-shadow:inset 0 7vh #020202,inset 0 -7vh #020202}}
