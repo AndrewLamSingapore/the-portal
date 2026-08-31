@@ -1,0 +1,7 @@
+(()=>{const root=document.getElementById('portalCinematic'),skip=document.getElementById('cinematicSkip'),replay=document.getElementById('cinematicReplay');if(!root||!skip)return;
+const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;let timers=[];let priorFocus=null;
+const clear=()=>{timers.forEach(clearTimeout);timers=[]};
+function close(){clear();root.classList.remove('is-running');root.classList.remove('is-active');root.setAttribute('aria-hidden','true');document.body.classList.remove('cinematic-locked');sessionStorage.setItem('portal-cinematic-seen','1');setTimeout(()=>{root.hidden=true;priorFocus?.focus?.()},850)}
+function open(){clear();priorFocus=document.activeElement;root.hidden=false;root.setAttribute('aria-hidden','false');root.dataset.beat=reduced?'5':'0';document.body.classList.add('cinematic-locked');requestAnimationFrame(()=>{root.classList.add('is-active');root.classList.add('is-running');skip.focus()});if(reduced){timers.push(setTimeout(close,1800));return}[[900,1],[2600,2],[4300,3],[6000,4],[7600,5]].forEach(([ms,beat])=>timers.push(setTimeout(()=>root.dataset.beat=String(beat),ms)));timers.push(setTimeout(close,10000))}
+skip.addEventListener('click',close);replay?.addEventListener('click',open);document.addEventListener('keydown',event=>{if(event.key==='Escape'&&root.classList.contains('is-active'))close()});if(!sessionStorage.getItem('portal-cinematic-seen'))open();
+})();
