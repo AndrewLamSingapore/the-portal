@@ -4,7 +4,8 @@ async function database(){const {db}=await import('../../lib/db.js');return db()
 
 export function portalEvent(eventType,payload,{eventId,occurredAt=new Date().toISOString(),correlationId=null,subjectId=null,evidenceLevel='E0',provenance=[]}={}) {
   if(!eventId) throw new Error('eventId is required for idempotency');
-  const event={version:'1.0',event_id:eventId,event_type:eventType,source:'the-portal',occurred_at:occurredAt,correlation_id:correlationId,subject_id:subjectId,evidence_level:evidenceLevel,provenance:[...provenance],payload:{...payload}};
+  const evidenceProvenance=provenance.length?[...provenance]:[`the-portal:${eventId}`];
+  const event={schema_version:'1.0.0',event_id:eventId,event_type:eventType,source:'the-portal',occurred_at:occurredAt,correlation_id:correlationId||eventId,subject_id:subjectId,evidence_level:evidenceLevel,provenance:evidenceProvenance,payload:{...payload}};
   return assertContract('portfolio-event-v1',event);
 }
 
