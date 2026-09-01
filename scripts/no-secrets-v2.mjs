@@ -6,6 +6,7 @@ const files = execFileSync('git', ['ls-files', '--cached', '--others', '--exclud
   .trim()
   .split('\n')
   .filter(Boolean)
+  .filter(file => fs.existsSync(file))
   .filter(file => !/\.(?:mp3|png|jpe?g|gif|webp|ico|woff2?|pdf)$/i.test(file));
 const openAiKey = new RegExp(['s', 'k', '-', '[A-Za-z0-9_-]{20,}'].join(''));
 const databaseCredential = new RegExp(['postgres', '(?:ql)?', ':\\/\\/', '[^\\s]+', ':', '[^\\s]+', '@'].join(''), 'i');

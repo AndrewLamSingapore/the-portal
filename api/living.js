@@ -6,6 +6,7 @@ import { LayeredMemory, runExecutiveCycle, TOOL_REGISTRY } from '../lib/living-i
 import { runLivingSandbox, SANDBOX_SEED } from '../lib/living-sandbox.js';
 import { runGenerations } from '../lib/multigeneration.js';
 import { recoverNoveltyCertificate } from '../lib/novelty-benchmark.js';
+import { deliverPortfolioOutbox, portalEvent, publishPortalEvents } from '../src/lib/portfolio-events.js';
 
 const PRODUCT_VERSION = '6.3.1';
 const CLEANROOM = 'PORTAL-63-CLEANROOM-20260828-A';
@@ -94,6 +95,7 @@ async function runCleanroom(req, res) {
     originAudit
   });
   const runId = `${CLEANROOM}-${Date.now()}`;
+  let portfolioFabric={queued:[],delivery:{processed:0,delivered:0,dead:0}};
 
   if (hasDatabase()) {
     await saveLivingRun({
@@ -116,6 +118,9 @@ async function runCleanroom(req, res) {
       verdict: trial.verdict,
       synthesis: generated.synthesis
     });
+    const events=generated.candidates.map(candidate=>portalEvent('portal.hypothesis.created',{statement:candidate.statement,niche:candidate.niche,epistemic_class:candidate.epistemic_class,confidence:candidate.confidence},{eventId:`portal-${runId}-${candidate.id}`,correlationId:runId,subjectId:candidate.id,evidenceLevel:'E1',provenance:candidate.ancestry?.parent_ids||[]}));
+    events.push(portalEvent('portal.experiment.completed',{verdict:trial.verdict,generations:trial.generations.length,model:generated.model},{eventId:`portal-${runId}-experiment`,correlationId:runId,subjectId:runId,evidenceLevel:'E2',provenance:generated.candidates.map(candidate=>candidate.id)}));
+    try{portfolioFabric=await publishPortalEvents(events);}catch(error){portfolioFabric={queued:[],delivery:{processed:0,delivered:0,dead:0},error:String(error?.message||error).slice(0,300)};}
   }
 
   return res.status(200).json({
@@ -137,7 +142,8 @@ async function runCleanroom(req, res) {
     initial_population: generated.candidates,
     generations: trial.generations,
     decisive_experiment: { protocol: trial.protocol, verdict: trial.verdict },
-    run_id: runId
+    run_id: runId,
+    portfolio_fabric: portfolioFabric
   });
 }
 
@@ -244,6 +250,13 @@ async function readLiving(req, res) {
 
 export default async function handler(req, res) {
   headers(res);
+  if (req.method === 'GET' && req.query?.route === 'portfolio-events') {
+    const expected=process.env.CRON_SECRET||process.env.PORTFOLIO_OUTBOX_TOKEN;
+    if(!expected)return res.status(503).json({error:'outbox_authorization_not_configured'});
+    if(req.headers?.authorization!==`Bearer ${expected}`)return res.status(401).json({error:'unauthorized'});
+    const result=await deliverPortfolioOutbox({limit:50});
+    return res.status(result.reason?503:200).json({ok:!result.reason,...result});
+  }
   if (!isLivingEnabled()) return res.status(404).json({ error: 'Living Observatory disabled' });
   if (req.method === 'POST') return observe(req, res);
   if (req.method === 'GET') return readLiving(req, res);

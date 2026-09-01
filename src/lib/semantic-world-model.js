@@ -38,3 +38,19 @@ export function contradictions(nodes,edges) {
   const byId=new Map((nodes||[]).map(n=>[n.id,normalizeNode(n)]));
   return (edges||[]).map(normalizeEdge).filter(e=>e.type==='contradicts').map(edge=>({edge,source:byId.get(edge.source)||null,target:byId.get(edge.target)||null}));
 }
+
+export function semanticSearch(query,nodes,limit=12) {
+  return hybridSearch(query,nodes,{limit}).map(({node,score,lexical,semantic,provenance})=>({...node,semantic_score:score,grounding_score:Math.round(score*100),score_components:{lexical,semantic,provenance}}));
+}
+
+export function buildWorldModel({nodes=[],edges=[]}={}) {
+  const normalizedNodes=nodes.map(normalizeNode);const normalizedEdges=edges.map(normalizeEdge);
+  return {nodes:normalizedNodes,edges:normalizedEdges,contradictions:contradictions(normalizedNodes,normalizedEdges)};
+}
+
+export function expandGraphNeighborhood(ranked,graph,{limit=24}={}) {
+  const seedIds=new Set(ranked.map(item=>item.node.id));const related=new Set(seedIds);
+  for(const edge of graph.edges||[]){const from=edge.from??edge.source;const to=edge.to??edge.target;if(seedIds.has(from))related.add(to);if(seedIds.has(to))related.add(from);}
+  const rank=new Map(ranked.map((item,index)=>[item.node.id,{...item,index}]));
+  return (graph.nodes||[]).filter(node=>related.has(node.id)).sort((left,right)=>(rank.get(left.id)?.index??999)-(rank.get(right.id)?.index??999)).slice(0,Math.max(1,Math.min(Number(limit)||24,60))).map(node=>({node,match:rank.has(node.id),score:rank.get(node.id)?.score??0}));
+}
