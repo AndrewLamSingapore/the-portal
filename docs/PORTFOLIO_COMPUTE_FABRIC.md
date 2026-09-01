@@ -17,3 +17,9 @@ Events are facts or explicitly labelled hypotheses; transport does not upgrade e
 - `prime.reasoning.completed`, `prime.memory.promoted`, `prime.review.completed`
 
 Every event carries evidence level and provenance. Consumers must be idempotent by `event_id` and preserve `correlation_id` across derived work. No event authorizes external actuation.
+
+## Live implementation
+
+Clean-room hypotheses and completed experiments enter a durable Postgres outbox. Delivery retries with exponential backoff, reaches `DEAD` after eight failed attempts, and can be replayed safely because PRIME deduplicates `event_id`.
+
+Graph queries use versioned, content-hashed OpenAI embeddings cached in `semantic_embeddings`, lexical/provenance reranking, and one-hop graph expansion. If the database, embedding credential, or provider is unavailable, the API returns an explicit `lexical_fallback` status instead of claiming semantic retrieval.

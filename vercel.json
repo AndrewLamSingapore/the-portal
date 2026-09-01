@@ -6,7 +6,8 @@
     "api/living.js": { "maxDuration": 60 }
   },
   "crons": [
-    { "path": "/api/autonomy", "schedule": "17 1 * * *" }
+    { "path": "/api/autonomy", "schedule": "17 1 * * *" },
+    { "path": "/api/portfolio-events", "schedule": "37 1 * * *" }
   ],
   "rewrites": [
     { "source": "/api/spine", "destination": "/api/health?route=spine" },
@@ -19,6 +20,7 @@
     { "source": "/api/manifest", "destination": "/api/meta?route=manifest" },
     { "source": "/api/metrics", "destination": "/api/meta?route=metrics" },
     { "source": "/api/prime-experiment", "destination": "/api/meta?route=prime-experiment" },
+    { "source": "/api/portfolio-events", "destination": "/api/living?route=portfolio-events" },
     { "source": "/api/readiness", "destination": "/api/meta?route=readiness" },
     { "source": "/api/status", "destination": "/api/meta?route=status" },
     { "source": "/api/v2", "destination": "/api/meta?route=v2" },

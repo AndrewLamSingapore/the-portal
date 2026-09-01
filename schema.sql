@@ -84,3 +84,24 @@ create table if not exists ecosystem_events (
   created_at timestamptz not null default now()
 );
 create index if not exists ecosystem_events_name_created_idx on ecosystem_events(event_name,created_at desc);
+create table if not exists portfolio_event_outbox (
+  event_id text primary key,
+  event_json jsonb not null,
+  status text not null default 'PENDING' check(status in ('PENDING','RETRY','DELIVERED','DEAD')),
+  attempts integer not null default 0,
+  next_attempt_at timestamptz not null default now(),
+  last_error text,
+  delivered_at timestamptz,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+create index if not exists portfolio_event_outbox_delivery_idx on portfolio_event_outbox(status,next_attempt_at);
+create table if not exists semantic_embeddings (
+  entity_id text not null,
+  model text not null,
+  content_hash text not null,
+  vector_json jsonb not null,
+  updated_at timestamptz not null default now(),
+  primary key(entity_id,model)
+);
+create index if not exists semantic_embeddings_updated_idx on semantic_embeddings(model,updated_at desc);
