@@ -1,0 +1,1 @@
+import { strict as assert } from 'node:assert'; import { portalEvent } from './portfolioEvent.js'; const event=portalEvent('portal.hypothesis.created',{claim:'x'},{provenance:['source:1']}); assert.equal(event.source,'the-portal'); assert.equal(event.evidence_level,'E0'); assert.deepEqual(event.provenance,['source:1']); console.log('portfolio event tests passed');
