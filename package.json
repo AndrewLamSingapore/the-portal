@@ -15,7 +15,7 @@
     "smoke:v2": "node scripts/v2-smoke.mjs",
     "synthetic:result": "node scripts/authenticated-result-loop.mjs"
   },
-  "devDependencies": { "playwright": "1.55.0" },
+  "devDependencies": { "playwright": "1.62.1" },
   "dependencies": { "@neondatabase/serverless": "^1.0.2" },
   "portal_release": {
     "decisive_score": "9/9",
