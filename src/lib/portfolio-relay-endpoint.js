@@ -1,5 +1,5 @@
 import { assertContract } from './generated/portfolio-contracts.js';
-import { acknowledgePortfolioEvents, claimPortfolioEvents, enqueuePortfolioEvent } from './portfolio-events.js';
+import { acknowledgePortfolioEvents, claimPortfolioEvents, enqueuePortfolioEvent, portfolioOutboxStatus, redrivePortfolioEvents } from './portfolio-events.js';
 import { authorized } from './relay-auth.js';
 
 export async function handlePortfolioRelay(req, res) {
@@ -24,6 +24,16 @@ export async function handlePortfolioRelay(req, res) {
       const result = await enqueuePortfolioEvent(body.event);
       console.log(JSON.stringify({ level: 'info', message: 'portfolio_relay_publish', route: '/api/portfolio-relay', event_id: body.event.event_id, queued: result.queued, duration_ms: Date.now() - started }));
       return res.status(result.queued ? 202 : 503).json({ ok: result.queued, ...result });
+    }
+    if (body.action === 'status') {
+      const result = await portfolioOutboxStatus();
+      console.log(JSON.stringify({ level: 'info', message: 'portfolio_relay_status', route: '/api/portfolio-relay', ready: result.ready, duration_ms: Date.now() - started }));
+      return res.status(200).json({ ok: true, ...result });
+    }
+    if (body.action === 'redrive') {
+      const result = await redrivePortfolioEvents({ eventIds: Array.isArray(body.event_ids) ? body.event_ids : [], limit: body.limit });
+      console.log(JSON.stringify({ level: 'info', message: 'portfolio_relay_redrive', route: '/api/portfolio-relay', count: result.redriven, duration_ms: Date.now() - started }));
+      return res.status(200).json({ ok: true, ...result });
     }
     if (body.action === 'ack') {
       const result = await acknowledgePortfolioEvents(Array.isArray(body.event_ids) ? body.event_ids : []);
