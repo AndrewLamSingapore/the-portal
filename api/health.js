@@ -1,6 +1,7 @@
 import { db, findArtifacts, hasDatabase } from '../lib/db.js';
 import { handlePortalSpine } from '../lib/spine-endpoint.js';
 import { handlePortfolioRelay } from '../src/lib/portfolio-relay-endpoint.js';
+import { portfolioOutboxStatus } from '../src/lib/portfolio-events.js';
 
 const PRODUCT_VERSION = '6.4.0';
 
@@ -22,12 +23,13 @@ export default async function handler(req, res) {
   if (!database) return res.status(503).json({ ok: false, database: false, archive: false, generation_configured: generation, portfolio_relay: false, schema_version: null, product_version: PRODUCT_VERSION, revision });
   try {
     const sql = db();
-    const [artifacts, columns, participation, resultSchema, relaySchema] = await Promise.all([
+    const [artifacts, columns, participation, resultSchema, relaySchema, outboxStatus] = await Promise.all([
       findArtifacts({ limit: 1 }),
       sql`select column_name from information_schema.columns where table_schema='public' and table_name='artifacts'`,
       sql`select to_regclass('public.artifact_verdicts') as verdicts`,
       sql`select to_regclass('public.experiment_results') as results`,
       sql`select to_regclass('public.portfolio_event_outbox') as outbox`,
+      portfolioOutboxStatus(),
     ]);
     const availableColumns = new Set(columns.map(row => row.column_name));
     const evidenceSchema = ['evidence_level', 'sources', 'relationships', 'experiment', 'connections', 'lifecycle', 'current_phase', 'recurrence_conditions', 'realization_signal'].every(column => availableColumns.has(column));
@@ -47,6 +49,7 @@ export default async function handler(req, res) {
       authenticated_result_writing: authenticatedResultWriting,
       portfolio_relay: relayConfigured,
       portfolio_outbox_schema: Boolean(relaySchema[0]?.outbox),
+      portfolio_outbox: outboxStatus,
       living_observatory: true,
       schema_version: evidenceSchema ? 6 : 5,
       product_version: PRODUCT_VERSION,
