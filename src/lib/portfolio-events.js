@@ -103,3 +103,43 @@ export async function publishPortalEvents(events, { fetchImpl = fetch } = {}) {
   const delivery = await deliverPortfolioOutbox({ limit: events.length, fetchImpl });
   return { queued, delivery };
 }
+
+export async function portfolioOutboxStatus() {
+  const sql = await database();
+  if (!sql) return { configured: false, counts: {}, ready: 0, oldest_ready_age_seconds: null };
+  await ensurePortfolioOutbox();
+  const [counts, ready] = await Promise.all([
+    sql`select status,count(*)::integer as count from portfolio_event_outbox group by status`,
+    sql`select count(*)::integer as count,
+      extract(epoch from (now()-min(created_at)))::integer as oldest_age
+      from portfolio_event_outbox where status in ('PENDING','RETRY') and next_attempt_at<=now()`,
+  ]);
+  return {
+    configured: true,
+    counts: Object.fromEntries(counts.map(row => [row.status, Number(row.count || 0)])),
+    ready: Number(ready[0]?.count || 0),
+    oldest_ready_age_seconds: ready[0]?.oldest_age == null ? null : Number(ready[0].oldest_age),
+  };
+}
+
+export async function redrivePortfolioEvents({ eventIds = [], limit = 20 } = {}) {
+  const sql = await database();
+  if (!sql) return { redriven: 0, reason: 'DATABASE_URL not configured' };
+  await ensurePortfolioOutbox();
+  const ids = [...new Set(eventIds.map(String).filter(Boolean))].slice(0, 100);
+  const capped = Math.max(1, Math.min(Number(limit) || 20, 100));
+  let rows;
+  if (ids.length) {
+    rows = await sql`update portfolio_event_outbox set status='RETRY',attempts=0,
+      next_attempt_at=now(),last_error=null,delivered_at=null,updated_at=now()
+      where status='DEAD' and event_id=any(${ids}::text[]) returning event_id`;
+  } else {
+    rows = await sql`with candidates as (
+      select event_id from portfolio_event_outbox where status='DEAD'
+      order by updated_at for update skip locked limit ${capped}
+    ) update portfolio_event_outbox as outbox set status='RETRY',attempts=0,
+      next_attempt_at=now(),last_error=null,delivered_at=null,updated_at=now()
+      from candidates where outbox.event_id=candidates.event_id returning outbox.event_id`;
+  }
+  return { redriven: rows.length, event_ids: rows.map(row => row.event_id) };
+}
