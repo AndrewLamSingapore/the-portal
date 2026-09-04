@@ -2,8 +2,7 @@ import { db, findArtifacts, hasDatabase } from '../lib/db.js';
 import { handlePortalSpine } from '../lib/spine-endpoint.js';
 import { handlePortfolioRelay } from '../src/lib/portfolio-relay-endpoint.js';
 import { portfolioOutboxStatus } from '../src/lib/portfolio-events.js';
-
-const PRODUCT_VERSION = '6.4.0';
+import { PRODUCT_VERSION } from '../lib/product-version.js';
 
 export default async function handler(req, res) {
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
