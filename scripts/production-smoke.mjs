@@ -5,7 +5,7 @@ const timeout = Number(process.env.SMOKE_TIMEOUT_MS || 15_000);
 
 async function get(path) {
   const response = await fetch(base + path, {
-    headers: { 'user-agent': 'portal-smoke/6.3.1', 'cache-control': 'no-cache' },
+    headers: { 'user-agent': 'portal-smoke/6.4.0', 'cache-control': 'no-cache' },
     signal: AbortSignal.timeout(timeout)
   });
   return { response, text: await response.text() };
@@ -53,7 +53,7 @@ assert.equal(livingPageResult.response.status, 200);
 assert.match(livingPageResult.text, /<h1>LIVING<br\s*\/?>OBSERVATORY<\/h1>/);
 const living = json(livingResult, '/api/living');
 assert.equal(livingResult.response.status, 200);
-assert.equal(living.version, '6.3.1');
+assert.equal(living.version, '6.4.0');
 assert.equal(living.mode, 'LIVING_OBSERVATORY');
 assert.ok(Array.isArray(living.generations) && living.generations.length > 0);
 assert.equal(living.safety.production_source_mutation_allowed, false);
@@ -61,7 +61,7 @@ assert.equal(living.safety.production_source_mutation_allowed, false);
 const version = json(versionResult, '/api/version');
 assert.equal(versionResult.response.status, 200);
 assert.equal(version.product, 'The Portal');
-assert.equal(version.version, '6.3.1');
+assert.equal(version.version, '6.4.0');
 assert.equal(version.schema_version, 6);
 assert.equal(version.experience, 'Continuous Futures Model');
 
@@ -76,14 +76,14 @@ assert.equal(health.public_participation, true);
 assert.equal(health.experiment_result_schema, true);
 assert.equal(health.authenticated_result_writing, true);
 assert.equal(health.schema_version, 6);
-assert.equal(health.product_version, '6.3.1');
+assert.equal(health.product_version, '6.4.0');
 assert.equal(health.living_observatory, true);
 if (process.env.EXPECTED_REVISION) assert.equal(health.revision, process.env.EXPECTED_REVISION);
 
 const status = json(statusResult, '/api/status');
 assert.equal(statusResult.response.status, 200);
 assert.equal(status.status, 'OPERATIONAL');
-assert.equal(status.product_version, '6.3.1');
+assert.equal(status.product_version, '6.4.0');
 const readiness = json(readinessResult, '/api/readiness');
 assert.equal(readinessResult.response.status, 200);
 assert.equal(readiness.ok, true);
@@ -127,4 +127,4 @@ assert.equal(trialResult.response.status, 200);
 assert.deepEqual(Object.keys(trial.counts).sort(), ['ARRIVED_QUIETLY', 'FAILED', 'TOO_EARLY']);
 
 assert.ok(archive.evolution && Array.isArray(archive.evolution.events));
-console.log(`PASS: Portal 6.3.1 production verified end to end (${archive.count} objects, revision ${health.revision || 'unknown'}).`);
+console.log(`PASS: Portal 6.4.0 production verified end to end (${archive.count} objects, revision ${health.revision || 'unknown'}).`);
