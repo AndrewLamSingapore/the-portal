@@ -110,4 +110,4 @@ assert.equal(certifiedCycle.decisive_gate, 'SCIENTIFIC_ACCEPTANCE_PASSED');
 assert.equal(certifiedCycle.readiness, 'SCIENTIFIC_ACCEPTANCE_READY');
 assert.ok(Object.values(certifiedCycle.acceptance).every(Boolean));
 
-console.log('PASS: Portal 6.3.1 scientific acceptance closes novelty, extinction, verified-tool and open-ended benchmark gates without bypassing evidence.');
+console.log('PASS: Portal 6.4.0 scientific acceptance closes novelty, extinction, verified-tool and open-ended benchmark gates without bypassing evidence.');
