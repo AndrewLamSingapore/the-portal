@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { PRODUCT_VERSION } from '../lib/product-version.js';
 import { runDecisiveExperiment } from '../lib/decisive-experiment.js';
 import { LayeredMemory, runExecutiveCycle } from '../lib/living-intelligence.js';
 import { recoverNoveltyCertificate } from '../lib/novelty-benchmark.js';
@@ -110,4 +111,4 @@ assert.equal(certifiedCycle.decisive_gate, 'SCIENTIFIC_ACCEPTANCE_PASSED');
 assert.equal(certifiedCycle.readiness, 'SCIENTIFIC_ACCEPTANCE_READY');
 assert.ok(Object.values(certifiedCycle.acceptance).every(Boolean));
 
-console.log('PASS: Portal 6.3.1 scientific acceptance closes novelty, extinction, verified-tool and open-ended benchmark gates without bypassing evidence.');
+console.log(`PASS: Portal ${PRODUCT_VERSION} scientific acceptance closes novelty, extinction, verified-tool and open-ended benchmark gates without bypassing evidence.`);
