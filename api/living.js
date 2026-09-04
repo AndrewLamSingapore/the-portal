@@ -7,8 +7,7 @@ import { runLivingSandbox, SANDBOX_SEED } from '../lib/living-sandbox.js';
 import { runGenerations } from '../lib/multigeneration.js';
 import { recoverNoveltyCertificate } from '../lib/novelty-benchmark.js';
 import { deliverPortfolioOutbox, portalEvent, publishPortalEvents } from '../src/lib/portfolio-events.js';
-
-const PRODUCT_VERSION = '6.3.1';
+import { PRODUCT_VERSION } from '../lib/product-version.js';
 const CLEANROOM = 'PORTAL-63-CLEANROOM-20260828-A';
 
 function isLivingEnabled() {
