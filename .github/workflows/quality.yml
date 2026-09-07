@@ -27,6 +27,7 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - run: node --check inhabitants.js && node --check scripts/inhabitants-smoke.mjs
       - run: npm run verify
       - run: npm run synthetic:result
 
