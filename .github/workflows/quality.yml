@@ -27,6 +27,7 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - run: node --check inhabitants.js && node --check scripts/inhabitants-smoke.mjs
       - run: npm run verify
       - run: npm run synthetic:result
 
@@ -55,7 +56,7 @@ jobs:
         run: |
           for attempt in 1 2 3 4 5; do
             echo "Production verification attempt $attempt/5"
-            if npm run smoke:production; then exit 0; fi
+            if npm run smoke:production && node scripts/inhabitants-smoke.mjs; then exit 0; fi
             if [ "$attempt" -lt 5 ]; then sleep 30; fi
           done
           exit 1
