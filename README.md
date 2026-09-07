@@ -1,6 +1,8 @@
 # The Portal
 
-Version 6.3.1 is a continuously evolving model of humanity's imagined futures. It tracks how ideas emerge, disappear, return, fail, partially materialize and become real—without hiding the boundary between generated hypotheses and source-supported history. Its public surfaces combine **The Future on Trial** with a production Living Observatory for bounded evolutionary hypotheses, falsification and fossil memory.
+[**Open The Portal ↗**](https://the-portal-ten.vercel.app/) · [**Discuss this project**](https://authority-engine-app.vercel.app/contact?source=portal) · [**Meet Andrew Lam**](https://authority-engine-app.vercel.app/about)
+
+The Portal is a continuously evolving model of humanity's imagined futures. It tracks how ideas emerge, disappear, return, fail, partially materialize and become real—without hiding the boundary between generated hypotheses and source-supported history. Its public surfaces combine **The Future on Trial** with a production Living Observatory for bounded evolutionary hypotheses, falsification and fossil memory.
 
 ## An explorable model of how encounters become connections, experiments and new ways of seeing.
 
