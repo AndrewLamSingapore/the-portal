@@ -20,5 +20,7 @@ for (const audibilityContract of ['audio.muted = false', 'audio.volume = 0.9', '
 }
 assert.ok(app.match(/openCurator[\s\S]{0,220}playPortalTheme/), 'every Portal world entry must start the theme');
 assert.ok(html.includes('id="portalSoundHint" role="status" aria-live="polite"'), 'blocked playback feedback must be announced');
+assert.ok(html.includes('id="portalSound"') && html.includes('SOUND LOADING') && html.includes('disabled'), 'sound must not advertise readiness before its handler is bound');
+assert.ok(app.indexOf("el('portalSound').addEventListener") < app.indexOf('function readCabinet'), 'sound handler must bind before archive initialization');
 
 console.log('PASS: living graph discovery, generation, cabinet and evidence UI contracts verified.');
