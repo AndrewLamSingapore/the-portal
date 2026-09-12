@@ -122,6 +122,18 @@ function togglePortalSound() {
   playPortalTheme({ restart: audio.ended });
 }
 
+// Bind and expose sound before the archive initialization work below. The
+// disabled HTML control prevents an early click from being silently dropped.
+el('portalSound').addEventListener('click', togglePortalSound);
+el('portalTheme').addEventListener('ended', () => updatePortalSoundControl('REPLAY THEME'));
+el('portalTheme').addEventListener('error', () => {
+  portalSoundAllowed = false;
+  updatePortalSoundControl('SOUND UNAVAILABLE');
+  el('portalSound').disabled = true;
+});
+el('portalSound').disabled = false;
+updatePortalSoundControl();
+
 function readCabinet() {
   try {
     const saved = JSON.parse(localStorage.getItem('portal-cabinet-v4') || '[]');
@@ -684,13 +696,6 @@ async function maximizeSerendipity(event) {
 }
 
 el('curatorForm').addEventListener('submit', generateEncounter);
-el('portalSound').addEventListener('click', togglePortalSound);
-el('portalTheme').addEventListener('ended', () => updatePortalSoundControl('REPLAY THEME'));
-el('portalTheme').addEventListener('error', () => {
-  portalSoundAllowed = false;
-  updatePortalSoundControl('SOUND UNAVAILABLE');
-  el('portalSound').disabled = true;
-});
 el('openTrial').addEventListener('click', () => {
   playPortalTheme({ restart: true });
   el('futureOnTrial').scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
