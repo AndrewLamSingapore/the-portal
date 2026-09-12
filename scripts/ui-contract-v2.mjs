@@ -15,5 +15,10 @@ for (const behavior of ['generateEncounter', 'maximizeSerendipity', 'renderCabin
 for (const soundContract of ['id="portalTheme"', 'src="/portal-theme.mp3"', 'id="portalSound"', 'THE PORTAL THEME AWAKENS ON ENTRY']) {
   assert.ok(html.includes(soundContract), `missing thematic sound contract: ${soundContract}`);
 }
+for (const audibilityContract of ['audio.muted = false', 'audio.volume = 0.9', 'playPortalConfirmationCue', 'Promise.all([themePromise, cuePromise])']) {
+  assert.ok(app.includes(audibilityContract), `missing audible playback contract: ${audibilityContract}`);
+}
+assert.ok(app.match(/openCurator[\s\S]{0,220}playPortalTheme/), 'every Portal world entry must start the theme');
+assert.ok(html.includes('id="portalSoundHint" role="status" aria-live="polite"'), 'blocked playback feedback must be announced');
 
 console.log('PASS: living graph discovery, generation, cabinet and evidence UI contracts verified.');

@@ -35,6 +35,7 @@ function emitPortalMotion(name, detail = {}) {
 
 const PORTAL_SOUND_PREFERENCE = 'portal-sound-v1';
 let portalSoundAllowed = true;
+let portalCueContext = null;
 try { portalSoundAllowed = localStorage.getItem(PORTAL_SOUND_PREFERENCE) !== 'off'; } catch {}
 
 function rememberPortalSound(value) {
@@ -50,16 +51,60 @@ function updatePortalSoundControl(label) {
   el('portalSoundLabel').textContent = label || (playing ? 'SOUND ACTIVE' : portalSoundAllowed ? 'SOUND READY' : 'SOUND OFF');
 }
 
+function playPortalConfirmationCue() {
+  const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+  if (!AudioContextClass) return Promise.resolve();
+  portalCueContext?.close().catch(() => {});
+  const context = new AudioContextClass();
+  portalCueContext = context;
+  const build = () => {
+    if (context.state !== 'running') throw new Error('The browser did not allow audio playback.');
+    const master = context.createGain();
+    master.gain.value = 0.2;
+    master.connect(context.destination);
+    [523.25, 659.25, 783.99].forEach((frequency, index) => {
+      const start = context.currentTime + 0.02 + index * 0.2;
+      const oscillator = context.createOscillator();
+      const gain = context.createGain();
+      oscillator.frequency.value = frequency;
+      gain.gain.setValueAtTime(0.0001, start);
+      gain.gain.exponentialRampToValueAtTime(0.85, start + 0.035);
+      gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.34);
+      oscillator.connect(gain).connect(master);
+      oscillator.start(start);
+      oscillator.stop(start + 0.36);
+    });
+    setTimeout(() => {
+      if (portalCueContext === context) portalCueContext = null;
+      context.close().catch(() => {});
+    }, 1100);
+  };
+  if (context.state === 'running') {
+    build();
+    return Promise.resolve();
+  }
+  return context.resume().then(build);
+}
+
 async function playPortalTheme({ restart = false } = {}) {
   if (!portalSoundAllowed) return;
   const audio = el('portalTheme');
   if (restart || audio.ended) audio.currentTime = 0;
-  audio.volume = 0.62;
+  audio.defaultMuted = false;
+  audio.muted = false;
+  audio.volume = 0.9;
   try {
-    await audio.play();
+    const cuePromise = playPortalConfirmationCue();
+    const themePromise = audio.play();
+    await Promise.all([themePromise, cuePromise]);
     updatePortalSoundControl('SOUND ACTIVE');
-  } catch {
+    el('portalSoundHint').textContent = 'The Portal theme is playing.';
+  } catch (error) {
+    audio.pause();
     updatePortalSoundControl('PLAY THEME');
+    el('portalSoundHint').textContent = error?.name === 'NotAllowedError'
+      ? 'Your browser blocked audio. Select PLAY THEME to try again.'
+      : 'The Portal theme could not start. Check this tab’s sound permission and try again.';
   }
 }
 
@@ -656,6 +701,7 @@ el('enterGraph').addEventListener('click', () => {
   el('graphSection').scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
 });
 el('openCurator').addEventListener('click', () => {
+  playPortalTheme({ restart: true });
   el('curator').scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
   el('mode').focus({ preventScroll: true });
 });
