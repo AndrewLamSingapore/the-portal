@@ -17,7 +17,7 @@ for (const file of files) {
   assert.ok(!databaseCredential.test(source), `${file} contains database credential-like material`);
 }
 
-const workflow = fs.readFileSync('.github/workflows/quality.yml', 'utf8');
+const workflow = fs.readFileSync('.github/workflows/quality.yml', 'utf8').replace(/\r\n/g, '\n');
 assert.ok(workflow.includes('permissions:\n  contents: read'), 'quality workflow must retain read-only permissions');
 assert.ok(!workflow.includes('${{ secrets.'), 'production smoke must not receive repository secrets');
 assert.ok(!/^\s*(?:run:\s*)?(?:printenv|env)(?:\s|$)/m.test(workflow), 'workflow must not dump its environment');
