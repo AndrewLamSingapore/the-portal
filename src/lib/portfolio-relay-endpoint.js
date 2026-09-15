@@ -5,8 +5,10 @@ import { authorized } from './relay-auth.js';
 export async function handlePortfolioRelay(req, res) {
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
   res.setHeader('Cache-Control', 'no-store');
-  if (!process.env.PORTFOLIO_RELAY_TOKEN) return res.status(503).json({ error: 'relay_not_configured' });
-  if (!authorized(req.headers?.authorization)) return res.status(401).json({ error: 'unauthorized' });
+  if (!process.env.PORTFOLIO_RELAY_TOKEN && !process.env.PRIME_TRUST_ABEX_RELAY_TOKEN) return res.status(503).json({ error: 'relay_not_configured' });
+  const legacy = authorized(req.headers?.authorization);
+  const consumer = authorized(req.headers?.authorization, process.env.PRIME_TRUST_ABEX_RELAY_TOKEN);
+  if (!legacy && !consumer) return res.status(401).json({ error: 'unauthorized' });
   const started = Date.now();
   try {
     if (req.method === 'GET') {
@@ -19,6 +21,7 @@ export async function handlePortfolioRelay(req, res) {
       return res.status(405).json({ error: 'method_not_allowed' });
     }
     const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body || {};
+    if (!legacy && !['ack','status'].includes(body.action)) return res.status(403).json({error:'operation_denied'});
     if (body.action === 'publish') {
       assertContract('portfolio-event-v1', body.event);
       const result = await enqueuePortfolioEvent(body.event);
