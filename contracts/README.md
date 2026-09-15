@@ -1,3 +1,5 @@
+> Portfolio authority: [one current JARVIS SSOT](https://github.com/AndrewLamSingapore/prime/blob/main/governance/operational-manifest.json). This document describes this repository only; it cannot override the canonical architecture or establish live deployment status.
+
 # The Portal Cross-Project Contracts
 
 The Portal is the discovery layer. It may turn a graph connection or unresolved question into a structured experiment candidate without claiming that the candidate is validated.

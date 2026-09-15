@@ -1,3 +1,5 @@
+> Portfolio authority: [one current JARVIS SSOT](https://github.com/AndrewLamSingapore/prime/blob/main/governance/operational-manifest.json). This document describes this repository only; it cannot override the canonical architecture or establish live deployment status.
+
 # Shared Design Language v1 — Personal JARVIS / Portal Conformance
 
 This repository implements Shared Design Language v1 concepts independently. It has no runtime dependency on VELYQUA Cloud or the Game Platform.

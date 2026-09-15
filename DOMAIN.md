@@ -1,3 +1,5 @@
+> Portfolio authority: [one current JARVIS SSOT](https://github.com/AndrewLamSingapore/prime/blob/main/governance/operational-manifest.json). This document describes this repository only; it cannot override the canonical architecture or establish live deployment status.
+
 # Public identity
 
 The Portal is domain-ready. The application uses relative URLs, secure headers and no Vercel-hostname dependency in its runtime logic.

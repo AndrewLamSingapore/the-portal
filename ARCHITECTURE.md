@@ -1,3 +1,5 @@
+> Portfolio authority: [one current JARVIS SSOT](https://github.com/AndrewLamSingapore/prime/blob/main/governance/operational-manifest.json). This document describes this repository only; it cannot override the canonical architecture or establish live deployment status.
+
 # The Portal — 6.2 Architecture
 
 Version 6 makes imagined-future lifecycles executable. A single generation creates an artifact, a testable experiment, optional typed links, and an evidence-bounded timeline showing how a future emerged, disappeared, returned, failed, partially materialized, or became real.
