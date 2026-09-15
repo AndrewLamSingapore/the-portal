@@ -1,3 +1,5 @@
+> Portfolio authority: [one current JARVIS SSOT](https://github.com/AndrewLamSingapore/prime/blob/main/governance/operational-manifest.json). This document describes this repository only; it cannot override the canonical architecture or establish live deployment status.
+
 # Stable Spine runtime status
 
 The deterministic policy engine in `lib/spine.js` is an inert library until a guarded API route and persistence layer are merged. It has no connector credentials and performs no execution by itself.

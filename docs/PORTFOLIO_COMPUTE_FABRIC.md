@@ -1,3 +1,5 @@
+> Portfolio authority: [one current JARVIS SSOT](https://github.com/AndrewLamSingapore/prime/blob/main/governance/operational-manifest.json). This document describes this repository only; it cannot override the canonical architecture or establish live deployment status.
+
 # Portfolio Compute Fabric
 
 The Portal is the semantic knowledge plane of the portfolio. Cross-product cognition uses `contracts/portfolio-event-v1.schema.json` as the transport-neutral event contract.

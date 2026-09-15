@@ -1,3 +1,5 @@
+> Portfolio authority: [one current JARVIS SSOT](https://github.com/AndrewLamSingapore/prime/blob/main/governance/operational-manifest.json). This document describes this repository only; it cannot override the canonical architecture or establish live deployment status.
+
 # The Portal
 
 [**Open The Portal ↗**](https://the-portal-ten.vercel.app/) · [**Discuss this project**](https://authority-engine-app.vercel.app/contact?source=portal) · [**Meet Andrew Lam**](https://authority-engine-app.vercel.app/about)
