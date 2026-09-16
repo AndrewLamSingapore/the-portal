@@ -3,11 +3,13 @@ import { handlePortalSpine } from '../lib/spine-endpoint.js';
 import { handlePortfolioRelay } from '../src/lib/portfolio-relay-endpoint.js';
 import { portfolioOutboxStatus } from '../src/lib/portfolio-events.js';
 import { PRODUCT_VERSION } from '../lib/product-version.js';
+import { trustRelayHandler, postgresTrustStore } from '../src/lib/trust-relay.js';
 
 export default async function handler(req, res) {
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
   res.setHeader('Cache-Control', 'no-store');
   const route = String(req.query?.route || 'health');
+  if (route === 'trust-relay') return trustRelayHandler(postgresTrustStore(db()))(req,res);
   if (route === 'portfolio-relay') return handlePortfolioRelay(req, res);
   if (['spine', 'autonomy', 'autonomy-latest'].includes(route)) return handlePortalSpine(req, res, route);
   if (route !== 'health') return res.status(404).json({ ok: false, error: 'Route not found' });
@@ -47,6 +49,12 @@ export default async function handler(req, res) {
       experiment_result_schema: experimentResultSchema,
       authenticated_result_writing: authenticatedResultWriting,
       portfolio_relay: relayConfigured,
+      prime_trust_relay: {
+        role_credentials_configured: Boolean(process.env.PRIME_TRUST_ABEX_RELAY_TOKEN
+          && process.env.PRIME_TRUST_VELYQUA_RELAY_TOKEN
+          && process.env.PRIME_TRUST_ABEX_RELAY_TOKEN !== process.env.PRIME_TRUST_VELYQUA_RELAY_TOKEN),
+        schema: Boolean((await sql`select to_regclass('public.prime_trust_relay') as relay`)[0]?.relay),
+      },
       portfolio_outbox_schema: Boolean(relaySchema[0]?.outbox),
       portfolio_outbox: outboxStatus,
       living_observatory: true,

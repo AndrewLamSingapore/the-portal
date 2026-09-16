@@ -6,6 +6,14 @@ assert.equal(authorized('Bearer relay-secret', 'relay-secret'), true);
 assert.equal(authorized('Bearer wrong-secret', 'relay-secret'), false);
 assert.equal(authorized('', 'relay-secret'), false);
 assert.equal(authorized('Bearer relay-secret', ''), false);
+assert.equal(authorized('relay-secret', 'relay-secret'), false);
+assert.equal(authorized('Basic relay-secret', 'relay-secret'), false);
+assert.equal(authorized('Bearer é', 'x'), false);
+assert.equal(authorized('Bearer x', 'é'), false);
+assert.equal(authorized(['Bearer relay-secret'], 'relay-secret'), false);
+assert.equal(authorized('Bearer relay-secret\n', 'relay-secret'), false);
+assert.equal(authorized('Bearer  relay-secret', 'relay-secret'), false);
+assert.equal(authorized('bearer relay-secret', 'relay-secret'), true);
 
 const relay = readFileSync(new URL('../src/lib/portfolio-relay-endpoint.js', import.meta.url), 'utf8');
 const outbox = readFileSync(new URL('../src/lib/portfolio-events.js', import.meta.url), 'utf8');
