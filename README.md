@@ -6,6 +6,12 @@
 
 The Portal is a continuously evolving model of humanity's imagined futures. It tracks how ideas emerge, disappear, return, fail, partially materialize and become real—without hiding the boundary between generated hypotheses and source-supported history. Its public surfaces combine **The Future on Trial** with a production Living Observatory for bounded evolutionary hypotheses, falsification and fossil memory.
 
+## Connected work
+
+[**Explore JARVIS PRIME**](https://authority-engine-app.vercel.app/jarvis) · [**Meet Andrew**](https://authority-engine-app.vercel.app/about) · [**Start a conversation**](https://authority-engine-app.vercel.app/contact?source=portal&intent=collaboration)
+
+JARVIS PRIME’s public walkthrough connects this project to Andrew’s wider work. Public navigation and enquiries do not merge accounts, data or runtime authority. Current operational evidence comes from the canonical portfolio record; this README describes source capabilities.
+
 ## An explorable model of how encounters become connections, experiments and new ways of seeing.
 
 The Portal is an AI-assisted discovery and knowledge-graph experiment. It is not a website *about* Andrew Lam and it is not a conventional feed. Its long-term direction is to model a living process:

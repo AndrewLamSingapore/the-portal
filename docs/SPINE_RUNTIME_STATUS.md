@@ -1,13 +1,5 @@
-> Portfolio authority: [one current JARVIS SSOT](https://github.com/AndrewLamSingapore/prime/blob/main/governance/operational-manifest.json). This document describes this repository only; it cannot override the canonical architecture or establish live deployment status.
+# Portal policy implementation
 
-# Stable Spine runtime status
+This replaces the obsolete pre-wiring status note. `lib/spine.js` implements deterministic policy; guarded API routes and persistence are present in the current source. `npm run verify` exercises the policy, API and relay contracts.
 
-The deterministic policy engine in `lib/spine.js` is an inert library until a guarded API route and persistence layer are merged. It has no connector credentials and performs no execution by itself.
-
-Runtime wiring must preserve:
-- Action Envelope v1 validation
-- deterministic classification and policy
-- gated public publishing and spend
-- separate event and audit persistence
-- execution/verification/outcome as distinct states
-- no runtime dependency on VELYQUA Cloud or Game Platform
+Implementation is not a production-runtime receipt. Read the canonical PRIME operational manifest for observed deployment identity and unresolved acceptance. Public navigation to JARVIS does not grant access to private PRIME execution. Portal retains its own data, permissions and product-specific controls.
