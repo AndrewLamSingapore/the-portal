@@ -6,8 +6,7 @@ const ECOSYSTEM_APPS={
   skyTablet:'https://sky-tablet.vercel.app/',
   github:'https://github.com/AndrewLamSingapore'
 };
-const host=location.hostname;
-const current=host.startsWith('the-portal')?'portal':host.startsWith('game-platform')?'gamePlatform':host.startsWith('authority-engine')?'authorityEngine':'';
+const current='portal'; // Stable identity on production and preview deployment domains.
 const campaign='lam_ecosystem_v1';
 export function buildEcosystemUrl(destination,placement='top_nav'){
   const url=new URL(ECOSYSTEM_APPS[destination]);
@@ -44,17 +43,22 @@ if(current==='gamePlatform'){
   const back=link('portal','← Return to The Portal','game_return_link');back.className='ecosystem-link-subtle';document.querySelector('#play>.row>div')?.append(back);
 }
 const source = current === 'gamePlatform' ? 'game-platform' : current === 'portal' ? 'portal' : 'authority-engine';
-const contactUrl = `https://authority-engine-app.vercel.app/contact?source=${source}`;
+const contactUrl = `https://authority-engine-app.vercel.app/contact?source=${source}&intent=collaboration`;
 const contact = document.createElement('a'); contact.href = contactUrl; contact.textContent = 'Talk with Andrew ↗'; contact.className = 'ecosystem-talk'; nav.append(contact);
 const bridge = document.createElement('section'); bridge.className = 'relationship-bridge'; bridge.setAttribute('aria-label','Continue the conversation');
 const intro = document.createElement('div');
 const overline = document.createElement('p'); overline.className = 'relationship-kicker'; overline.textContent = 'BUILT BY ANDREW LAM';
-const title = document.createElement('h2'); title.textContent = current === 'portal' ? 'Found a connection worth exploring?' : 'Imagine what we could build together.';
-const copy = document.createElement('p'); copy.textContent = current === 'portal' ? 'Share a question, a source or an idea. The next useful discovery might start with a conversation.' : 'Bring a world-building idea, a creative collaboration or a thoughtful piece of feedback.';
+const title = document.createElement('h2'); title.textContent = current === 'portal' ? 'What connection did you see?' : 'Your next idea could become a world.';
+const copy = document.createElement('p'); copy.textContent = current === 'portal' ? 'I’m Andrew Lam. I built The Portal to explore connections between ideas. Bring a question, a useful source or a project you want to investigate together.' : 'I’m Andrew Lam. I’m exploring worlds where choices matter. Tell me about a story, learning experience or interactive project you would like to build.';
 intro.append(overline,title,copy);
 const actions = document.createElement('div'); actions.className = 'relationship-actions';
-const talk = document.createElement('a'); talk.href = contactUrl; talk.textContent = 'Start a conversation ↗'; talk.className = 'relationship-primary';
+const talk = document.createElement('a'); talk.href = contactUrl; talk.textContent = current === 'portal' ? 'Explore an idea with Andrew ↗' : 'Discuss a creative project ↗'; talk.className = 'relationship-primary';
 const linkedIn = document.createElement('a'); linkedIn.href = 'https://www.linkedin.com/in/lam-teck-sing-andrew-79886719'; linkedIn.textContent = 'Connect on LinkedIn';
 actions.append(talk,linkedIn); bridge.append(intro,actions);
 (document.querySelector('main') || document.querySelector('footer'))?.after(bridge);
+// A short creator invitation is visible before the deep experience, not only in the footer.
+const creator = document.createElement('aside');creator.className='creator-invitation';creator.setAttribute('aria-label','Meet the creator');
+const creatorText=document.createElement('p');creatorText.textContent=current==='portal'?'An exploration by Andrew Lam. Follow an idea. Find a connection. Bring your perspective.':'An interactive world by Andrew Lam. Play a scene, then imagine what we could create together.';
+const creatorLink=document.createElement('a');creatorLink.href=contactUrl;creatorLink.textContent='Talk with Andrew ↗';creator.append(creatorText,creatorLink);
+const entry=current==='portal'?document.querySelector('.hero'):document.querySelector('.dashboard-hero');entry?.append(creator);
 captureIncomingReferral();
