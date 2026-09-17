@@ -5,10 +5,11 @@ import path from 'node:path';
 import { db, findArtifacts, getArtifact, getExperimentResult, hasDatabase, saveExperimentResult } from '../lib/db.js';
 import { acceptExperimentResult } from '../lib/experiment-result-service.js';
 import { validateExperimentCandidate, validatePrimeRelayResponse } from '../lib/experiment-candidate.js';
+import { handleEvidenceLab } from '../lib/evidence-lab-endpoint.js';
 import { PRODUCT_VERSION } from '../lib/product-version.js';
 const SCHEMA_VERSION = 6;
 const EXPERIENCE = 'Continuous Futures Model';
-const META_ROUTES = new Set(['capabilities', 'ecosystem-event', 'evidence', 'experiment-result', 'manifest', 'metrics', 'prime-experiment', 'readiness', 'status', 'verify', 'version', 'v2']);
+const META_ROUTES = new Set(['capabilities', 'ecosystem-event', 'evidence', 'evidence-lab', 'experiment-result', 'manifest', 'metrics', 'prime-experiment', 'readiness', 'status', 'verify', 'version', 'v2']);
 
 function jsonHeaders(res, cache = 'no-store') {
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
@@ -254,6 +255,8 @@ export default async function handler(req, res) {
     return res.send(fs.readFileSync(path.join(process.cwd(), 'v2.html'), 'utf8'));
   }
 
+  if (route === 'evidence-lab') return handleEvidenceLab(req, res);
+
   jsonHeaders(res, ['capabilities', 'manifest', 'version'].includes(route) ? 'public, s-maxage=3600' : 'no-store');
 
   if (route === 'capabilities') {
@@ -285,6 +288,8 @@ export default async function handler(req, res) {
         evolutionary_hypotheses: true,
         falsification_memory: true,
         decisive_experiment: true,
+        ethereum_transaction_evidence_lab: true,
+        portable_artifact_snapshots: true,
         domain_ready: true
       },
       external_commitments: { custom_domain_purchase: false }
@@ -300,7 +305,7 @@ export default async function handler(req, res) {
       product_version: PRODUCT_VERSION,
       schema_version: SCHEMA_VERSION,
       experience: EXPERIENCE,
-      capabilities: ['evidence-layer', 'source-trails', 'temporal-graph', 'artifact-relationships', 'testable-experiments', 'typed-connections', 'evolution-ledger', 'continuous-futures-model', 'lifecycle-transitions', 'realization-watchlist', 'serendipity-engine', 'curated-exhibitions', 'ai-curator', 'private-cabinet', 'anonymous-public-trials', 'accessibility-baseline', 'production-monitoring', 'domain-ready'],
+      capabilities: ['evidence-layer', 'source-trails', 'temporal-graph', 'artifact-relationships', 'testable-experiments', 'typed-connections', 'evolution-ledger', 'continuous-futures-model', 'lifecycle-transitions', 'realization-watchlist', 'serendipity-engine', 'curated-exhibitions', 'ai-curator', 'private-cabinet', 'anonymous-public-trials', 'ethereum-transaction-evidence-lab', 'portable-artifact-snapshots', 'accessibility-baseline', 'production-monitoring', 'domain-ready'],
       evidence_states: ['AI-CURATED', 'CONCEPTUAL-INFERENCE', 'HISTORICALLY-VERIFIED']
     });
   }

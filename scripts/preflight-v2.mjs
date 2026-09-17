@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
-for (const file of ['api/artifact.js', 'api/archive.js', 'api/serendipity.js', 'api/graph.js', 'api/relationship.js', 'api/exhibition.js', 'api/exhibitions.js', 'api/health.js', 'api/meta.js', 'api/trial.js', 'api/living.js', 'index.html', 'living.html', 'living.js', 'inhabitants.html', 'inhabitants.js', 'inhabitants.css', 'app.js', 'styles.css']) {
+for (const file of ['api/artifact.js', 'api/archive.js', 'api/serendipity.js', 'api/graph.js', 'api/relationship.js', 'api/exhibition.js', 'api/exhibitions.js', 'api/health.js', 'api/meta.js', 'api/trial.js', 'api/living.js', 'index.html', 'evidence-lab.html', 'evidence-lab.js', 'evidence-lab.css', 'evidence-export.js', 'living.html', 'living.js', 'inhabitants.html', 'inhabitants.js', 'inhabitants.css', 'app.js', 'styles.css']) {
   assert.ok(fs.existsSync(file), `missing ${file}`);
 }
 
