@@ -49,6 +49,37 @@ try {
     await page.locator('#results:not([hidden])').waitFor();
     assert.match(await page.locator('#summary').textContent(),/MATCH · 4/);
     assert.match(await page.locator('#reportDigest').textContent(),/[a-f0-9]{64}/);
+    const layout = await page.locator('#results').evaluate(results => {
+      const table = results.querySelector('table');
+      const row = results.querySelector('tbody tr');
+      const cells = [...row.querySelectorAll('td')];
+      const panelBox = results.getBoundingClientRect();
+      return {
+        pageFitsViewport: document.documentElement.scrollWidth <= window.innerWidth,
+        tableMinWidth: getComputedStyle(table).minWidth,
+        headerDisplay: getComputedStyle(table.querySelector('thead')).display,
+        rowDisplay: getComputedStyle(row).display,
+        labels: cells.map(cell => cell.dataset.label),
+        values: cells.map(cell => cell.innerText),
+        cellsInsidePanel: cells.every(cell => {
+          const box = cell.getBoundingClientRect();
+          return box.left >= panelBox.left && box.right <= panelBox.right + 0.5;
+        })
+      };
+    });
+    if (viewport.width === 390) {
+      assert.equal(layout.pageFitsViewport,true,'mobile page must not overflow horizontally');
+      assert.equal(layout.tableMinWidth,'0px');
+      assert.equal(layout.headerDisplay,'none');
+      assert.equal(layout.rowDisplay,'block');
+      assert.deepEqual(layout.labels,['Check','Result','Expected','Observed']);
+      assert.equal(layout.values[1],'MATCH');
+      assert.equal(layout.cellsInsidePanel,true,'every stacked result field must remain inside the panel');
+    } else {
+      assert.equal(layout.tableMinWidth,'650px');
+      assert.notEqual(layout.headerDisplay,'none');
+      assert.notEqual(layout.rowDisplay,'block');
+    }
     assert.equal(errors.length,0,errors.join('\n'));
     if (process.env.PORTAL_EVIDENCE_SCREENSHOT && viewport.width === 390) await page.screenshot({path:process.env.PORTAL_EVIDENCE_SCREENSHOT,fullPage:true});
     await page.close();
