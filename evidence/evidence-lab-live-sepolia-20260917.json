@@ -1,0 +1,50 @@
+{
+  "schema_version": "portal-ethereum-transaction-evidence-v1",
+  "tool": { "name": "The Portal Evidence Lab", "version": "1.0.0" },
+  "observation": {
+    "mode": "LIVE_RPC_FETCH",
+    "observed_at_utc": "2026-09-17T05:55:22.542Z",
+    "source": { "provider_id": "publicnode", "origin": "https://ethereum-sepolia-rpc.publicnode.com", "credentials_exposed": false },
+    "trust_assumption": "Results rely on the configured RPC source. Re-running this checker against the same source is reproducibility evidence, not an independent audit."
+  },
+  "supported_scope": {
+    "network": { "id": "ethereum-sepolia", "name": "Ethereum Sepolia", "chain_id": "11155111", "chain_id_hex": "0xaa36a7", "native_unit": "wei" },
+    "transaction_types": ["0x0", "0x1", "0x2"],
+    "exclusions": ["signing", "transaction submission", "contract deployment", "proxy implementation identification", "business-outcome verification", "pre-execution declaration timing proof"]
+  },
+  "declaration": {
+    "network": "ethereum-sepolia",
+    "transaction_hash": "0x2780f91022d1364efc63b94161ad0bc80b93e315414be33f58054de3632903ab",
+    "expectations": { "sender": "0x31d43856566fc3bc465f67e7e1e48cbda40d6e68", "recipient": "0x07ea2ff889e6228cded329a09f66e370f12c705e", "nonce": "107", "value_wei": "0", "gas_limit": "134461", "max_fee_per_gas_wei": "50000000000", "max_priority_fee_per_gas_wei": "10000000000", "execution_status": "SUCCESS" }
+  },
+  "declaration_digest": { "algorithm": "SHA-256", "canonical_encoding": "portal-canonical-json-v1", "value": "7be4afc02799f8533fc3891087009850265c657fee275014fea828c6e1194b00" },
+  "notice": "Compares the observed transaction with the supplied declaration. It does not establish that the declaration existed or was authorized before execution.",
+  "transaction_identity": { "hash": "0x2780f91022d1364efc63b94161ad0bc80b93e315414be33f58054de3632903ab", "observed_type": "0x2" },
+  "block_reference": { "number": "11721748", "hash": "0xbda16a57f0efdcf1f6e1517cf564ce7279b999933ca01903eb8f0c33866d2518", "timestamp": "1789623612" },
+  "receipt_reference": { "block_number": "11721748", "block_hash": "0xbda16a57f0efdcf1f6e1517cf564ce7279b999933ca01903eb8f0c33866d2518", "status": "1" },
+  "finality": { "status": "FINALIZED_UNDER_RPC_SOURCE", "basis": "Transaction block number is not newer than the RPC finalized block.", "finalized_block_number": "11721751", "finalized_block_hash": "0x3b9ae6a7f56a01fe7160614449d8c3c2826e25fd973968e789e33b97d3577462" },
+  "fee_evidence": {
+    "maximum_settings": { "gas_limit": "134461", "gas_price_wei": "11063199500", "max_fee_per_gas_wei": "50000000000", "max_priority_fee_per_gas_wei": "10000000000" },
+    "actual_execution": { "gas_used": "129528", "effective_gas_price_wei": "11063199500", "actual_fee_wei": "1432994104836000" },
+    "distinction": "Maximum transaction fee settings are declaration limits. Actual execution fee is gas_used multiplied by effective_gas_price and may be lower."
+  },
+  "checks": [
+    { "field": "network.chain_id", "expected": "11155111", "observed": "11155111", "result": "MATCH", "reason": "Observed value equals the supplied declaration.", "evidence": ["rpc.eth_chainId"] },
+    { "field": "sender", "expected": "0x31d43856566fc3bc465f67e7e1e48cbda40d6e68", "observed": "0x31d43856566fc3bc465f67e7e1e48cbda40d6e68", "result": "MATCH", "reason": "Observed value equals the supplied declaration.", "evidence": ["transaction.from"] },
+    { "field": "recipient", "expected": "0x07ea2ff889e6228cded329a09f66e370f12c705e", "observed": "0x07ea2ff889e6228cded329a09f66e370f12c705e", "result": "MATCH", "reason": "Observed value equals the supplied declaration.", "evidence": ["transaction.to"] },
+    { "field": "nonce", "expected": "107", "observed": "107", "result": "MATCH", "reason": "Observed value equals the supplied declaration.", "evidence": ["transaction.nonce"] },
+    { "field": "value_wei", "expected": "0", "observed": "0", "result": "MATCH", "reason": "Observed value equals the supplied declaration.", "evidence": ["transaction.value"] },
+    { "field": "gas_limit", "expected": "134461", "observed": "134461", "result": "MATCH", "reason": "Observed value equals the supplied declaration.", "evidence": ["transaction.gas"] },
+    { "field": "max_fee_per_gas_wei", "expected": "50000000000", "observed": "50000000000", "result": "MATCH", "reason": "Observed value equals the supplied declaration.", "evidence": ["transaction.maxFeePerGas"] },
+    { "field": "max_priority_fee_per_gas_wei", "expected": "10000000000", "observed": "10000000000", "result": "MATCH", "reason": "Observed value equals the supplied declaration.", "evidence": ["transaction.maxPriorityFeePerGas"] },
+    { "field": "execution_status", "expected": "SUCCESS", "observed": "SUCCESS", "result": "MATCH", "reason": "Observed value equals the supplied declaration.", "evidence": ["receipt.status"] }
+  ],
+  "retained_evidence": {
+    "transaction": { "hash": "0x2780f91022d1364efc63b94161ad0bc80b93e315414be33f58054de3632903ab", "type": "0x2", "chainId": "0xaa36a7", "from": "0x31d43856566fc3bc465f67e7e1e48cbda40d6e68", "to": "0x07ea2ff889e6228cded329a09f66e370f12c705e", "nonce": "0x6b", "value": "0x0", "input": "0xd79875eb00000000000000000000000000000000000000000000000000071afd498d000000000000000000000000000000000000000000000000000000122c98b5c34b06", "gas": "0x20d3d", "gasPrice": "0x2936b070c", "maxFeePerGas": "0xba43b7400", "maxPriorityFeePerGas": "0x2540be400", "blockHash": "0xbda16a57f0efdcf1f6e1517cf564ce7279b999933ca01903eb8f0c33866d2518", "blockNumber": "0xb2dc14", "transactionIndex": "0x0" },
+    "receipt": { "transactionHash": "0x2780f91022d1364efc63b94161ad0bc80b93e315414be33f58054de3632903ab", "blockHash": "0xbda16a57f0efdcf1f6e1517cf564ce7279b999933ca01903eb8f0c33866d2518", "blockNumber": "0xb2dc14", "status": "0x1", "type": "0x2", "from": "0x31d43856566fc3bc465f67e7e1e48cbda40d6e68", "to": "0x07ea2ff889e6228cded329a09f66e370f12c705e", "gasUsed": "0x1f9f8", "effectiveGasPrice": "0x2936b070c", "contractAddress": null },
+    "block": { "number": "0xb2dc14", "hash": "0xbda16a57f0efdcf1f6e1517cf564ce7279b999933ca01903eb8f0c33866d2518", "timestamp": "0x6aab7d3c" },
+    "finalized_block": { "number": "0xb2dc17", "hash": "0x3b9ae6a7f56a01fe7160614449d8c3c2826e25fd973968e789e33b97d3577462" }
+  },
+  "limitations": ["A matching recipient does not identify the implementation behind a proxy.", "A successful receipt does not prove the intended business outcome occurred.", "Inclusion is not finality; only the finality evidence recorded above was observed.", "No wallet, signature, transaction submission, contract deployment, escrow, token or real-fund capability is present."],
+  "digest": { "algorithm": "SHA-256", "canonical_encoding": "portal-canonical-json-v1", "value": "4b2213325a78963faf2b6c1b3811eb68c766f367f0aea45de9a1ac8c7afdc288" }
+}

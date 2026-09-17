@@ -58,6 +58,7 @@ export default async function handler(req, res) {
       portfolio_outbox_schema: Boolean(relaySchema[0]?.outbox),
       portfolio_outbox: outboxStatus,
       living_observatory: true,
+      ethereum_evidence_lab: { network: 'ethereum-sepolia', chain_id: '11155111', mode: 'read-only' },
       schema_version: evidenceSchema ? 6 : 5,
       product_version: PRODUCT_VERSION,
       experience: 'Continuous Futures Model',

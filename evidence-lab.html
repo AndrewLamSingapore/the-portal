@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#080604">
+  <meta name="description" content="Read-only Ethereum Sepolia transaction evidence from The Portal.">
+  <title>Evidence Lab · The Portal</title>
+  <link rel="stylesheet" href="/shared-tokens.css">
+  <link rel="stylesheet" href="/evidence-lab.css">
+  <script src="/evidence-export.js" defer></script>
+  <script src="/evidence-lab.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to the checker</a>
+  <header class="lab-topbar"><a href="/" class="brand" aria-label="The Portal home">PTL<span>↻</span></a><span>EVIDENCE LAB · READ ONLY</span><span class="network">ETHEREUM SEPOLIA · 11155111</span></header>
+  <main id="main">
+    <header class="lab-hero">
+      <p class="eyebrow">OBSERVE → COMPARE → PRESERVE</p>
+      <h1>Transaction<br>Evidence Lab</h1>
+      <p class="lede">Compare an existing Sepolia transaction with a precise declaration. The checker reads public chain evidence, preserves uncertainty, and produces a reproducible JSON report.</p>
+      <div class="boundary"><b>Evidence boundary</b><span>No wallet. No signing. No transaction submission. No contract deployment. No escrow, token, or real-fund action.</span></div>
+    </header>
+
+    <section class="panel" aria-labelledby="checkerTitle">
+      <div class="panel-heading"><div><p class="index">01 · DECLARE</p><h2 id="checkerTitle">What should the transaction contain?</h2></div><button id="loadExample" class="quiet" type="button">LOAD PUBLIC EXAMPLE</button></div>
+      <p class="guidance">Enter the transaction hash and only the facts you expect. Blank fields are not checked. Integer fields use exact decimal values—never floating point.</p>
+      <form id="evidenceForm">
+        <label class="wide">Transaction hash<input name="transaction_hash" required spellcheck="false" placeholder="0x… 64 hex characters" pattern="0x[0-9a-fA-F]{64}"></label>
+        <fieldset><legend>Identity and value</legend><div class="form-grid">
+          <label>Sender<input name="sender" spellcheck="false" placeholder="0x…"></label>
+          <label>Recipient<input name="recipient" spellcheck="false" placeholder="0x… or CONTRACT_CREATION"></label>
+          <label>Nonce<input name="nonce" inputmode="numeric" placeholder="decimal integer"></label>
+          <label>Value (wei)<input name="value_wei" inputmode="numeric" placeholder="decimal integer"></label>
+          <label>Execution status<select name="execution_status"><option value="">Not checked</option><option>SUCCESS</option><option>FAILURE</option></select></label>
+        </div></fieldset>
+        <fieldset><legend>Calldata</legend><div class="form-grid">
+          <label class="wide">Exact calldata<input name="calldata" spellcheck="false" placeholder="0x… even-length hex"></label>
+          <label class="wide">Expected calldata SHA-256<input name="calldata_sha256" spellcheck="false" placeholder="64 hex characters"></label>
+        </div></fieldset>
+        <fieldset><legend>Fee declaration limits</legend><p class="field-note">These are transaction limits/settings. They are reported separately from the actual execution fee observed in the receipt.</p><div class="form-grid">
+          <label>Gas limit<input name="gas_limit" inputmode="numeric" placeholder="decimal integer"></label>
+          <label>Legacy gas price (wei)<input name="gas_price_wei" inputmode="numeric" placeholder="types 0x0 / 0x1"></label>
+          <label>Max fee per gas (wei)<input name="max_fee_per_gas_wei" inputmode="numeric" placeholder="type 0x2"></label>
+          <label>Max priority fee (wei)<input name="max_priority_fee_per_gas_wei" inputmode="numeric" placeholder="type 0x2"></label>
+        </div></fieldset>
+        <details><summary>Timing declaration (unsupported in this release)</summary><label class="wide">Claimed timing evidence<input name="timing_evidence" maxlength="200" placeholder="Recorded, but never treated as independent proof"></label></details>
+        <button class="primary" id="verifyButton" type="submit">VERIFY EXISTING TRANSACTION</button>
+      </form>
+      <p id="labState" class="lab-state" role="status" aria-live="polite">Ready. Nothing is sent to the chain.</p>
+    </section>
+
+    <section class="panel results" id="results" aria-labelledby="resultsTitle" hidden>
+      <div class="panel-heading"><div><p class="index">02 · EVIDENCE</p><h2 id="resultsTitle">Observed comparison</h2></div><button id="downloadReport" class="quiet" type="button">DOWNLOAD JSON</button></div>
+      <div id="summary" class="summary"></div>
+      <p class="mandatory-notice" id="mandatoryNotice"></p>
+      <div class="table-wrap"><table><thead><tr><th>Check</th><th>Result</th><th>Expected</th><th>Observed</th></tr></thead><tbody id="checkRows"></tbody></table></div>
+      <div id="evidenceDetails" class="evidence-details"></div>
+      <details open><summary>Limitations and trust assumptions</summary><ul id="limitations"></ul></details>
+      <p class="digest" id="reportDigest"></p>
+    </section>
+
+    <section class="panel" aria-labelledby="verifyExportTitle">
+      <p class="index">03 · REPRODUCE</p><h2 id="verifyExportTitle">Independently check a Portal export</h2>
+      <p class="guidance">Choose a downloaded Evidence Lab report or artifact snapshot. Verification happens locally in this browser; the file is not uploaded. For a second implementation, run <code>node scripts/check-portal-export.mjs &lt;file.json&gt;</code> from the repository.</p>
+      <label class="file-label">Select JSON export<input id="exportFile" type="file" accept="application/json,.json"></label>
+      <output id="exportVerification" class="lab-state">No file selected.</output>
+    </section>
+  </main>
+  <footer><a href="/">← RETURN TO THE PORTAL</a><span>Evidence, not manufactured certainty.</span></footer>
+</body>
+</html>

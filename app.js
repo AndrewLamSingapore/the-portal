@@ -535,7 +535,8 @@ function detailMarkup(artifact) {
     ${connections ? `<h3>Typed graph connections</h3><div>${connections}</div>` : ''}
     ${experiment}
     <h3>Unresolved question</h3><p>${escapeHtml(artifact.unresolved_question || artifact.question || 'What becomes visible when this connects to another domain?')}</p>
-    ${level === 'HISTORICALLY-VERIFIED' && !sources.length ? '<p class="evidence-notice">This record is labelled verified but has no visible source trail. Treat verification as incomplete.</p>' : sourceMarkup}`;
+    ${level === 'HISTORICALLY-VERIFIED' && !sources.length ? '<p class="evidence-notice">This record is labelled verified but has no visible source trail. Treat verification as incomplete.</p>' : sourceMarkup}
+    <h3>Portable evidence</h3><p>Download this exact artifact snapshot with its provenance, qualification state, uncertainty labels and a reproducible SHA-256 digest.</p><button class="artifact-export" id="exportArtifact" type="button">DOWNLOAD SEALED JSON</button><p class="export-state" id="exportState" role="status" aria-live="polite"></p>`;
 }
 
 function showArtifact(id, trigger) {
@@ -545,6 +546,20 @@ function showArtifact(id, trigger) {
   state.lastTrigger = trigger || document.activeElement;
   el('detail').innerHTML = detailMarkup(artifact);
   bindOutcomes(el('detail'));
+  el('exportArtifact')?.addEventListener('click', async () => {
+    const button = el('exportArtifact');
+    const message = el('exportState');
+    button.disabled = true;
+    try {
+      const snapshot = await window.PortalEvidenceExport.buildArtifactSnapshot(artifact);
+      window.PortalEvidenceExport.downloadJson(snapshot, `portal-artifact-${artifact.id}.json`);
+      message.textContent = `SHA-256 · ${snapshot.digest.value}`;
+    } catch {
+      message.textContent = 'Export failed safely. No incomplete snapshot was downloaded.';
+    } finally {
+      button.disabled = false;
+    }
+  });
   const drawer = el('drawer');
   drawer.removeAttribute('inert');
   drawer.setAttribute('aria-hidden', 'false');
