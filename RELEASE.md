@@ -2,7 +2,7 @@
 
 # Portal release acceptance
 
-The source version is defined in `package.json` (6.4.0 at this update). This replaces the older V2 and 6.3.1 release summaries.
+The source version is defined in `package.json` (6.5.0 at this update). This replaces the older V2, 6.3.1 and 6.4.0 release summaries.
 
 The release gate covers structured experiments, typed connections, deterministic evolution events, and backward compatibility with earlier artifacts.
 
