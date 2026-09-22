@@ -1,12 +1,17 @@
 # Shared JARVIS source of truth
 
-For JARVIS/PRIME and portfolio work, begin with SSOT.json. Resolve the latest
-canonical PRIME main commit and read governance/operational-manifest.json and
-governance/CHANNEL_CONTRACT.md at that same commit. Follow its architecture and
-component references. On PRIME itself, a clean checkout of current main provides
-the same files. A working branch is a candidate, never a second current version.
+For JARVIS/PRIME and portfolio work, begin with STATUS.md, the single current
+status and evidence authority: https://github.com/AndrewLamSingapore/prime/blob/main/STATUS.md
+There is no active SSOT system: the former SSOT and reconciler apparatus is
+retired and superseded, and STATUS.md must never be maintained in parallel with
+it. SSOT.json in this repository is only a machine-readable component pointer; no
+status claim may live in it. For architecture and component references, resolve
+the latest canonical PRIME main commit and read
+governance/operational-manifest.json and governance/CHANNEL_CONTRACT.md at that
+same commit. On PRIME itself, a clean checkout of current main provides the same
+files. A working branch is a candidate, never a second current version.
 
-Canonical entrypoint: https://github.com/AndrewLamSingapore/prime/blob/main/governance/operational-manifest.json
+Machine-readable component reference: https://github.com/AndrewLamSingapore/prime/blob/main/governance/operational-manifest.json
 
 This applies equally to ChatGPT, Codex, Sol, Astra and other assistants. Prior
 chat, memory, exported documents, screenshots, old branches and model identity
