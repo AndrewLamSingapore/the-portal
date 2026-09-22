@@ -6,9 +6,13 @@
  * front door -> open a card -> copy link -> close -> deep link -> browser back
  * -> unknown card id. Records console errors and acceptance screenshots.
  *
+ * Set PORTAL_CHECK_BASE to run the same journey against a deployed site (for
+ * example https://the-portal-ten.vercel.app) instead of the local stubs.
+ *
  * Opt-in (never part of CI): it needs a Chromium-family browser on the host.
  *
  *   node scripts/card-permalink-browser.mjs
+ *   PORTAL_CHECK_BASE=https://the-portal-ten.vercel.app node scripts/card-permalink-browser.mjs
  */
 import { createServer } from 'node:http';
 import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
@@ -17,6 +21,7 @@ import path from 'node:path';
 
 const ROOT = new URL('../', import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1');
 const PORT = Number(process.env.PORTAL_CHECK_PORT || 4191);
+const REMOTE_BASE = String(process.env.PORTAL_CHECK_BASE || '').replace(/\/$/, '');
 const SHOTS = process.env.PORTAL_CHECK_SHOTS || path.join(tmpdir(), 'portal-v2-shots');
 const EDGE_PATHS = [
   'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe',
@@ -129,7 +134,7 @@ const launchOptions = EDGE_PATHS.find((candidate) => existsSync(candidate))
   : { channel: 'msedge' };
 
 mkdirSync(SHOTS, { recursive: true });
-await new Promise((resolve) => server.listen(PORT, '127.0.0.1', resolve));
+if (!REMOTE_BASE) await new Promise((resolve) => server.listen(PORT, '127.0.0.1', resolve));
 
 const browser = await chromium.launch({ ...launchOptions, headless: true });
 const context = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
@@ -140,7 +145,7 @@ page.on('console', (message) => {
 });
 page.on('pageerror', (error) => errors.push(`pageerror: ${error.message}`));
 
-const base = `http://127.0.0.1:${PORT}`;
+const base = REMOTE_BASE || `http://127.0.0.1:${PORT}`;
 const drawerOpen = () => page.evaluate(() => document.getElementById('drawer').classList.contains('open'));
 
 await step('front door and card journey', async () => {
@@ -151,12 +156,14 @@ await step('front door and card journey', async () => {
   record('the front door explains outcome, evidence label and open question', ['OUTCOME OR STATUS', 'EVIDENCE LABEL', 'OPEN QUESTION'].every((token) => frontDoor.includes(token)));
   await page.screenshot({ path: path.join(SHOTS, '01-front-door.png'), fullPage: false });
 
+  const cardId = await page.locator('#grid .card').first().getAttribute('data-id');
+  const cardTitle = (await page.locator('#grid .card').first().locator('b').textContent()).trim();
   await page.locator('#grid .card').first().click();
   await page.waitForFunction(() => document.getElementById('drawer').classList.contains('open'));
-  record('opening a card records a stable /card/<id> link', page.url().endsWith('/card/container-telegraph'), page.url());
-  record('the open card updates the document title', (await page.title()).includes('The Container Telegraph'), await page.title());
+  record('opening a card records a stable /card/<id> link', page.url().endsWith(`/card/${encodeURIComponent(cardId)}`), page.url());
+  record('the open card updates the document title', (await page.title()).includes(cardTitle), await page.title());
   const canonical = await page.getAttribute('link[rel="canonical"]', 'href');
-  record('the open card sets its canonical link', String(canonical).endsWith('/card/container-telegraph'), String(canonical));
+  record('the open card sets its canonical link', String(canonical).endsWith(`/card/${encodeURIComponent(cardId)}`), String(canonical));
   record('the drawer offers a copy-link control', await page.locator('#copyCardLink').isVisible());
 
   await page.locator('#copyCardLink').click();
@@ -173,10 +180,12 @@ await step('front door and card journey', async () => {
 });
 
 await step('deep link, history and unknown card', async () => {
-  await page.goto(`${base}/card/quiet-arrival`, { waitUntil: 'domcontentloaded' });
+  const sharedId = await page.locator('#grid .card').first().getAttribute('data-id');
+  const sharedTitle = (await page.locator('#grid .card').first().locator('b').textContent()).trim();
+  await page.goto(`${base}/card/${encodeURIComponent(sharedId)}`, { waitUntil: 'domcontentloaded' });
   await page.waitForFunction(() => document.getElementById('drawer').classList.contains('open'), null, { timeout: 20000 });
   const title = await page.locator('#drawerTitle').textContent();
-  record('a shared /card/<id> link opens that card on first load', title.trim() === 'The Quiet Arrival', title);
+  record('a shared /card/<id> link opens that card on first load', title.trim() === sharedTitle, title);
   await page.screenshot({ path: path.join(SHOTS, '03-deep-link.png'), fullPage: false });
 
   await page.goBack();
