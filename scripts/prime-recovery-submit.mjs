@@ -356,9 +356,19 @@ for (const viewportName of bothViewports) {
     assert.equal(new URL(page.url()).search, '', 'the unusable link material is removed from the address bar');
     assert.deepEqual(seen.pageErrors, [], `page errors: ${seen.pageErrors.join('; ')}`);
   });
+
+  await scenario('the private pages load cleanly for an anonymous visitor', viewportName, async (page, seen) => {
+    for (const privatePath of ['/prime', '/reports']) {
+      const response = await page.goto(`${base}${privatePath}`, { waitUntil: 'domcontentloaded' });
+      assert.equal(response?.status(), 200, `${privatePath} did not return HTTP 200`);
+      await page.waitForFunction(() => Boolean(document.querySelector('[data-state]:not([hidden])')), null, { timeout: 10_000 });
+    }
+    assert.deepEqual(seen.consoleErrors, [], `console errors (a blocked script, stylesheet or request would appear here): ${seen.consoleErrors.join('; ')}`);
+    assert.deepEqual(seen.pageErrors, [], `page errors: ${seen.pageErrors.join('; ')}`);
+  });
 }
 
-await scenario('the private pages declare no duplicate element ids', 'desktop', async (page, seen) => {
+  await scenario('the private pages declare no duplicate element ids', 'desktop', async (page, seen) => {
   for (const privatePath of ['/prime', '/reports']) {
     const response = await page.goto(`${base}${privatePath}`, { waitUntil: 'domcontentloaded' });
     assert.equal(response?.status(), 200, `${privatePath} did not return HTTP 200`);
@@ -367,7 +377,7 @@ await scenario('the private pages declare no duplicate element ids', 'desktop', 
     assert.equal(new Set(view.ids).size, view.ids.length, `duplicate element ids on ${privatePath}: ${view.ids.join(', ')}`);
   }
   assert.deepEqual(seen.pageErrors, [], `page errors: ${seen.pageErrors.join('; ')}`);
-});
+  });
 
 await scenario('the public Portal still loads unchanged', 'desktop', async (page, seen) => {
   const response = await page.goto(`${base}/`, { waitUntil: 'domcontentloaded' });
