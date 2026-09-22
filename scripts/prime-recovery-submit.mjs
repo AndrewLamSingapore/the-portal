@@ -345,6 +345,17 @@ for (const viewportName of bothViewports) {
     assert.equal(view.hash, '', 'the fragment is consumed before the hand-over');
     assertSessionKeptSecret(view, seen);
   });
+
+  await scenario('recovery material PRIME cannot consume is explained, not ignored', viewportName, async (page, seen) => {
+    const response = await page.goto(`${base}/prime?code=synthetic-code-not-real&error=access_denied`, { waitUntil: 'domcontentloaded' });
+    assert.equal(response?.status(), 200);
+    await page.waitForSelector('#setPasswordForm', { state: 'visible', timeout: 10_000 });
+    const view = await snapshot(page);
+    assert.equal(view.state, 'recovery');
+    assert.match(view.error, /request a new one/i, 'an unusable link must explain itself');
+    assert.equal(new URL(page.url()).search, '', 'the unusable link material is removed from the address bar');
+    assert.deepEqual(seen.pageErrors, [], `page errors: ${seen.pageErrors.join('; ')}`);
+  });
 }
 
 await scenario('the private pages declare no duplicate element ids', 'desktop', async (page, seen) => {

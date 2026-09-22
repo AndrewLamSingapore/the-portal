@@ -85,6 +85,32 @@ const remember = (value) => {
   else localStorage.removeItem(SESSION_KEY);
 };
 
+/**
+ * Supabase can also deliver recovery material in the query string (`?code=`,
+ * or `?error_description=` when a link was rejected) when a project uses PKCE.
+ * PRIME consumes the implicit-flow fragment, so say so plainly and take the
+ * material out of the address bar instead of rendering an unexplained sign-in
+ * form. `?id=` on the reports page is not touched here.
+ */
+function unusableLinkMaterial() {
+  const params = new URLSearchParams(location.search);
+  if (params.get('error_description') || params.get('error')) {
+    return 'That recovery link was rejected before it reached PRIME. Request a new one.';
+  }
+  if (params.get('code')) {
+    return 'That recovery link cannot be completed in this browser. Request a new one.';
+  }
+  return '';
+}
+
+/** Removes query-string authentication material from the visible URL. */
+function clearLinkFromUrl() {
+  const params = new URLSearchParams(location.search);
+  for (const key of ['code', 'error', 'error_code', 'error_description']) params.delete(key);
+  const rest = params.toString();
+  history.replaceState(null, '', `${location.pathname}${rest ? `?${rest}` : ''}`);
+}
+
 async function token() {
   const current = session();
   if (!current?.access_token) return null;
@@ -190,6 +216,12 @@ async function load() {
     if (recovery.error || !recovery.access) {
       say('recoveryError', 'That recovery link is no longer valid. Request a new one.');
     }
+    return showRecovery();
+  }
+  const unusable = unusableLinkMaterial();
+  if (unusable && !session()?.access_token) {
+    clearLinkFromUrl();
+    say('recoveryError', unusable);
     return showRecovery();
   }
   // A recovery session that has not set a password yet keeps offering the step,
