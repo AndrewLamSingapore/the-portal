@@ -1,4 +1,4 @@
-> Portfolio authority: [one current JARVIS SSOT](https://github.com/AndrewLamSingapore/prime/blob/main/governance/operational-manifest.json). This document describes this repository only; it cannot override the canonical architecture or establish live deployment status.
+> Portfolio authority: [STATUS.md](https://github.com/AndrewLamSingapore/prime/blob/main/STATUS.md) is the single current status source of truth; the [machine-readable operational reference](https://github.com/AndrewLamSingapore/prime/blob/main/governance/operational-manifest.json) describes components only. This document describes this repository only; it cannot override STATUS.md, the canonical architecture, or establish live deployment status.
 
 # The Portal
 
