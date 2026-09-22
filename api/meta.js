@@ -6,10 +6,11 @@ import { db, findArtifacts, getArtifact, getExperimentResult, hasDatabase, saveE
 import { acceptExperimentResult } from '../lib/experiment-result-service.js';
 import { validateExperimentCandidate, validatePrimeRelayResponse } from '../lib/experiment-candidate.js';
 import { handleEvidenceLab } from '../lib/evidence-lab-endpoint.js';
+import { authenticate as primeAuthenticate, readReports as primeReadReports, resolvePrimeIdentity as primeResolveIdentity, sendJson as primeSendJson } from '../lib/prime-auth.js';
 import { PRODUCT_VERSION } from '../lib/product-version.js';
 const SCHEMA_VERSION = 6;
 const EXPERIENCE = 'Continuous Futures Model';
-const META_ROUTES = new Set(['capabilities', 'ecosystem-event', 'evidence', 'evidence-lab', 'experiment-result', 'manifest', 'metrics', 'prime-experiment', 'readiness', 'status', 'verify', 'version', 'v2']);
+const META_ROUTES = new Set(['capabilities', 'ecosystem-event', 'evidence', 'evidence-lab', 'experiment-result', 'manifest', 'metrics', 'prime', 'prime-experiment', 'prime-report', 'readiness', 'status', 'verify', 'version', 'v2']);
 
 function jsonHeaders(res, cache = 'no-store') {
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
@@ -237,6 +238,32 @@ async function handleExperimentResult(req, res) {
   return res.status(outcome.status).json(outcome.body);
 }
 
+async function handlePrime(req, res) {
+  const auth = await primeAuthenticate(req.headers);
+  if (auth.error) return primeSendJson(res, auth.status, { error: auth.error });
+  const mapped = await primeResolveIdentity(auth.user, auth.token);
+  if (mapped.error) return primeSendJson(res, mapped.status, { error: mapped.error });
+  const reports = await primeReadReports(auth.token);
+  if (reports.error) return primeSendJson(res, reports.status, { error: reports.error });
+  return primeSendJson(res, 200, {
+    identity: { person_key: mapped.identity.person_key, display_name: mapped.identity.display_name, role: mapped.identity.role },
+    reports: reports.rows
+  });
+}
+
+async function handlePrimeReport(req, res) {
+  const id = String(req.query?.id || '').trim();
+  if (!id || id.length > 128) return primeSendJson(res, 400, { error: 'report_id_required' });
+  const auth = await primeAuthenticate(req.headers);
+  if (auth.error) return primeSendJson(res, auth.status, { error: auth.error });
+  const mapped = await primeResolveIdentity(auth.user, auth.token);
+  if (mapped.error) return primeSendJson(res, mapped.status, { error: mapped.error });
+  const reports = await primeReadReports(auth.token, { id });
+  if (reports.error) return primeSendJson(res, reports.status, { error: reports.error });
+  if (!reports.rows.length) return primeSendJson(res, 404, { error: 'report_not_found' });
+  return primeSendJson(res, 200, { identity: { role: mapped.identity.role }, report: reports.rows[0] });
+}
+
 export default async function handler(req, res) {
   const routeValue = Array.isArray(req.query?.route) ? req.query.route[0] : req.query?.route;
   const route = String(routeValue || '');
@@ -299,6 +326,8 @@ export default async function handler(req, res) {
   if (route === 'evidence') return handleEvidence(req, res);
   if (route === 'experiment-result') return handleExperimentResult(req, res);
   if (route === 'prime-experiment') return handlePrimeExperiment(req, res);
+  if (route === 'prime') return handlePrime(req, res);
+  if (route === 'prime-report') return handlePrimeReport(req, res);
   if (route === 'manifest') {
     if (!allow(req, res, 'GET')) return;
     return res.status(200).json({
