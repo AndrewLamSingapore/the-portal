@@ -1,4 +1,7 @@
+@font-face{font-family:"Bricolage Grotesque Variable";src:url('/assets/fonts/bricolage-grotesque-latin-wght-normal.woff2') format('woff2');font-weight:200 800;font-style:normal;font-display:swap}
+@font-face{font-family:"Newsreader Variable";src:url('/assets/fonts/newsreader-latin-wght-normal.woff2') format('woff2');font-weight:200 800;font-style:normal;font-display:swap}
 :root{--family-mint:#6ee7b7;--family-mint-soft:#a7f3d0;--family-gold:#fcd34d;--family-ink:#050807;--family-line:rgba(255,255,255,.10);color-scheme:dark}
+html body{font-family:"Newsreader Variable",Georgia,serif!important}h1,h2,h3,button,input,textarea,select,.brand,.eyebrow,.index,.tag,.k,.ecosystem-nav{font-family:"Bricolage Grotesque Variable","Avenir Next","Segoe UI",system-ui,sans-serif!important}
 html,body{overflow-x:hidden}
 .ecosystem-nav a,.topbar a,.topbar button,.lab-topbar a,.inhabitant-topbar a{min-height:44px;display:inline-flex;align-items:center}
 html{background:var(--family-ink);scroll-behavior:smooth}body{background:radial-gradient(circle at 76% 3%,rgba(52,211,153,.08),transparent 32rem),radial-gradient(circle at 8% 62%,rgba(252,211,77,.04),transparent 28rem),var(--family-ink);color:#f1f5f9;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}.topbar,.lab-topbar,.inhabitant-topbar{background:rgba(5,8,7,.9);border-bottom-color:var(--family-line);backdrop-filter:blur(18px)}
