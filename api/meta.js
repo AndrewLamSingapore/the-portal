@@ -252,10 +252,10 @@ async function handlePrime(req, res) {
 }
 
 async function handlePrimeReport(req, res) {
-  const id = String(req.query?.id || '').trim();
-  if (!id || id.length > 128) return primeSendJson(res, 400, { error: 'report_id_required' });
   const auth = await primeAuthenticate(req.headers);
   if (auth.error) return primeSendJson(res, auth.status, { error: auth.error });
+  const id = String(req.query?.id || '').trim();
+  if (!id || id.length > 128) return primeSendJson(res, 400, { error: 'report_id_required' });
   const mapped = await primeResolveIdentity(auth.user, auth.token);
   if (mapped.error) return primeSendJson(res, mapped.status, { error: mapped.error });
   const reports = await primeReadReports(auth.token, { id });
