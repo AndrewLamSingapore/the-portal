@@ -12,6 +12,32 @@ const SESSION_KEY = 'portal-prime-session-v1';
 const MODE = document.body.dataset.primeMode || 'summary';
 
 const el = (id) => document.getElementById(id);
+/** Reads Supabase's implicit-flow material out of the URL fragment. */
+function recoveryMaterial() {
+  const hash = String(location.hash || '').replace(/^#/, '');
+  if (!hash) return null;
+  const params = new URLSearchParams(hash);
+  const access = params.get('access_token');
+  const error = params.get('error_description') || params.get('error');
+  if (!access && !error) return null;
+  return {
+    access,
+    refresh: params.get('refresh_token'),
+    expiresIn: Number(params.get('expires_in') || 3600),
+    type: params.get('type') || '',
+    error,
+  };
+}
+
+/**
+ * Removes authentication material from the visible URL immediately: tokens in
+ * the address bar leak through screenshots, history, referrers and shared links.
+ */
+function clearAuthFromUrl() {
+  if (!location.hash) return;
+  history.replaceState(null, '', `${location.pathname}${location.search}`);
+}
+
 const session = () => {
   try { return JSON.parse(localStorage.getItem(SESSION_KEY) || 'null'); } catch { return null; }
 };
@@ -53,8 +79,47 @@ function renderReports(reports) {
     <span class="muted">${report.status} · ${report.visibility} · ${new Date(report.created_at).toISOString().slice(0, 10)}</span></a></li>`).join('');
 }
 
+async function setNewPassword(password) {
+  const current = session();
+  const access = current?.access_token || await token();
+  if (!access) {
+    el('recoveryError').textContent = 'That recovery link has expired. Request a new one and try again.';
+    return;
+  }
+  const response = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+    method: 'PUT',
+    headers: { apikey: PUBLISHABLE_KEY, Authorization: `Bearer ${access}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ password }),
+  });
+  if (!response.ok) {
+    el('recoveryError').textContent = response.status === 422
+      ? 'That password is too weak or was used before. Choose a stronger one.'
+      : 'The password could not be updated. Request a new recovery link.';
+    return;
+  }
+  el('recoveryError').textContent = '';
+  el('recoveryStatus').textContent = 'Password updated. Continuing to private operations…';
+  await load();
+}
+
 async function load() {
   show('loading');
+  const recovery = recoveryMaterial();
+  if (recovery) {
+    // Consume the fragment before anything else can read, log or render it.
+    if (recovery.access) {
+      remember({
+        access_token: recovery.access,
+        refresh_token: recovery.refresh || null,
+        expires_at: Math.floor(Date.now() / 1000) + recovery.expiresIn,
+      });
+    }
+    clearAuthFromUrl();
+    if (recovery.error || !recovery.access) {
+      el('recoveryError').textContent = 'That recovery link is no longer valid. Request a new one.';
+    }
+    return show('recovery');
+  }
   const access = await token();
   if (!access) return show('anonymous');
   let response;
@@ -124,5 +189,23 @@ el('signOut')?.addEventListener('click', async () => {
   show('anonymous');
 });
 
+el('setPasswordForm')?.addEventListener('submit', async (event) => {
+  event.preventDefault();
+  el('recoveryError').textContent = '';
+  const chosen = el('newPassword').value;
+  if (chosen.length < 8) {
+    el('recoveryError').textContent = 'Use at least 8 characters.';
+    return;
+  }
+  if (chosen !== el('confirmPassword').value) {
+    el('recoveryError').textContent = 'The two passwords do not match.';
+    return;
+  }
+  el('newPassword').value = '';
+  el('confirmPassword').value = '';
+  await setNewPassword(chosen);
+});
+
 window.addEventListener('pageshow', (event) => { if (event.persisted) load(); });
+window.addEventListener('hashchange', () => { if (recoveryMaterial()) load(); });
 await load();

@@ -4,7 +4,19 @@
 <h1>PRIME Operations</h1>
 <p class="thesis">Private operational reports, evidence and artifacts. Your identity here proves who you are; PRIME decides what you may read.</p>
 <section data-state="loading" hidden><p class="muted">Checking your session…</p></section>
+<section data-state="recovery" hidden>
+  <h2>Set a new password</h2>
+  <p class="muted">Your recovery link is valid. Choose a password you have not used before — authentication material is already removed from the address bar.</p>
+  <form id="setPasswordForm">
+    <label for="newPassword">New password</label><input id="newPassword" name="newPassword" type="password" autocomplete="new-password" minlength="8" required>
+    <label for="confirmPassword">Confirm password</label><input id="confirmPassword" name="confirmPassword" type="password" autocomplete="new-password" minlength="8" required>
+    <button type="submit">Save password and continue</button>
+    <p id="recoveryError" role="alert" class="muted"></p>
+    <p id="recoveryStatus" role="status" class="muted"></p>
+  </form>
+</section>
 <section data-state="anonymous" hidden>
+
   <h2>Sign in</h2>
   <form id="signInForm">
     <label for="email">Email</label><input id="email" name="email" type="email" autocomplete="username" required>
