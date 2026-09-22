@@ -32,6 +32,7 @@ const SUPABASE_ORIGIN = 'https://vtrfgckzpjgtmqsnumur.supabase.co';
 // Synthetic values only. Nothing here is, or resembles, a real credential.
 const SYNTHETIC_TOKEN = 'synthetic-recovery-token-not-real';
 const SYNTHETIC_PASSWORD = 'synthetic-passphrase-not-real';
+const PRIVATE_MARKER = 'SYNTHETIC-PRIVATE-REPORT-MARKER';
 const REDACT = (value) => String(value).split(SYNTHETIC_TOKEN).join('[redacted]');
 
 const VIEWPORTS = {
@@ -138,7 +139,19 @@ async function openPage(viewport, options = {}) {
   page.on('pageerror', (error) => seen.pageErrors.push(REDACT(error.message).slice(0, 200)));
 
   await context.route(new RegExp(`^${SUPABASE_ORIGIN.replace(/\./g, '\\.')}/`), async (route) => {
-    seen.authRequests.push(`${route.request().method()} ${new URL(route.request().url()).pathname}`);
+    const pathname = new URL(route.request().url()).pathname;
+    seen.authRequests.push(`${route.request().method()} ${pathname}`);
+    if (pathname === '/auth/v1/token') {
+      // Refresh behaviour is decided here so expiry can be exercised deterministically.
+      if (options.refresh === 'reject') {
+        return route.fulfill({ status: 400, contentType: 'application/json', body: '{"error":"invalid_grant"}' });
+      }
+      return route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ access_token: 'synthetic-refreshed-token', refresh_token: SYNTHETIC_TOKEN, expires_at: Math.floor(Date.now() / 1000) + 3600 }),
+      });
+    }
     if (options.identity === 'abort') return route.abort('failed');
     if (typeof options.identity === 'number') {
       return route.fulfill({ status: options.identity, contentType: 'application/json', body: '{"error":"synthetic"}' });
@@ -147,13 +160,16 @@ async function openPage(viewport, options = {}) {
   });
   await context.route(/\/api\/prime(\/|\?|$)/, async (route) => {
     seen.primeRequests.push(new URL(route.request().url()).pathname);
+    if (options.primeDelayMs) await new Promise((resolve) => setTimeout(resolve, options.primeDelayMs));
     if (options.prime === 'unavailable') return route.fulfill({ status: 503, contentType: 'application/json', body: '{"error":"synthetic"}' });
     return route.fulfill({
       status: 200,
       contentType: 'application/json',
       body: JSON.stringify({
         identity: { display_name: 'Synthetic Owner', role: 'OWNER', person_key: 'synthetic' },
-        reports: [],
+        reports: options.privateMarker
+          ? [{ id: 'synthetic-report', objective: PRIVATE_MARKER, status: 'VERIFIED', visibility: 'OWNER', created_at: '2026-09-22T00:00:00Z' }]
+          : [],
       }),
     });
   });
@@ -231,6 +247,26 @@ async function scenario(name, viewportName, run, options = {}) {
     await context.close();
   }
 }
+
+/**
+ * Seeds a browser-only session the way a real visit would have left one. The
+ * guard lives in sessionStorage so a reload does not silently re-seed the
+ * session a test explicitly signed out of.
+ */
+async function seedSession(context, session) {
+  await context.addInitScript((value) => {
+    if (window.sessionStorage.getItem('prime-session-seeded')) return;
+    window.sessionStorage.setItem('prime-session-seeded', '1');
+    window.localStorage.setItem('portal-prime-session-v1', JSON.stringify(value));
+  }, session);
+}
+
+const liveSession = (overrides = {}) => ({
+  access_token: SYNTHETIC_TOKEN,
+  refresh_token: SYNTHETIC_TOKEN,
+  expires_at: Math.floor(Date.now() / 1000) + 3600,
+  ...overrides,
+});
 
 const bothViewports = Object.keys(VIEWPORTS);
 
@@ -366,6 +402,114 @@ for (const viewportName of bothViewports) {
     assert.deepEqual(seen.consoleErrors, [], `console errors (a blocked script, stylesheet or request would appear here): ${seen.consoleErrors.join('; ')}`);
     assert.deepEqual(seen.pageErrors, [], `page errors: ${seen.pageErrors.join('; ')}`);
   });
+
+  await scenario('the private pages are uncacheable and noindex', viewportName, async (page) => {
+    for (const privatePath of ['/prime', '/reports']) {
+      const response = await page.goto(`${base}${privatePath}`, { waitUntil: 'domcontentloaded' });
+      assert.equal(response.headers()['cache-control'], 'private, no-store, max-age=0', `${privatePath} must be uncacheable`);
+      assert.equal(response.headers()['x-robots-tag'], 'noindex, nofollow', `${privatePath} must forbid indexing`);
+      assert.notEqual(
+        response.headers()['access-control-allow-origin'],
+        '*',
+        `${privatePath} must not advertise wildcard CORS`,
+      );
+    }
+  });
+
+  await scenario('a stored session is restored and private data never flashes before the server answers', viewportName, async (page, seen, context) => {
+    await seedSession(context, liveSession());
+    await page.goto(`${base}/prime`, { waitUntil: 'domcontentloaded' });
+    await page.waitForFunction(() => {
+      const state = [...document.querySelectorAll('[data-state]')].find((node) => !node.hidden)?.dataset.state;
+      return state === 'loading' || state === 'ready';
+    }, null, { timeout: 10_000 });
+    const during = await snapshot(page);
+    assert.equal(during.state, 'loading', 'nothing may be announced before the server has answered');
+    assert.ok(!during.text.includes(PRIVATE_MARKER), 'no private payload may render before authorization completes');
+    await page.waitForSelector('[data-state="ready"]:not([hidden])', { timeout: 10_000 });
+    const after = await snapshot(page);
+    assert.ok(after.text.includes(PRIVATE_MARKER), 'a stored session must restore into the private surface');
+    assert.ok(seen.primeRequests.length >= 1, 'the restore must be authorised by the server, not by the client');
+    assertSessionKeptSecret(after, seen);
+  }, { primeDelayMs: 1200, privateMarker: true });
+
+  await scenario('an unusable refresh token signs the visitor out instead of hanging', viewportName, async (page, seen, context) => {
+    await seedSession(context, liveSession({ access_token: 'expired-token-synthetic', expires_at: 1 }));
+    await page.goto(`${base}/prime`, { waitUntil: 'domcontentloaded' });
+    await page.waitForSelector('[data-state="anonymous"]:not([hidden])', { timeout: 10_000 });
+    const view = await snapshot(page);
+    assert.equal(view.state, 'anonymous');
+    assert.equal(view.session, null, 'a session that cannot be refreshed must not be kept');
+    assert.ok(seen.authRequests.some((entry) => entry.startsWith('POST /auth/v1/token')), 'the refresh must actually have been attempted');
+    assert.deepEqual(seen.primeRequests, [], 'an unusable session must never reach the private API');
+  }, { refresh: 'reject' });
+
+  await scenario('signing out revokes the session, survives reload and blocks the back button', viewportName, async (page, seen, context) => {
+    await seedSession(context, liveSession());
+    await page.goto(`${base}/prime`, { waitUntil: 'domcontentloaded' });
+    await page.waitForSelector('[data-state="ready"]:not([hidden])', { timeout: 10_000 });
+    await page.click('[data-state="ready"] [data-signout]');
+    await page.waitForSelector('[data-state="anonymous"]:not([hidden])', { timeout: 10_000 });
+    assert.ok(seen.authRequests.includes('POST /auth/v1/logout'), 'sign out must revoke the session with the identity service');
+    const signedOut = await snapshot(page);
+    assert.equal(signedOut.session, null);
+    assert.ok(!signedOut.text.includes(PRIVATE_MARKER), 'private content must be gone once signed out');
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await page.waitForSelector('[data-state="anonymous"]:not([hidden])', { timeout: 10_000 });
+    assert.equal((await snapshot(page)).state, 'anonymous', 'post-logout denial must survive a reload');
+    // Leave the private page and walk back into it: a restored history entry
+    // must be re-authorised, not replayed from the back/forward cache.
+    await page.goto(`${base}/`, { waitUntil: 'domcontentloaded' });
+    await page.goBack({ waitUntil: 'domcontentloaded' }).catch(() => {});
+    await page.waitForSelector('[data-state="anonymous"]:not([hidden])', { timeout: 10_000 });
+    const back = await snapshot(page);
+    assert.equal(back.state, 'anonymous', 'the back button must not reveal private content after signing out');
+    assert.ok(!back.text.includes(PRIVATE_MARKER), 'no private payload may return through history');
+  }, { privateMarker: true });
+
+  await scenario('a finished recovery does not reopen the set-password step', viewportName, async (page) => {
+    await openRecovery(page);
+    await page.waitForSelector('#setPasswordForm', { state: 'visible' });
+    const view = await submit(page);
+    assert.equal(view.state, 'ready');
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await page.waitForSelector('[data-state="ready"]:not([hidden])', { timeout: 10_000 });
+    const after = await snapshot(page);
+    assert.equal(after.state, 'ready', 'a completed recovery must not demand the password again');
+    assert.equal(await page.locator('[data-state="recovery"]:not([hidden])').count(), 0);
+    assert.equal(after.hash, '', 'no recovery material may return with the reload');
+  });
+
+  await scenario('double-tapping submit performs exactly one password update', viewportName, async (page, seen) => {
+    await openRecovery(page);
+    await page.waitForSelector('#setPasswordForm', { state: 'visible' });
+    await page.fill('#newPassword', SYNTHETIC_PASSWORD);
+    await page.fill('#confirmPassword', SYNTHETIC_PASSWORD);
+    await page.evaluate(() => {
+      const button = document.querySelector('#setPasswordForm button[type="submit"]');
+      button.click();
+      button.click();
+    });
+    const view = await settle(page);
+    assert.equal(view.state, 'ready', `a double tap must still continue, saw ${view.state} (${view.error})`);
+    assert.deepEqual(seen.authRequests, ['PUT /auth/v1/user'], 'a double tap must not produce two updates');
+  });
+
+  await scenario('the private surface registers no service worker and persists no private payload', viewportName, async (page, seen, context) => {
+    await seedSession(context, liveSession());
+    await page.goto(`${base}/prime`, { waitUntil: 'domcontentloaded' });
+    await page.waitForSelector('[data-state="ready"]:not([hidden])', { timeout: 10_000 });
+    const audit = await page.evaluate(async () => ({
+      registrations: navigator.serviceWorker ? (await navigator.serviceWorker.getRegistrations()).length : 'unsupported',
+      keys: Object.keys(localStorage),
+      dump: JSON.stringify(localStorage),
+    }));
+    if (typeof audit.registrations === 'number') {
+      assert.equal(audit.registrations, 0, 'no service worker may cache private responses');
+    }
+    assert.deepEqual(audit.keys.filter((key) => key !== 'portal-prime-session-v1'), [], 'only the session may be persisted');
+    assert.ok(!audit.dump.includes(PRIVATE_MARKER), 'private payloads must never be persisted in the browser');
+  }, { privateMarker: true });
 }
 
   await scenario('the private pages declare no duplicate element ids', 'desktop', async (page, seen) => {

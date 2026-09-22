@@ -241,6 +241,13 @@ async function handleExperimentResult(req, res) {
 async function handlePrime(req, res) {
   const auth = await primeAuthenticate(req.headers);
   if (auth.error) return primeSendJson(res, auth.status, { error: auth.error });
+  // Authentication first, then the method: a read-only private route must not
+  // silently serve a write verb, and an anonymous caller must never be able to
+  // tell a wrong verb from a wrong credential.
+  if (req.method !== 'GET') {
+    res.setHeader('Allow', 'GET');
+    return primeSendJson(res, 405, { error: 'method_not_allowed' });
+  }
   const mapped = await primeResolveIdentity(auth.user, auth.token);
   if (mapped.error) return primeSendJson(res, mapped.status, { error: mapped.error });
   const reports = await primeReadReports(auth.token);
@@ -254,6 +261,10 @@ async function handlePrime(req, res) {
 async function handlePrimeReport(req, res) {
   const auth = await primeAuthenticate(req.headers);
   if (auth.error) return primeSendJson(res, auth.status, { error: auth.error });
+  if (req.method !== 'GET') {
+    res.setHeader('Allow', 'GET');
+    return primeSendJson(res, 405, { error: 'method_not_allowed' });
+  }
   const id = String(req.query?.id || '').trim();
   if (!id || id.length > 128) return primeSendJson(res, 400, { error: 'report_id_required' });
   const mapped = await primeResolveIdentity(auth.user, auth.token);

@@ -4,6 +4,17 @@
 
 ## Unreleased - PRIME password recovery submit
 
+- Adds `scripts/prime-authorization-contract.mjs` (`npm run prime:authorization`): 12 server-side checks that
+  authentication is decided before authorization, before parameters and before any report is read; that only the
+  publishable key and the caller's own token are ever forwarded; that a MEMBER cannot read OWNER-only rows and an
+  IDOR probe is a 404; that an unmapped identity is refused before any report query; and that every private
+  response is `private, no-store`, `Vary: Authorization` and `noindex`.
+- Adds a method guard to the private read routes: an authenticated non-GET is now 405 rather than silently
+  serving a read, while an anonymous caller still gets 401 so a wrong verb never reveals a wrong credential.
+- Extends the browser suite to session restore, refresh failure, sign out with reload and back-button denial,
+  recovery replay, double-tap concurrency, private-data flash prevention, browser persistence and service-worker
+  absence, private cache/noindex headers, and both viewports.
+
 - Fixes "Save password and continue" appearing to do nothing on a fresh recovery link. The deployment's
   Content Security Policy said `connect-src 'self'`, so the browser refused the Supabase Auth request, the
   rejected promise had nowhere to report itself and the page never moved. The policy now allows this project's
