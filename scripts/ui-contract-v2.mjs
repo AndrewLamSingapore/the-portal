@@ -3,6 +3,7 @@ import fs from 'node:fs';
 
 const html = fs.readFileSync('index.html', 'utf8');
 const app = fs.readFileSync('app.js', 'utf8');
+const familyCss = fs.readFileSync('authority-family.css', 'utf8');
 for (const phrase of ['THE CONTINUOUS FUTURES MODEL', 'continuously evolving model', 'How futures move', 'Latest transitions', 'Realization watchlist', 'PUT A FUTURE ON TRIAL', 'FOLLOW THE GRAPH', 'CREATE AN ENCOUNTER', 'ENTER THE LIVING OBSERVATORY', 'The Future on Trial', 'Open an unexpected drawer', 'The graph', 'Constellations', 'Experiments worth running', 'Evolution ledger', 'Shared archive', 'My cabinet', 'Questions over manufactured certainty']) {
   assert.ok(html.includes(phrase), `missing living-graph experience contract: ${phrase}`);
 }
@@ -22,5 +23,8 @@ assert.ok(app.match(/openCurator[\s\S]{0,220}playPortalTheme/), 'every Portal wo
 assert.ok(html.includes('id="portalSoundHint" role="status" aria-live="polite"'), 'blocked playback feedback must be announced');
 assert.ok(html.includes('id="portalSound"') && html.includes('SOUND LOADING') && html.includes('disabled'), 'sound must not advertise readiness before its handler is bound');
 assert.ok(app.indexOf("el('portalSound').addEventListener") < app.indexOf('function readCabinet'), 'sound handler must bind before archive initialization');
+for (const mobileHeaderRule of ['.topbar{grid-template-columns:1fr', '.topbar-end{width:100%', 'grid-template-columns:repeat(3,minmax(0,1fr))', '.topbar-end>.system-state{display:none}']) {
+  assert.ok(familyCss.includes(mobileHeaderRule), `missing collision-safe mobile header rule: ${mobileHeaderRule}`);
+}
 
 console.log('PASS: living graph discovery, generation, cabinet and evidence UI contracts verified.');
