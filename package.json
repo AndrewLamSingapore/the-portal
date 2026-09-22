@@ -16,7 +16,8 @@
     "smoke:browser": "node scripts/browser-smoke.mjs",
     "smoke:v2": "node scripts/v2-smoke.mjs",
     "synthetic:result": "node scripts/authenticated-result-loop.mjs",
-    "prime:recovery": "node scripts/prime-recovery-submit.mjs"
+    "prime:recovery": "node scripts/prime-recovery-submit.mjs",
+    "prime:authorization": "node scripts/prime-authorization-contract.mjs"
   },
   "devDependencies": { "playwright": "1.63.0" },
   "dependencies": { "@neondatabase/serverless": "^1.0.2" },

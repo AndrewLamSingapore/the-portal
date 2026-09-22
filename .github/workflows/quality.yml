@@ -30,6 +30,8 @@ jobs:
       - run: node --check inhabitants.js && node --check scripts/inhabitants-smoke.mjs
       - run: npm run verify
       - run: npm run synthetic:result
+      - name: Verify the PRIME authorization contract
+        run: npm run prime:authorization
       - name: Install recovery-test browser
         run: npx playwright install --with-deps chromium
       - name: Verify PRIME password recovery submission

@@ -166,6 +166,10 @@
         {
           "key": "X-Robots-Tag",
           "value": "noindex, nofollow"
+        },
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "https://the-portal-ten.vercel.app"
         }
       ]
     },
@@ -179,6 +183,10 @@
         {
           "key": "X-Robots-Tag",
           "value": "noindex, nofollow"
+        },
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "https://the-portal-ten.vercel.app"
         }
       ]
     },
