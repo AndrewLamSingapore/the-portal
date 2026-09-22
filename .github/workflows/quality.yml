@@ -19,17 +19,21 @@ concurrency:
 jobs:
   verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
       - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
-        with:
+      with:
           node-version: 22
           cache: npm
       - run: npm ci
       - run: node --check inhabitants.js && node --check scripts/inhabitants-smoke.mjs
       - run: npm run verify
       - run: npm run synthetic:result
+      - name: Install recovery-test browser
+        run: npx playwright install --with-deps chromium
+      - name: Verify PRIME password recovery submission
+        run: npm run prime:recovery
 
   production-smoke:
     if: github.event_name != 'pull_request'
@@ -60,3 +64,7 @@ jobs:
             if [ "$attempt" -lt 5 ]; then sleep 30; fi
           done
           exit 1
+      - name: Verify the deployed PRIME recovery submit path
+        env:
+          PRIME_BASE: https://the-portal-ten.vercel.app
+        run: npm run prime:recovery

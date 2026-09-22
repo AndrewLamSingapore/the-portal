@@ -2,6 +2,23 @@
 
 # Changelog
 
+## Unreleased - PRIME password recovery submit
+
+- Fixes "Save password and continue" appearing to do nothing on a fresh recovery link. The deployment's
+  Content Security Policy said `connect-src 'self'`, so the browser refused the Supabase Auth request, the
+  rejected promise had nowhere to report itself and the page never moved. The policy now allows this project's
+  identity origin, and the page/CSP contract fails if a shipped client script ever fetches an origin the
+  deployed policy blocks.
+- Makes every recovery submit end in one of exactly two visible outcomes: continuation into private
+  operations, or an actionable message for a mismatch, a too-short password, a rejected password, an expired
+  or unusable link, an unreachable identity service, or an unexpected failure. A rejected update no longer
+  clears the recovery session, and an expired one leaves no stale session behind.
+- Binds Sign out per state instead of by a duplicated id, so the button in the signed-in state works, and
+  hands a recovery session opened on `/reports` over to `/prime` instead of consuming the link and rendering
+  nothing.
+- Adds `scripts/prime-recovery-submit.mjs`: 22 deterministic checks at 1280x900 and 390x844 that serve the
+  repository with the headers the deployment actually sends and prove the two-outcome rule end to end.
+
 ## Unreleased — Three Worlds Atmosphere
 
 - Reframes the three primary doorways as distinct worlds: The Tribunal, The Constellation and The Cabinet.
