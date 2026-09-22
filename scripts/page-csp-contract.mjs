@@ -40,6 +40,10 @@ for (const page of pages) {
     .map((match) => match[0])
     .filter((tag) => /href=["']https?:\/\//.test(tag));
   assert.equal(externalStyles.length, 0, `${page} links an external stylesheet that style-src blocks`);
+  assert.ok(
+    html.includes('<link rel="icon" type="image/svg+xml" href="/favicon.svg">'),
+    `${page} must declare the icon, otherwise every visit logs a /favicon.ico 404`,
+  );
 }
 
 // The page that was broken must keep its behaviour in a same-origin file.
