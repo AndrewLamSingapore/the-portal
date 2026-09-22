@@ -10,7 +10,7 @@
     { "path": "/api/portfolio-events", "schedule": "37 1 * * *" }
   ],
   "rewrites": [
-    { "source": "/card/:id", "destination": "/index.html" },
+    { "source": "/card/(.*)", "destination": "/" },
     { "source": "/api/trust-relay", "destination": "/api/health?route=trust-relay" },
     { "source": "/api/portfolio-relay", "destination": "/api/health?route=portfolio-relay" },
     { "source": "/api/spine", "destination": "/api/health?route=spine" },

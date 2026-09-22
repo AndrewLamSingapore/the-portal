@@ -61,11 +61,11 @@ assert.ok(app.includes('id="copyCardState" role="status" aria-live="polite"'), '
 
 // --- Routing ---------------------------------------------------------------
 const rewrites = config.rewrites || [];
-const cardRewrite = rewrites.find((rewrite) => rewrite.source === '/card/:id');
+const cardRewrite = rewrites.find((rewrite) => rewrite.source === '/card/(.*)');
 assert.ok(cardRewrite, 'vercel.json rewrites /card/:id');
-assert.equal(cardRewrite.destination, '/index.html', 'the card route serves the exhibition shell');
+assert.equal(cardRewrite.destination, '/', 'the card route serves the exhibition shell (clean URL, because cleanUrls drops an /index.html destination)');
 assert.ok(
-  rewrites.every((rewrite) => rewrite.source.startsWith('/api/') || rewrite.source === '/card/:id'),
+  rewrites.every((rewrite) => rewrite.source.startsWith('/api/') || rewrite.source === '/card/(.*)'),
   'no other public rewrite was changed',
 );
 
