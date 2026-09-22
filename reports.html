@@ -5,13 +5,13 @@
 <p class="thesis">Every report below was returned by the server for your identity alone. Nothing is cached for anyone else.</p>
 <section data-state="loading" hidden><p class="muted">Checking your session…</p></section>
 <section data-state="anonymous" hidden><h2>Sign in</h2><form id="signInForm"><label for="email">Email</label><input id="email" name="email" type="email" autocomplete="username" required><label for="password">Password</label><input id="password" name="password" type="password" autocomplete="current-password" required><button type="submit">Enter private operations</button><p id="signInError" role="alert" class="muted"></p></form></section>
-<section data-state="unmapped" hidden><h2>Authenticated, not yet authorized</h2><p class="muted">No PRIME identity is mapped to this account, so no reports are shown.</p><button id="signOut" type="button">Sign out</button></section>
-<section data-state="unavailable" hidden><h2>Reports are unavailable</h2><p class="muted">The authorization service did not answer.</p><button id="signOut" type="button">Sign out</button></section>
+<section data-state="unmapped" hidden><h2>Authenticated, not yet authorized</h2><p class="muted">No PRIME identity is mapped to this account, so no reports are shown.</p><button type="button" data-signout>Sign out</button></section>
+<section data-state="unavailable" hidden><h2>Reports are unavailable</h2><p class="muted">The authorization service did not answer.</p><button type="button" data-signout>Sign out</button></section>
 <section data-state="ready" hidden>
   <p id="identity" class="muted"></p>
   <ul id="reportList" class="prime-list"></ul>
   <article id="reportDetail" class="muted"></article>
-  <button id="signOut" type="button">Sign out</button>
+  <button type="button" data-signout>Sign out</button>
 </section>
 <p><a href="/prime">Back to private operations</a> · <a href="/">Public Portal</a></p>
 </main>

@@ -7,7 +7,7 @@
 <section data-state="recovery" hidden>
   <h2>Set a new password</h2>
   <p class="muted">Your recovery link is valid. Choose a password you have not used before — authentication material is already removed from the address bar.</p>
-  <form id="setPasswordForm">
+  <form id="setPasswordForm" novalidate>
     <label for="newPassword">New password</label><input id="newPassword" name="newPassword" type="password" autocomplete="new-password" minlength="8" required>
     <label for="confirmPassword">Confirm password</label><input id="confirmPassword" name="confirmPassword" type="password" autocomplete="new-password" minlength="8" required>
     <button type="submit">Save password and continue</button>
@@ -25,14 +25,14 @@
     <p id="signInError" role="alert" class="muted"></p>
   </form>
 </section>
-<section data-state="unmapped" hidden><h2>Authenticated, not yet authorized</h2><p class="muted">Your account exists but is not mapped to a PRIME identity, so no private material is shown. Ask the owner to map this account.</p><button id="signOut" type="button">Sign out</button></section>
-<section data-state="unavailable" hidden><h2>Private operations are unavailable</h2><p class="muted">The authorization service did not answer. Try again shortly.</p><button id="signOut" type="button">Sign out</button></section>
+<section data-state="unmapped" hidden><h2>Authenticated, not yet authorized</h2><p class="muted">Your account exists but is not mapped to a PRIME identity, so no private material is shown. Ask the owner to map this account.</p><button type="button" data-signout>Sign out</button></section>
+<section data-state="unavailable" hidden><h2>Private operations are unavailable</h2><p class="muted">The authorization service did not answer. Try again shortly.</p><button type="button" data-signout>Sign out</button></section>
 <section data-state="ready" hidden>
   <p id="identity" class="muted"></p>
   <h2>Reports visible to this identity</h2>
   <ul id="reportList" class="prime-list"></ul>
   <p><a href="/reports">Open the reports surface</a></p>
-  <button id="signOut" type="button">Sign out</button>
+  <button type="button" data-signout>Sign out</button>
 </section>
 <p><a href="/">Return to the public Portal</a></p>
 </main>
