@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="The Portal">
+  <rect width="32" height="32" rx="6" fill="#0a0a12"/>
+  <circle cx="16" cy="16" r="12.5" fill="none" stroke="#a88bff" stroke-width="1.2" opacity="0.7"/>
+  <circle cx="16" cy="16" r="6.5" fill="none" stroke="#71e8ff" stroke-width="1.4"/>
+  <circle cx="16" cy="16" r="2.2" fill="#f7f1e7"/>
+  <path d="M16 2.5v3.2M16 26.3v3.2M2.5 16h3.2M26.3 16h3.2" stroke="#a88bff" stroke-width="1.2" stroke-linecap="round"/>
+</svg>
