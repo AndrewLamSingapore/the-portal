@@ -285,7 +285,7 @@
     }
     changedRoots.forEach(changedRoot => enhanceItems(changedRoot));
   });
-  dynamicContent.observe(document.body, { childList: true, subtree: true });
+  if (document.body) dynamicContent.observe(document.body, { childList: true, subtree: true });
 
   document.addEventListener('visibilitychange', () => {
     root.classList.toggle('motion-paused', document.hidden);
