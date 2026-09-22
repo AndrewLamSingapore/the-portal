@@ -29,6 +29,82 @@ const safeHttpsUrl = value => {
   }
 };
 
+/* --- Stable card permalinks (Portal V2, WP5) -------------------------------
+   Every card has a stable /card/<id> link; ?card=<id> is accepted too so older
+   or hand-written links keep working. Opening a card records the link, closing
+   it returns to the exhibition, and browser back/forward stay in sync. */
+const CARD_ROUTE = '/card/';
+const BASE_TITLE = 'THE PORTAL \u00b7 Living Knowledge System';
+let syncingCardUrl = false;
+
+function requestedCardId() {
+  const pathMatch = location.pathname.match(/\/card\/([^/]+)\/?$/);
+  if (pathMatch) return decodeURIComponent(pathMatch[1]);
+  return new URLSearchParams(location.search).get('card');
+}
+
+function cardPermalink(id) {
+  return `${location.origin}${CARD_ROUTE}${encodeURIComponent(id)}`;
+}
+
+function setMetaContent(selector, attribute, key, value) {
+  let element = document.querySelector(selector);
+  if (!element) {
+    element = document.createElement('meta');
+    element.setAttribute(attribute, key);
+    document.head.append(element);
+  }
+  element.setAttribute('content', value);
+}
+
+function setCanonical(url) {
+  let link = document.querySelector('link[rel="canonical"]');
+  if (!link) {
+    link = document.createElement('link');
+    link.rel = 'canonical';
+    document.head.append(link);
+  }
+  link.href = url;
+}
+
+function updateCardMetadata(artifact) {
+  if (!artifact) {
+    document.title = BASE_TITLE;
+    setMetaContent('meta[property="og:title"]', 'property', 'og:title', BASE_TITLE);
+    setMetaContent('meta[property="og:url"]', 'property', 'og:url', `${location.origin}/`);
+    setCanonical(`${location.origin}/`);
+    return;
+  }
+  const title = `${artifact.title} \u00b7 THE PORTAL`;
+  const description = String(artifact.description || artifact.imagined_future || '').slice(0, 240);
+  document.title = title;
+  setMetaContent('meta[name="description"]', 'name', 'description', description);
+  setMetaContent('meta[property="og:title"]', 'property', 'og:title', title);
+  setMetaContent('meta[property="og:description"]', 'property', 'og:description', description);
+  setMetaContent('meta[property="og:url"]', 'property', 'og:url', cardPermalink(artifact.id));
+  setCanonical(cardPermalink(artifact.id));
+}
+
+function syncCardUrl(id, { replace = false } = {}) {
+  if (syncingCardUrl) return;
+  const url = cardPermalink(id);
+  if (location.href === url) return;
+  history[replace ? 'replaceState' : 'pushState']({ card: id }, '', url);
+}
+
+function clearCardUrl() {
+  if (syncingCardUrl) return;
+  if (!location.pathname.startsWith(CARD_ROUTE) && !new URLSearchParams(location.search).has('card')) return;
+  history.pushState({}, '', '/');
+}
+
+function announceCardNotice(message) {
+  const notice = el('cardNotice');
+  if (!notice) return;
+  notice.textContent = message || '';
+  notice.hidden = !message;
+}
+
 function emitPortalMotion(name, detail = {}) {
   document.dispatchEvent(new CustomEvent(`portal:${name}`, { detail }));
 }
@@ -536,14 +612,20 @@ function detailMarkup(artifact) {
     ${experiment}
     <h3>Unresolved question</h3><p>${escapeHtml(artifact.unresolved_question || artifact.question || 'What becomes visible when this connects to another domain?')}</p>
     ${level === 'HISTORICALLY-VERIFIED' && !sources.length ? '<p class="evidence-notice">This record is labelled verified but has no visible source trail. Treat verification as incomplete.</p>' : sourceMarkup}
+    <h3>Share this card</h3><p>Stable link: <code>${escapeHtml(cardPermalink(artifact.id))}</code></p>
+<button class="artifact-export" id="copyCardLink" type="button">COPY LINK</button>
+<p class="export-state" id="copyCardState" role="status" aria-live="polite"></p>
     <h3>Portable evidence</h3><p>Download this exact artifact snapshot with its provenance, qualification state, uncertainty labels and a reproducible SHA-256 digest.</p><button class="artifact-export" id="exportArtifact" type="button">DOWNLOAD SEALED JSON</button><p class="export-state" id="exportState" role="status" aria-live="polite"></p>`;
 }
 
-function showArtifact(id, trigger) {
+function showArtifact(id, trigger, options = {}) {
   const artifact = artifactById(id);
   if (!artifact) return;
   state.activeId = id;
   state.lastTrigger = trigger || document.activeElement;
+  if (!options.silent) syncCardUrl(id);
+  updateCardMetadata(artifact);
+  announceCardNotice('');
   el('detail').innerHTML = detailMarkup(artifact);
   bindOutcomes(el('detail'));
   el('exportArtifact')?.addEventListener('click', async () => {
@@ -558,6 +640,17 @@ function showArtifact(id, trigger) {
       message.textContent = 'Export failed safely. No incomplete snapshot was downloaded.';
     } finally {
       button.disabled = false;
+    }
+  });
+  el('copyCardLink')?.addEventListener('click', async () => {
+    const message = el('copyCardState');
+    const url = cardPermalink(artifact.id);
+    try {
+      if (!navigator.clipboard?.writeText) throw new Error('clipboard-unavailable');
+      await navigator.clipboard.writeText(url);
+      message.textContent = `Link copied \u00b7 ${url}`;
+    } catch {
+      message.textContent = `Copy this link: ${url}`;
     }
   });
   const drawer = el('drawer');
@@ -584,6 +677,8 @@ function closeDrawer() {
   });
   document.body.style.overflow = '';
   if (state.lastTrigger instanceof HTMLElement) state.lastTrigger.focus();
+  updateCardMetadata(null);
+  clearCardUrl();
 }
 
 function trapDrawerFocus(event) {
@@ -629,6 +724,11 @@ async function loadPortal() {
   renderCabinet();
   drawGraph();
   await loadTrialVerdicts();
+  const requested = requestedCardId();
+  if (requested) {
+    if (artifactById(requested)) showArtifact(requested, null, { replace: true });
+    else announceCardNotice(`No card is filed under "${requested}". The exhibition is open below; the link may be out of date.`);
+  }
 }
 
 async function generateEncounter(event) {
@@ -754,6 +854,17 @@ addEventListener('resize', () => {
 });
 
 updatePortalSoundControl();
+
+window.addEventListener('popstate', () => {
+  syncingCardUrl = true;
+  try {
+    const id = requestedCardId();
+    if (id && artifactById(id) && !el('drawer').classList.contains('open')) showArtifact(id, null, { silent: true });
+    else if (!id && el('drawer').classList.contains('open')) closeDrawer();
+  } finally {
+    syncingCardUrl = false;
+  }
+});
 
 loadPortal().catch(() => {
   el('systemState').textContent = 'PRIVATE CABINET MODE';
