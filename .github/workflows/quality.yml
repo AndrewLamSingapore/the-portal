@@ -32,6 +32,8 @@ jobs:
       - run: npm run synthetic:result
       - name: Verify the PRIME authorization contract
         run: npm run prime:authorization
+      - name: Verify the PRIME publish contract
+        run: npm run prime:publish
       - name: Install recovery-test browser
         run: npx playwright install --with-deps chromium
       - name: Verify PRIME password recovery submission

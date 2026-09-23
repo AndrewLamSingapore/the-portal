@@ -6,11 +6,12 @@ import { db, findArtifacts, getArtifact, getExperimentResult, hasDatabase, saveE
 import { acceptExperimentResult } from '../lib/experiment-result-service.js';
 import { validateExperimentCandidate, validatePrimeRelayResponse } from '../lib/experiment-candidate.js';
 import { handleEvidenceLab } from '../lib/evidence-lab-endpoint.js';
-import { authenticate as primeAuthenticate, readReports as primeReadReports, resolvePrimeIdentity as primeResolveIdentity, sendJson as primeSendJson } from '../lib/prime-auth.js';
+import { authenticate as primeAuthenticate, publishReport as primePublishReport, readReports as primeReadReports, resolvePrimeIdentity as primeResolveIdentity, sendJson as primeSendJson } from '../lib/prime-auth.js';
+import { REPORT_LIMITS, validateReport } from '../lib/prime-reports.js';
 import { PRODUCT_VERSION } from '../lib/product-version.js';
 const SCHEMA_VERSION = 6;
 const EXPERIENCE = 'Continuous Futures Model';
-const META_ROUTES = new Set(['capabilities', 'ecosystem-event', 'evidence', 'evidence-lab', 'experiment-result', 'manifest', 'metrics', 'prime', 'prime-experiment', 'prime-report', 'readiness', 'status', 'verify', 'version', 'v2']);
+const META_ROUTES = new Set(['capabilities', 'ecosystem-event', 'evidence', 'evidence-lab', 'experiment-result', 'manifest', 'metrics', 'prime', 'prime-experiment', 'prime-publish', 'prime-report', 'readiness', 'status', 'verify', 'version', 'v2']);
 
 function jsonHeaders(res, cache = 'no-store') {
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
@@ -275,6 +276,59 @@ async function handlePrimeReport(req, res) {
   return primeSendJson(res, 200, { identity: { role: mapped.identity.role }, report: reports.rows[0] });
 }
 
+/** Accepts a Vercel-parsed JSON body, or a raw JSON string, but never a non-object. */
+function reportBody(body) {
+  if (body && typeof body === 'object' && !Array.isArray(body)) return body;
+  if (typeof body === 'string' && body.trim()) {
+    try {
+      const parsed = JSON.parse(body);
+      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) return parsed;
+    } catch {
+      return null;
+    }
+  }
+  return null;
+}
+
+/**
+ * The producer side of the private domain: a machine publisher pushes a report
+ * outward over HTTPS. The credential is required before the method or the body is
+ * judged, so a wrong verb can never be told apart from a wrong credential, and
+ * only the credential's digest is ever forwarded.
+ */
+async function handlePrimePublish(req, res) {
+  const raw = String(req.headers?.authorization || req.headers?.Authorization || '');
+  if (!raw.toLowerCase().startsWith('bearer ')) {
+    return primeSendJson(res, 401, { error: 'publisher_credential_required' });
+  }
+  const publisherToken = raw.slice(7).trim();
+  if (!publisherToken) return primeSendJson(res, 401, { error: 'publisher_credential_required' });
+
+  if (req.method !== 'POST') {
+    res.setHeader('Allow', 'POST');
+    return primeSendJson(res, 405, { error: 'method_not_allowed' });
+  }
+
+  const declaredLength = Number(req.headers?.['content-length'] || 0);
+  if (Number.isFinite(declaredLength) && declaredLength > REPORT_LIMITS.bodyBytes) {
+    return primeSendJson(res, 413, { error: 'report_too_large' });
+  }
+
+  const report = reportBody(req.body);
+  if (!report) return primeSendJson(res, 400, { error: 'invalid_report', detail: 'body_must_be_a_json_object' });
+
+  const payload = validateReport(report);
+  if (!payload.ok) return primeSendJson(res, 400, { error: 'invalid_report', detail: payload.error });
+
+  const outcome = await primePublishReport(publisherToken, report);
+  if (outcome.error) {
+    const body = { error: outcome.error };
+    if (outcome.detail) body.detail = outcome.detail;
+    return primeSendJson(res, outcome.status, body);
+  }
+  return primeSendJson(res, outcome.published.inserted ? 201 : 200, { published: outcome.published });
+}
+
 export default async function handler(req, res) {
   const routeValue = Array.isArray(req.query?.route) ? req.query.route[0] : req.query?.route;
   const route = String(routeValue || '');
@@ -338,6 +392,7 @@ export default async function handler(req, res) {
   if (route === 'experiment-result') return handleExperimentResult(req, res);
   if (route === 'prime-experiment') return handlePrimeExperiment(req, res);
   if (route === 'prime') return handlePrime(req, res);
+  if (route === 'prime-publish') return handlePrimePublish(req, res);
   if (route === 'prime-report') return handlePrimeReport(req, res);
   if (route === 'manifest') {
     if (!allow(req, res, 'GET')) return;

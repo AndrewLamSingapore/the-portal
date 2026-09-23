@@ -2,6 +2,26 @@
 
 # Changelog
 
+## Unreleased - Private PRIME report ingestion
+
+- Adds the missing producer path for the private PRIME domain. The read surface
+  existed but nothing in any repository could write `prime_reports`, so `/reports`
+  could only ever say "No reports are visible to this identity yet". `POST
+  /api/prime/publish` now accepts one immutable report from an authorised machine
+  producer, and `scripts/publish-prime-report.mjs` is the fail-closed client.
+- Stores only the SHA-256 digest of each producer credential (new
+  `public.prime_publishers`, RLS forced, no client policies). The credential itself
+  never reaches the database, the repository, a log or a browser.
+- Ingestion is one `SECURITY DEFINER` function with a fixed search path that checks
+  the digest, validates the payload and inserts at most once per report id; a
+  repeated id never rewrites a stored report.
+- Removes the unused default write grants on the private tables from `anon` and
+  `authenticated`, so write refusal is defence in depth rather than RLS alone.
+- Adds `scripts/prime-publish-contract.mjs` (12 checks: credential before method,
+  credential before payload, digest-only forwarding, malformed payload refused
+  before any insert, insert-once, owner-only rows stay owner-only, private
+  no-store/noindex headers) and `tests/prime-reports.test.js`, and runs both in CI.
+
 ## Unreleased - PRIME password recovery submit
 
 - Adds `scripts/prime-authorization-contract.mjs` (`npm run prime:authorization`): 12 server-side checks that
