@@ -4,6 +4,12 @@
 
 ## Unreleased - Private PRIME report ingestion
 
+- Fixes a private read defect found during the 23 September 2026 production
+  acceptance: a report id carrying PostgREST filter syntax (for example `1 OR
+  1=1`) was forwarded to the query, rejected by PostgREST and surfaced as a 503
+  availability failure. An id that cannot exist is now a 400 `invalid_report_id`
+  that never reaches the database, and a rejected query is mapped to a client
+  error rather than an outage.
 - Adds the missing producer path for the private PRIME domain. The read surface
   existed but nothing in any repository could write `prime_reports`, so `/reports`
   could only ever say "No reports are visible to this identity yet". `POST

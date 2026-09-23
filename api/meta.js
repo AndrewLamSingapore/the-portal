@@ -7,7 +7,7 @@ import { acceptExperimentResult } from '../lib/experiment-result-service.js';
 import { validateExperimentCandidate, validatePrimeRelayResponse } from '../lib/experiment-candidate.js';
 import { handleEvidenceLab } from '../lib/evidence-lab-endpoint.js';
 import { authenticate as primeAuthenticate, publishReport as primePublishReport, readReports as primeReadReports, resolvePrimeIdentity as primeResolveIdentity, sendJson as primeSendJson } from '../lib/prime-auth.js';
-import { REPORT_LIMITS, validateReport } from '../lib/prime-reports.js';
+import { REPORT_ID_PATTERN, REPORT_LIMITS, validateReport } from '../lib/prime-reports.js';
 import { PRODUCT_VERSION } from '../lib/product-version.js';
 const SCHEMA_VERSION = 6;
 const EXPERIENCE = 'Continuous Futures Model';
@@ -268,6 +268,9 @@ async function handlePrimeReport(req, res) {
   }
   const id = String(req.query?.id || '').trim();
   if (!id || id.length > 128) return primeSendJson(res, 400, { error: 'report_id_required' });
+  // An id that cannot exist is a client error and must never reach the database:
+  // a value carrying filter syntax would otherwise be answered as an outage.
+  if (!REPORT_ID_PATTERN.test(id)) return primeSendJson(res, 400, { error: 'invalid_report_id' });
   const mapped = await primeResolveIdentity(auth.user, auth.token);
   if (mapped.error) return primeSendJson(res, mapped.status, { error: mapped.error });
   const reports = await primeReadReports(auth.token, { id });
