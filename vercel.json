@@ -107,6 +107,10 @@
     {
       "source": "/api/prime/report",
       "destination": "/api/meta?route=prime-report"
+    },
+    {
+      "source": "/api/prime/publish",
+      "destination": "/api/meta?route=prime-publish"
     }
   ],
   "headers": [

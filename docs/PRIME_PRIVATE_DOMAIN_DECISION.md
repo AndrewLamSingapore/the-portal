@@ -1,6 +1,7 @@
 # Private PRIME operations domain — decision required
 
-Status: **AUTHENTICATION DECISION REQUIRED** (recorded 22 September 2026).
+Status: **DECIDED AND IMPLEMENTED** (decision recorded 22 September 2026; the
+option C surface, including the producer path, implemented 23 September 2026).
 
 ## What exists today
 
@@ -36,8 +37,10 @@ objective. That needs two decisions the repository cannot make on its own:
    is introduced deliberately.
 
 Inventing either one would create a second, weaker authority path and risk exposing
-private operational evidence. So this branch builds nothing behind that line and
-records the choice instead.
+private operational evidence. Both decisions were then made by Lam: the human
+identity provider is Supabase Auth in the estate's existing project
+(`vtrfgckzpjgtmqsnumur`), and private reports live in `public.prime_identities` /
+`public.prime_reports` under row level security.
 
 ## Smallest concrete choice for Lam
 
@@ -51,6 +54,34 @@ Pick one, and the implementation work is bounded and mechanical:
 
 Recommendation: **B** if Lam wants the private surface usable from any device quickly,
 **C** if private reports must be queryable alongside the existing evidence spine.
+
+## What was built (23 September 2026)
+
+Option **C** was chosen. The read side answers only to a mapped PRIME identity and
+RLS decides every row. `prime_reports` had **no producer at all**, which is why the
+private surface could only ever report "No reports are visible to this identity
+yet" - an empty store was not an authorization failure, but it was also not a
+working report surface.
+
+The producer path now exists and follows the same direction of travel as the rest
+of the estate - **the producer pushes outward, the Portal never reaches in**:
+
+| Element | Contract |
+| --- | --- |
+| Endpoint | `POST /api/prime/publish` (rewrite of `api/meta.js?route=prime-publish`) |
+| Credential | `Authorization: Bearer <publisher credential>`, read by the producer from its own environment |
+| Storage | only the **SHA-256 digest** of the credential is stored, in `public.prime_publishers`, which has RLS forced and no client policies |
+| Decision order | credential, then method (`POST` only), then body size, then payload, then the database |
+| Payload | `id`, `schema_version`, `mission_id`, `task_id`, `parent_task_id`, `objective`, `summary`, `status` (`VERIFIED`/`PARTIAL`/`FAILED`), `visibility` (`OWNER`/`MEMBER`), `agents`, `artifacts`, `claims` |
+| Enforcement | `public.prime_publish_report(text, jsonb)` (`SECURITY DEFINER`, `search_path = ''`) checks the digest, validates the payload and inserts at most once |
+| Immutability | a repeated `id` returns `inserted: false` and never rewrites the stored report |
+| Client writes | none: `INSERT`/`UPDATE`/`DELETE`/`TRUNCATE` are revoked from `anon` and `authenticated`, so a mistaken future policy cannot make a browser session an author |
+| Responses | `private, no-store`, `Vary: Authorization`, `X-Robots-Tag: noindex, nofollow`, no credential ever echoed |
+| Provisioning | one privileged insert of a digest; no secret transits the repository, a log or a browser |
+
+The producer is `scripts/publish-prime-report.mjs`, which fails closed: with no
+`PORTAL_PRIME_PUBLISH_TOKEN` it refuses to send anything. PRIME on ABEX (or an
+owner-authorised acceptance runner) runs it with its own credential.
 
 ## Invariants that must hold in any option
 
