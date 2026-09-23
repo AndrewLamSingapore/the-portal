@@ -205,6 +205,19 @@ await check('parameter validation never precedes authentication', async () => {
   assert.equal(longId.status, 400);
 });
 
+await check('an id that cannot exist is a client error and never reaches the database', async () => {
+  for (const id of ['1 OR 1=1', 'id=eq.1', 'PTL-RPT-OK;drop table prime_reports', 'a b', '-leading']) {
+    const result = await call('prime-report', { token: TOKENS.owner, id });
+    assert.equal(result.status, 400, `id ${JSON.stringify(id)} must be refused as a client error`);
+    assert.equal(result.body.error, 'invalid_report_id');
+    assert.deepEqual(pathsUsed(result), ['/auth/v1/user'], 'a malformed id must never reach an identity or report query');
+  }
+  const valid = await call('prime-report', { token: TOKENS.owner, id: 'report-owner-only' });
+  assert.equal(valid.status, 200, 'a well-formed id still resolves');
+  const rejectedQuery = await call('prime-report', { token: TOKENS.owner, id: 'report-member-visible' });
+  assert.equal(rejectedQuery.status, 200, 'a well-formed member-visible id resolves for the owner');
+});
+
 await check('no response body ever repeats the caller credential', async () => {
   for (const token of Object.values(TOKENS)) {
     const result = await call('prime', { token });
