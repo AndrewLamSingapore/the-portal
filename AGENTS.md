@@ -2,10 +2,8 @@
 
 For JARVIS/PRIME and portfolio work, begin with STATUS.md, the single current
 status and evidence authority: https://github.com/AndrewLamSingapore/prime/blob/main/STATUS.md
-There is no active SSOT system: the former SSOT and reconciler apparatus is
-retired and superseded, and STATUS.md must never be maintained in parallel with
-it. SSOT.json in this repository is only a machine-readable component pointer; no
-status claim may live in it. For architecture and component references, resolve
+No parallel status pointer or reconciler is maintained. For architecture and
+component references, resolve
 the latest canonical PRIME main commit and read
 governance/operational-manifest.json and governance/CHANNEL_CONTRACT.md at that
 same commit. On PRIME itself, a clean checkout of current main provides the same
