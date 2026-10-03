@@ -30,3 +30,7 @@ repository rules, then regenerate consumers and the existing resume mirror.
 Preserve Git history and commissioning evidence. Superseded files are references
 or historical evidence, not executable instructions. Do not reinstall, reset or
 mutate the sealed ABEX baseline to make a status record look current.
+
+## Gate Zero — Owner operating doctrine (3 October 2026)
+
+Default to useful execution. Classify `BLOCKER` only with concrete current evidence that a **specific** requested operation is prevented, or would create material risk that cannot reasonably be contained or reversed; stop only that operation. A failed probe, unknown, historical incident, optional check, backlog item or unavailable auxiliary peer is not a global failure or blocker. Continue independent work. Preserve authentication, secrets, data integrity, recoverability and known-good production; do not disable functioning tools, agents, models or probes merely to make status clean. The fuller shared rule is in PRIME's `AGENTS.md`; `STATUS.md` remains status authority, and a candidate/CI result is not live deployment proof.
