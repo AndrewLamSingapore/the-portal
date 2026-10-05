@@ -22,7 +22,7 @@
     "prime:report": "node scripts/publish-prime-report.mjs"
   },
   "devDependencies": { "playwright": "1.63.0" },
-  "dependencies": { "@neondatabase/serverless": "^1.0.2" },
+  "dependencies": { "@neondatabase/serverless": "^1.2.0" },
   "portal_release": {
     "decisive_score": "9/9",
     "scientific_acceptance": "replay_verified_cleanroom_certificate_required",
