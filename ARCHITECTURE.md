@@ -19,6 +19,36 @@ The Portal is not a feed. No popularity ranking, engagement optimisation or beha
 5. **Persistence** — local/private cabinet always works; Postgres enables the durable shared archive.
 6. **Safety & economics** — server-only credentials, request throttling, bounded upstream calls, restrictive browser headers and explicit scaling gates.
 
+## Evidence Lab and discovery lenses
+
+The Portal's **Evidence Lab**, at `/evidence-lab`, compares an existing Ethereum
+Sepolia transaction with the visitor's declared expectations. The browser sends
+the declaration to `/api/evidence-lab`; Portal-owned server code reads an
+allowlisted RPC source and reports `MATCH`, `MISMATCH`, `UNKNOWN` or `UNSUPPORTED`
+for each requested check. Reports retain source and observation details,
+limitations and canonical SHA-256 digests. The same page checks downloaded
+Portal report or artifact digests locally; the selected file is not uploaded.
+
+This is scoped verification and provenance, not a general credibility verdict.
+A matching transaction does not prove that a declaration existed or was
+authorized before execution. Finality is reported under the observed RPC source,
+and unsupported timing evidence remains unsupported. The lab reads public chain
+data; it has no wallet, signing, transaction submission or contract deployment.
+
+The homepage's **curator lenses** select a discovery mode. Its **concept lenses**
+(constellations) filter archive artifacts and related experiments by a shared
+concept. Those browser interactions support exploration of imagined futures;
+they do not run the transaction checker or upgrade generated claims to verified
+history.
+
+Sky Tablet's **Interpretation Lens** is a separately owned explanation of its
+historical scene and source boundaries. It does not verify Portal transactions
+or exports. Each product owns its lens implementation, records and authority;
+public navigation and shared design conventions do not create a shared lens
+runtime or move domain data. Portal's optional persistence, AI generation and
+portfolio integrations retain their existing boundaries and are not required by
+the Evidence Lab checker or local export-digest verification.
+
 ## Request flow
 
 ```text
