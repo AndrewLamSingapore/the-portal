@@ -40,10 +40,19 @@ for (const page of pages) {
     .map((match) => match[0])
     .filter((tag) => /href=["']https?:\/\//.test(tag));
   assert.equal(externalStyles.length, 0, `${page} links an external stylesheet that style-src blocks`);
-  assert.ok(
-    html.includes('<link rel="icon" type="image/svg+xml" href="/favicon.svg">'),
-    `${page} must declare the icon, otherwise every visit logs a /favicon.ico 404`,
-  );
+  if (page === 'prime.html' || page === 'reports.html') {
+    // These noindex ORQEVIA pages own their icon; the public Portal keeps its SVG.
+    for (const size of [32, 48]) {
+      const icon = `/assets/brands/orqevia/orqevia-official-v1-favicon-${size}.png`;
+      assert.ok(html.includes(`<link rel="icon" type="image/png" sizes="${size}x${size}" href="${icon}">`), `${page} declares its approved private-page icon`);
+      assert.ok(fs.existsSync(`.${icon}`), `${page} icon must resolve to a shipped file`);
+    }
+  } else {
+    assert.ok(
+      html.includes('<link rel="icon" type="image/svg+xml" href="/favicon.svg">'),
+      `${page} must declare the icon, otherwise every visit logs a /favicon.ico 404`,
+    );
+  }
 }
 
 // The page that was broken must keep its behaviour in a same-origin file.

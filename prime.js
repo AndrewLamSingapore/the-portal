@@ -18,8 +18,8 @@ const PUBLISHABLE_KEY = 'sb_publishable_zsgA314WZue1tlu_Kt-SDQ_UopdKMNs';
 const SESSION_KEY = 'portal-prime-session-v1';
 const MODE = document.body.dataset.primeMode || 'summary';
 
-const UNREACHABLE = 'PRIME could not reach its identity service, so nothing was saved. Check your connection, then reload and try again.';
-const UNEXPECTED = 'PRIME hit an unexpected problem and nothing was saved. Reload the page and try again.';
+const UNREACHABLE = 'ORQEVIA could not reach its identity service, so nothing was saved. Check your connection, then reload and try again.';
+const UNEXPECTED = 'ORQEVIA hit an unexpected problem and nothing was saved. Reload the page and try again.';
 const LINK_EXPIRED = 'That recovery link is no longer valid. Request a new one and try again.';
 const WEAK_PASSWORD = 'That password is too weak, or it was used before. Choose a stronger password you have not used here yet.';
 
@@ -95,7 +95,7 @@ const remember = (value) => {
 function unusableLinkMaterial() {
   const params = new URLSearchParams(location.search);
   if (params.get('error_description') || params.get('error')) {
-    return 'That recovery link was rejected before it reached PRIME. Request a new one.';
+    return 'That recovery link was rejected before it reached ORQEVIA. Request a new one.';
   }
   if (params.get('code')) {
     return 'That recovery link cannot be completed in this browser. Request a new one.';
