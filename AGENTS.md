@@ -1,29 +1,36 @@
-# Shared JARVIS source of truth
+# ORQEVIA status and domain ownership
 
-For JARVIS/PRIME and portfolio work, begin with STATUS.md, the single current
-status and evidence authority: https://github.com/AndrewLamSingapore/prime/blob/main/STATUS.md
-No parallel status pointer or reconciler is maintained. For architecture and
-component references, resolve
-the latest canonical PRIME main commit and read
-governance/operational-manifest.json and governance/CHANNEL_CONTRACT.md at that
-same commit. On PRIME itself, a clean checkout of current main provides the same
-files. A working branch is a candidate, never a second current version.
+For ORQEVIA and portfolio work, review current status claims in
+[STATUS.md](https://github.com/AndrewLamSingapore/orqevia/blob/main/STATUS.md) in the
+private ORQEVIA repository. It is a portfolio status record, not a source for
+product code, configuration, contracts, or domain data. Each product owns those
+records in its own repository.
+Only Lam may move an item into its "Verified" sections.
 
-Machine-readable component reference: https://github.com/AndrewLamSingapore/prime/blob/main/governance/operational-manifest.json
+Then resolve the latest canonical ORQEVIA `main` commit and read governance/operational-manifest.json
+and governance/CHANNEL_CONTRACT.md at that same commit as component and
+observation references: they describe recorded architecture and observed
+revisions, and cannot establish current status. On ORQEVIA itself, a clean checkout
+of `main` provides the same files. A working branch is a candidate, never a
+second current version.
+
+Canonical entrypoint: https://github.com/AndrewLamSingapore/orqevia/blob/main/governance/operational-manifest.json
 
 This applies equally to ChatGPT, Codex, Sol, Astra and other assistants. Prior
 chat, memory, exported documents, screenshots, old branches and model identity
-cannot override the current canonical record. Report the source revision used.
-If canonical access fails, mark current state UNVERIFIED and use cached material
+cannot establish current status. Report the source revision used. If current
+status or owning source cannot be checked, mark that claim UNVERIFIED and use cached material
 only as explicitly dated context; do not invent freshness or request routine
 approval merely to continue reversible work already authorized by Lam.
 
-One architecture is current. Product-specific code and domain records remain in
-their owning repositories, subordinate to the portfolio contract. Runtime status
+ORQEVIA governs shared orchestration and cross-product contracts. Product-specific
+code, configuration, contracts, and domain records remain in their owning
+repositories. Reconcile cross-product claims against each owner's source and
+observed deployment without transferring domain authority to ORQEVIA. Runtime status
 requires observed runtime identity and evidence; a merge or CI pass is not a
 deployment receipt. Never substitute historical Dell identity for ABEX identity.
 
-Update canonical source first, test relevant behavior, publish through existing
+Update the owning source first, test relevant behavior, publish through existing
 repository rules, then regenerate consumers and the existing resume mirror.
 Preserve Git history and commissioning evidence. Superseded files are references
 or historical evidence, not executable instructions. Do not reinstall, reset or
