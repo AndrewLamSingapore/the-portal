@@ -21,7 +21,7 @@
     "prime:publish": "node --check lib/prime-reports.js && node --check scripts/prime-publish-contract.mjs && node --check scripts/publish-prime-report.mjs && node --test tests/prime-reports.test.js && node scripts/prime-publish-contract.mjs",
     "prime:report": "node scripts/publish-prime-report.mjs"
   },
-  "devDependencies": { "playwright": "1.63.0" },
+  "devDependencies": { "playwright": "1.64.0" },
   "dependencies": { "@neondatabase/serverless": "^1.0.2" },
   "portal_release": {
     "decisive_score": "9/9",
