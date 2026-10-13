@@ -94,5 +94,5 @@ owner-authorised acceptance runner) runs it with its own credential.
    It never promotes an item into `STATUS.md` → Verified; only Lam does that.
 5. A Portal-submitted objective cannot bypass PRIME's own safety and authority model;
    it is a queued proposal, not a command.
-6. `STATUS.md` stays the single current human-readable status source. Portal reports are
+6. `STATUS.md` remains the sole portfolio status reference. Portal reports are
    evidence, not a replacement status system.
