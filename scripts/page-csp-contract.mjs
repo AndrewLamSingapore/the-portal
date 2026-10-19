@@ -25,8 +25,21 @@ assert.ok(pages.length >= 5, `expected the full page set, found ${pages.length}`
 
 for (const page of pages) {
   const html = fs.readFileSync(page, 'utf8');
-  const inlineScripts = [...html.matchAll(/<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/g)]
-    .filter((match) => match[1].trim().length > 0);
+  // Only executable script types are subject to script-src. Data blocks such
+  // as application/ld+json (SEO structured data) and application/json are
+  // inert: the browser never executes them, and CSP does not block them.
+  const inlineScripts = [...html.matchAll(/<script([^>]*)>([\s\S]*?)<\/script>/g)]
+    .filter(([, attributes, body]) => {
+      if (body.trim().length === 0) return false;
+      if (/\bsrc\s*=/.test(attributes)) return false;
+      const type = (attributes.match(/\btype\s*=\s*["']([^"']+)["']/i) || [])[1];
+      if (!type) return true;
+      const normalized = type.trim().toLowerCase();
+      return normalized === 'module'
+        || normalized.endsWith('javascript')
+        || normalized === 'text/ecmascript'
+        || normalized === 'application/ecmascript';
+    });
   assert.equal(
     inlineScripts.length,
     0,
