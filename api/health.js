@@ -41,6 +41,14 @@ export default async function handler(req, res) {
     const ok = archive && generation && evidenceSchema && publicParticipation && experimentResultSchema && authenticatedResultWriting;
     return res.status(ok ? 200 : 503).json({
       ok,
+      health_scope: 'public_portal',
+      integrations: {
+        stable_spine: { configured: Boolean(process.env.PORTAL_SPINE_TOKEN), end_to_end_verified: false },
+        autonomy: { enabled: process.env.PORTAL_AUTONOMY_ENABLED === '1', credential_configured: Boolean(process.env.CRON_SECRET) },
+        portfolio_schedule: { credential_configured: Boolean(process.env.CRON_SECRET || process.env.PORTFOLIO_OUTBOX_TOKEN) },
+        private_reports: { publisher_status: 'not_checked_by_public_health' },
+        encrypted_relay: { configured: Boolean(process.env.PRIME_TRUST_ABEX_RELAY_TOKEN && process.env.PRIME_TRUST_VELYQUA_RELAY_TOKEN && process.env.PRIME_TRUST_ABEX_RELAY_TOKEN !== process.env.PRIME_TRUST_VELYQUA_RELAY_TOKEN), end_to_end_verified: false }
+      },
       database: true,
       archive,
       generation_configured: generation,

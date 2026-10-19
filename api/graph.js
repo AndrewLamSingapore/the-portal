@@ -2,6 +2,7 @@ import { findArtifacts, hasDatabase, listExperimentResults } from '../lib/db.js'
 import { attachExperimentResults } from '../lib/experiment-result.js';
 import { buildKnowledgeGraph } from '../lib/knowledge.js';
 import { expandGraphNeighborhood, hybridSearch } from '../src/lib/semantic-world-model.js';
+import { searchAdmission, validateSearch } from '../lib/search-controls.js';
 import { semanticScores } from '../lib/semantic-embeddings.js';
 
 export default async function handler(req, res) {
@@ -11,13 +12,16 @@ export default async function handler(req, res) {
     res.setHeader('Allow', 'GET');
     return res.status(405).json({ error: 'Method not allowed' });
   }
+  const validation=validateSearch(req.query||{});
+  if(validation.error)return res.status(400).json({error:validation.error});
+  const query=validation.query;
+  if(query){const admission=await searchAdmission(req);if(!admission.allowed){res.setHeader('Retry-After','60');return res.status(admission.status).json({error:admission.error});}}
   if (!hasDatabase()) return res.status(503).json({ error: 'Archive unavailable' });
   const [artifacts, results] = await Promise.all([
     findArtifacts({ limit: 60 }),
     listExperimentResults(60)
   ]);
   const graph = attachExperimentResults(buildKnowledgeGraph(artifacts), results);
-  const query = String(req.query?.q || '').trim();
   if (!query) return res.status(200).json(graph);
   const nodes=graph.nodes.map(node=>({...node,type:'asset',provenance:Array.isArray(node.sources)?node.sources:[]}));
   const semantic=await semanticScores(query,nodes);const ranked=hybridSearch(query,nodes,{limit:req.query?.limit,semanticScorer:(_query,node)=>semantic.scores.get(node.id)||0});const expanded=expandGraphNeighborhood(ranked,graph,{limit:24});const ids=new Set(expanded.map(item=>item.node.id));const rank=new Map(ranked.map(item=>[item.node.id,item]));
