@@ -3,7 +3,9 @@
   "version": "6.5.0",
   "private": true,
   "type": "module",
-  "engines": { "node": "22.x" },
+  "engines": {
+    "node": "22.x"
+  },
   "scripts": {
     "preverify": "node --test tests/search-controls.test.js && node --check evidence-lab.js && node --check evidence-export.js && node --check lib/evidence-lab-endpoint.js && node --check lib/evidence-canonical.js && node --check lib/ethereum-evidence.js && node --check lib/portal-export.js && node --check scripts/evidence-lab-contract.mjs && node --check scripts/evidence-lab-browser.mjs && node --check scripts/check-portal-export.mjs && node scripts/evidence-lab-contract.mjs && node --test tests/ethereum-evidence.test.js tests/evidence-export.test.js tests/evidence-lab-api.test.js",
     "smoke:evidence-lab": "node scripts/evidence-lab-browser.mjs",
@@ -21,8 +23,12 @@
     "prime:publish": "node --check lib/prime-reports.js && node --check scripts/prime-publish-contract.mjs && node --check scripts/publish-prime-report.mjs && node --test tests/prime-reports.test.js && node scripts/prime-publish-contract.mjs",
     "prime:report": "node scripts/publish-prime-report.mjs"
   },
-  "devDependencies": { "playwright": "1.64.0" },
-  "dependencies": { "@neondatabase/serverless": "^1.0.2" },
+  "devDependencies": {
+    "playwright": "1.64.1"
+  },
+  "dependencies": {
+    "@neondatabase/serverless": "^1.0.2"
+  },
   "portal_release": {
     "decisive_score": "9/9",
     "scientific_acceptance": "replay_verified_cleanroom_certificate_required",

@@ -1,5 +1,3 @@
-> Portfolio status: [STATUS.md](https://github.com/AndrewLamSingapore/orqevia/blob/main/STATUS.md) is the sole portfolio status reference. Each product owns its source, configuration, contracts and domain records. The [operational manifest](https://github.com/AndrewLamSingapore/orqevia/blob/main/governance/operational-manifest.json) provides dated ORQEVIA component and observation references; it does not establish deployment status.
-
 # The Portal
 
 [**Open The Portal ↗**](https://the-portal-ten.vercel.app/) · [**Discuss this project**](https://authority-engine-app.vercel.app/contact?source=portal) · [**Meet Andrew Lam**](https://authority-engine-app.vercel.app/about)
@@ -229,3 +227,8 @@ The production Living Observatory is available at `/living`. Its deterministic e
 ---
 
 ### The Portal is not a record of what has been done. It is a living map of how encounters become connections, connections become experiments, and experiments create new ways of seeing the world.
+
+
+## Status and evidence
+
+> Portfolio status: [STATUS.md](https://github.com/AndrewLamSingapore/orqevia/blob/main/STATUS.md) is the sole portfolio status reference. Each product owns its source, configuration, contracts and domain records. The [operational manifest](https://github.com/AndrewLamSingapore/orqevia/blob/main/governance/operational-manifest.json) provides dated ORQEVIA component and observation references; it does not establish deployment status.
