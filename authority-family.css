@@ -20,3 +20,6 @@ button,input,textarea,select{font-size:1rem}
 .section-heading,.worlds,.artifact-head{min-width:0}
 .hero h1{font-size:clamp(3.25rem,11vw,8.25rem);line-height:1.02}
 @media(max-width:680px){.topbar{grid-template-columns:minmax(0,1fr)}.topbar-end{justify-content:flex-start}.topbar-end>a,.topbar-end>button{min-height:44px}}
+
+/* Browser-default small text must remain readable in generated experiment cards. */
+.experiment-card small{font-size:.875rem;line-height:1.5}
