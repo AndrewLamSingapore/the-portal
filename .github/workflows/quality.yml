@@ -36,6 +36,8 @@ jobs:
         run: npm run prime:publish
       - name: Install recovery-test browser
         run: npx playwright install --with-deps chromium
+      - name: Verify fresh card links and homepage opening
+        run: npm run smoke:card-links
       - name: Verify PRIME password recovery submission
         run: npm run prime:recovery
 
