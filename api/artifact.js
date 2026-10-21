@@ -1,6 +1,6 @@
 import crypto from 'node:crypto';
 
-import { MODES, generateArtifact } from '../lib/artifact-generation.js';
+import { ArtifactInputError, MODES, generateArtifact } from '../lib/artifact-generation.js';
 import { findArtifacts, hasDatabase, saveArtifact } from '../lib/db.js';
 
 const GENERATION_TIMEOUT_MS = 52_000;
@@ -8,15 +8,23 @@ const GENERATION_TIMEOUT_MS = 52_000;
 const buckets = globalThis.__portalBuckets || (globalThis.__portalBuckets = new Map());
 const WINDOW_MS = 3_600_000;
 const MAX_PER_WINDOW = 12;
+const MAX_BUCKETS = 4_096;
 
 function ip(req) {
-  return String(req.headers['x-forwarded-for'] || req.headers['x-real-ip'] || 'unknown').split(',')[0].trim();
+  const address = String(req.headers['x-forwarded-for'] || req.headers['x-real-ip'] || 'unknown').split(',')[0].trim();
+  return crypto.createHash('sha256').update(address).digest('hex');
 }
 
 function allowed(key) {
   const now = Date.now();
+  // Opportunistic expiry needs no background timer. At capacity, deny new
+  // clients rather than evicting active budgets and enabling limit bypass.
+  for (const [client, bucket] of buckets) {
+    if (now - bucket.start >= WINDOW_MS) buckets.delete(client);
+  }
   const bucket = buckets.get(key);
-  if (!bucket || now - bucket.start >= WINDOW_MS) {
+  if (!bucket) {
+    if (buckets.size >= MAX_BUCKETS) return false;
     buckets.set(key, { start: now, count: 1 });
     return true;
   }
@@ -60,7 +68,7 @@ export default async function handler(req, res) {
   if (!process.env.OPENAI_API_KEY) return res.status(503).json({ error: 'Archive not configured' });
   if (!allowed(ip(req))) return res.status(429).json({ error: 'The archive needs time to settle. Try again later.' });
 
-  const mode = MODES[req.body?.mode] ? req.body.mode : 'wander';
+  const mode = typeof req.body?.mode === 'string' && Object.hasOwn(MODES, req.body.mode) ? req.body.mode : 'wander';
   let context = '', recent = [];
   if (hasDatabase()) {
     try {
@@ -88,11 +96,12 @@ export default async function handler(req, res) {
     }
     return res.status(200).json(artifact);
   } catch (error) {
+    const inputRejected = error instanceof ArtifactInputError;
     const timedOut = error?.name === 'AbortError';
     const upstreamFailure = error?.upstream === true || error instanceof TypeError;
     console.error('artifact error', timedOut ? 'timeout' : error?.code || error?.message || error);
-    return res.status(timedOut ? 504 : upstreamFailure ? 502 : 500).json({
-      error: timedOut ? 'Archive timed out' : upstreamFailure ? 'Archive generation was incomplete. Please try again.' : 'Archive failure'
+    return res.status(inputRejected ? 503 : timedOut ? 504 : upstreamFailure ? 502 : 500).json({
+      error: inputRejected ? 'Archive context exceeds generation limits. Please try again later.' : timedOut ? 'Archive timed out' : upstreamFailure ? 'Archive generation was incomplete. Please try again.' : 'Archive failure'
     });
   } finally {
     clearTimeout(timer);
