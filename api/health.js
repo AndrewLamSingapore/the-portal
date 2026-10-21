@@ -4,6 +4,7 @@ import { handlePortfolioRelay } from '../src/lib/portfolio-relay-endpoint.js';
 import { portfolioOutboxStatus } from '../src/lib/portfolio-events.js';
 import { PRODUCT_VERSION } from '../lib/product-version.js';
 import { trustRelayHandler, postgresTrustStore } from '../src/lib/trust-relay.js';
+import { ADMISSION_POLICY } from '../lib/generation-admission.js';
 
 export default async function handler(req, res) {
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
@@ -12,6 +13,68 @@ export default async function handler(req, res) {
   if (route === 'trust-relay') return trustRelayHandler(postgresTrustStore(db()))(req,res);
   if (route === 'portfolio-relay') return handlePortfolioRelay(req, res);
   if (['spine', 'autonomy', 'autonomy-latest'].includes(route)) return handlePortalSpine(req, res, route);
+  if (route === 'admission') {
+    if (req.method !== 'GET') {
+      res.setHeader('Allow', 'GET');
+      return res.status(405).json({ ok: false, error: 'Method not allowed' });
+    }
+    if (!hasDatabase()) {
+      return res.status(503).json({ ok: false, error: 'Admission ledger unavailable' });
+    }
+    try {
+      const sql = db();
+      const rows = await sql`
+        select
+          c.policy_id,
+          c.allowance_micro_usd::text as allowance_micro_usd,
+          c.reserved_micro_usd::text as reserved_micro_usd,
+          (c.allowance_micro_usd - c.reserved_micro_usd)::text as remaining_micro_usd,
+          (select count(*)::text from portal_generation_admission.requests) as admitted_request_rows,
+          (select coalesce(sum(reserved_micro_usd), 0)::text from portal_generation_admission.requests) as request_reservation_sum_micro_usd,
+          (select max(admitted_at)::text from portal_generation_admission.requests) as last_admitted_at
+        from portal_generation_admission.credit c
+        where c.policy_id = ${ADMISSION_POLICY.id}
+        limit 1
+      `;
+      if (rows.length !== 1) throw new Error('Admission policy row missing');
+      const row = rows[0];
+      const allowance = Number(row.allowance_micro_usd);
+      const reserved = Number(row.reserved_micro_usd);
+      const remaining = Number(row.remaining_micro_usd);
+      const admittedRows = Number(row.admitted_request_rows);
+      const requestReservationSum = Number(row.request_reservation_sum_micro_usd);
+      if (row.policy_id !== ADMISSION_POLICY.id
+          || !Number.isSafeInteger(allowance)
+          || !Number.isSafeInteger(reserved)
+          || !Number.isSafeInteger(remaining)
+          || !Number.isSafeInteger(admittedRows)
+          || !Number.isSafeInteger(requestReservationSum)
+          || allowance !== ADMISSION_POLICY.allowanceMicroUsd
+          || reserved < 0
+          || reserved > allowance
+          || remaining !== allowance - reserved
+          || reserved % ADMISSION_POLICY.reservationMicroUsd !== 0) {
+        throw new Error('Admission policy state invalid');
+      }
+      return res.status(200).json({
+        ok: true,
+        scope: 'PORTAL_GENERATION_ADMISSION_READ_ONLY',
+        policy_id: row.policy_id,
+        allowance_micro_usd: allowance,
+        reserved_micro_usd: reserved,
+        remaining_micro_usd: remaining,
+        reservation_micro_usd: ADMISSION_POLICY.reservationMicroUsd,
+        admitted_request_rows: admittedRows,
+        request_reservation_sum_micro_usd: requestReservationSum,
+        reservation_matches_request_rows: reserved === requestReservationSum,
+        last_admitted_at: row.last_admitted_at,
+        revision: process.env.VERCEL_GIT_COMMIT_SHA || null,
+      });
+    } catch {
+      console.error(JSON.stringify({ level: 'error', message: 'admission_status_failed', route: '/api/health?route=admission' }));
+      return res.status(503).json({ ok: false, error: 'Admission ledger unavailable' });
+    }
+  }
   if (route !== 'health') return res.status(404).json({ ok: false, error: 'Route not found' });
   if (req.method !== 'GET') {
     res.setHeader('Allow', 'GET');

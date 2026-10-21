@@ -49,6 +49,18 @@ async function fixture(run, options = {}) {
       if (state.failRelay) throw new Error('Optional relay fixture failure');
       return result([{ relay: null }]);
     }
+    if (query.includes('from portal_generation_admission.credit')) {
+      if (state.failAdmission) throw new Error('Admission fixture failure');
+      return result([{
+        policy_id: 'portal-artifact-generation-v1',
+        allowance_micro_usd: '10000000',
+        reserved_micro_usd: state.reservedMicroUsd ?? '2160000',
+        remaining_micro_usd: state.remainingMicroUsd ?? '7840000',
+        admitted_request_rows: state.admittedRequestRows ?? '2',
+        request_reservation_sum_micro_usd: state.requestReservationSumMicroUsd ?? '2160000',
+        last_admitted_at: '2026-10-21 05:17:52+00',
+      }]);
+    }
     if (query.includes('from portfolio_event_outbox')) {
       if (state.failOutbox) throw new Error('Optional outbox fixture failure');
       if (state.missingOutbox) throw new Error('Optional outbox table does not exist');
@@ -71,11 +83,31 @@ async function fixture(run, options = {}) {
   }
 }
 
-async function request(method = 'GET') {
+async function request(method = 'GET', query = {}) {
   const res = { statusCode: 200, headers: {}, setHeader(key, value) { this.headers[key] = value; }, status(code) { this.statusCode = code; return this; }, json(body) { this.body = body; return this; } };
-  await handler({ method, headers: {}, query: {} }, res);
+  await handler({ method, headers: {}, query }, res);
   return res;
 }
+
+test('admission status is a read-only aggregate ledger view', async () => fixture(async ({ queries }) => {
+  const res = await request('GET', { route: 'admission' });
+  assert.equal(res.statusCode, 200);
+  assert.equal(res.body.ok, true);
+  assert.equal(res.body.scope, 'PORTAL_GENERATION_ADMISSION_READ_ONLY');
+  assert.equal(res.body.allowance_micro_usd, 10000000);
+  assert.equal(res.body.reserved_micro_usd, 2160000);
+  assert.equal(res.body.remaining_micro_usd, 7840000);
+  assert.equal(res.body.admitted_request_rows, 2);
+  assert.equal(res.body.reservation_matches_request_rows, true);
+  assert.ok(queries.every(query => /^\s*select\b/i.test(query)));
+  assert.match(res.headers['Cache-Control'], /no-store/);
+}));
+
+test('admission status fails closed without exposing database details', async () => fixture(async () => {
+  const res = await request('GET', { route: 'admission' });
+  assert.equal(res.statusCode, 503);
+  assert.deepEqual(res.body, { ok: false, error: 'Admission ledger unavailable' });
+}, { failAdmission: true }));
 
 test('public health is read-only and independent of unconfigured portfolio credentials', async () => fixture(async ({ queries }) => {
   const res = await request();
