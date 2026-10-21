@@ -14,15 +14,33 @@ Stable Spine needs PORTAL_SPINE_TOKEN installed on both caller and Portal. The e
 
 ## Environment isolation
 
-Production retains the existing Neon main database. Preview uses the separate portal-preview-isolated Neon branch, including database connection aliases. Shared production Neon Auth URLs are no longer exposed to Preview; Portal identity remains its existing Supabase integration. Existing deployments retain their deployment-time variables; redeploy previews before treating them as isolated. Never perform preview write tests against a deployment created before the isolation change.
+Production retains the existing Portal-owned Neon main database. Preview uses
+the separate `portal-preview-isolated` Neon branch, including database
+connection aliases and its branch-specific Neon Auth endpoint. Existing
+deployments retain their deployment-time variables; redeploy previews before
+treating them as isolated. Never perform preview write tests against a
+deployment created before the isolation change.
 
-The .env.example file lists application runtime variables. Values are server-only except the already-public Supabase URL and publishable key. Keep all secrets out of Git, logs and browser bundles.
+Portal private identity and reports now use `portal_identities`,
+`portal_reports` and `portal_publishers` in the Portal-owned Neon database.
+The legacy Supabase tables remain untouched as rollback evidence but are not a
+runtime dependency. `NEON_AUTH_BASE_URL` remains server-side and is reached only
+through same-origin Portal API routes. `PORTAL_OWNER_EMAIL` may bootstrap the
+first OWNER identity only when the authenticated Neon Auth email matches it.
+
+The .env.example file lists application runtime variables. Keep all secrets out
+of Git, logs and browser bundles. No Supabase URL or publishable key is shipped
+by the private Portal client.
 
 ## Account controls requiring administrative access
 
 Require pull requests, one independent approval, successful verify/verify-v2/status checks, resolved conversations, and no force pushes or deletion on main. A policy document is not enforcement; verify the actual GitHub ruleset after applying it. The connected GitHub installation does not expose administration writes.
 
-Enable Supabase leaked-password protection for password-based identity access using the owning Supabase project's Auth security settings, then verify the security advisor clears. Do not disable password access or unrelated project services to remove the warning. Public health does not inspect that Auth setting.
+Leaked-password protection is an authentication-provider setting. With the
+Portal moved to Neon Auth, the prior Supabase Game Platform warning is no longer
+a Portal dependency. The Neon Auth production checklist still requires an
+explicit password-policy and email-verification decision before broader private
+account rollout.
 
 ## Public health and optional integrations
 

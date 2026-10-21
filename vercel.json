@@ -105,12 +105,44 @@
       "destination": "/api/meta?route=prime"
     },
     {
+      "source": "/api/prime/boundary",
+      "destination": "/api/meta?route=prime-boundary"
+    },
+    {
+      "source": "/api/prime/identity",
+      "destination": "/api/meta?route=prime-identity"
+    },
+    {
+      "source": "/api/prime/login",
+      "destination": "/api/meta?route=prime-login"
+    },
+    {
+      "source": "/api/prime/logout",
+      "destination": "/api/meta?route=prime-logout"
+    },
+    {
+      "source": "/api/prime/publisher",
+      "destination": "/api/meta?route=prime-publisher"
+    },
+    {
       "source": "/api/prime/report",
       "destination": "/api/meta?route=prime-report"
     },
     {
       "source": "/api/prime/publish",
       "destination": "/api/meta?route=prime-publish"
+    },
+    {
+      "source": "/api/prime/request-password-reset",
+      "destination": "/api/meta?route=prime-request-password-reset"
+    },
+    {
+      "source": "/api/prime/reset-password",
+      "destination": "/api/meta?route=prime-reset-password"
+    },
+    {
+      "source": "/api/prime/signup",
+      "destination": "/api/meta?route=prime-signup"
     }
   ],
   "headers": [
@@ -147,7 +179,7 @@
         },
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'self' https://vtrfgckzpjgtmqsnumur.supabase.co; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'; upgrade-insecure-requests"
+          "value": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'; upgrade-insecure-requests"
         }
       ]
     },
@@ -203,7 +235,7 @@
         },
         {
           "key": "Vary",
-          "value": "Authorization"
+          "value": "Cookie, Authorization"
         },
         {
           "key": "X-Robots-Tag",
@@ -220,7 +252,7 @@
         },
         {
           "key": "Vary",
-          "value": "Authorization"
+          "value": "Cookie, Authorization"
         },
         {
           "key": "X-Robots-Tag",

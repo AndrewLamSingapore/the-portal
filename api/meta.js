@@ -6,12 +6,49 @@ import { db, findArtifacts, getArtifact, getExperimentResult, hasDatabase, saveE
 import { acceptExperimentResult } from '../lib/experiment-result-service.js';
 import { validateExperimentCandidate, validatePrimeRelayResponse } from '../lib/experiment-candidate.js';
 import { handleEvidenceLab } from '../lib/evidence-lab-endpoint.js';
-import { authenticate as primeAuthenticate, publishReport as primePublishReport, readReports as primeReadReports, resolvePrimeIdentity as primeResolveIdentity, sendJson as primeSendJson } from '../lib/prime-auth.js';
+import {
+  authenticate as primeAuthenticate,
+  privateBoundaryStatus,
+  provisionIdentity as primeProvisionIdentity,
+  proxyAuth as primeProxyAuth,
+  publishReport as primePublishReport,
+  readReports as primeReadReports,
+  registerPublisher as primeRegisterPublisher,
+  requestOrigin,
+  resolvePrimeIdentity as primeResolveIdentity,
+  revokePublisher as primeRevokePublisher,
+  sendJson as primeSendJson,
+} from '../lib/prime-auth.js';
 import { REPORT_ID_PATTERN, REPORT_LIMITS, validateReport } from '../lib/prime-reports.js';
 import { PRODUCT_VERSION } from '../lib/product-version.js';
 const SCHEMA_VERSION = 6;
 const EXPERIENCE = 'Continuous Futures Model';
-const META_ROUTES = new Set(['capabilities', 'ecosystem-event', 'evidence', 'evidence-lab', 'experiment-result', 'manifest', 'metrics', 'prime', 'prime-experiment', 'prime-publish', 'prime-report', 'readiness', 'status', 'verify', 'version', 'v2']);
+const META_ROUTES = new Set([
+  'capabilities',
+  'ecosystem-event',
+  'evidence',
+  'evidence-lab',
+  'experiment-result',
+  'manifest',
+  'metrics',
+  'prime',
+  'prime-boundary',
+  'prime-experiment',
+  'prime-identity',
+  'prime-login',
+  'prime-logout',
+  'prime-publisher',
+  'prime-publish',
+  'prime-report',
+  'prime-request-password-reset',
+  'prime-reset-password',
+  'prime-signup',
+  'readiness',
+  'status',
+  'verify',
+  'version',
+  'v2',
+]);
 
 function jsonHeaders(res, cache = 'no-store') {
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
@@ -240,8 +277,9 @@ async function handleExperimentResult(req, res) {
 }
 
 async function handlePrime(req, res) {
-  const auth = await primeAuthenticate(req.headers);
+  const auth = await primeAuthenticate(req.headers, { origin: requestOrigin(req) });
   if (auth.error) return primeSendJson(res, auth.status, { error: auth.error });
+  if (auth.setCookies?.length) res.setHeader('Set-Cookie', auth.setCookies);
   // Authentication first, then the method: a read-only private route must not
   // silently serve a write verb, and an anonymous caller must never be able to
   // tell a wrong verb from a wrong credential.
@@ -249,9 +287,9 @@ async function handlePrime(req, res) {
     res.setHeader('Allow', 'GET');
     return primeSendJson(res, 405, { error: 'method_not_allowed' });
   }
-  const mapped = await primeResolveIdentity(auth.user, auth.token);
+  const mapped = await primeResolveIdentity(auth.user);
   if (mapped.error) return primeSendJson(res, mapped.status, { error: mapped.error });
-  const reports = await primeReadReports(auth.token);
+  const reports = await primeReadReports(auth.user.id);
   if (reports.error) return primeSendJson(res, reports.status, { error: reports.error });
   return primeSendJson(res, 200, {
     identity: { person_key: mapped.identity.person_key, display_name: mapped.identity.display_name, role: mapped.identity.role },
@@ -260,8 +298,9 @@ async function handlePrime(req, res) {
 }
 
 async function handlePrimeReport(req, res) {
-  const auth = await primeAuthenticate(req.headers);
+  const auth = await primeAuthenticate(req.headers, { origin: requestOrigin(req) });
   if (auth.error) return primeSendJson(res, auth.status, { error: auth.error });
+  if (auth.setCookies?.length) res.setHeader('Set-Cookie', auth.setCookies);
   if (req.method !== 'GET') {
     res.setHeader('Allow', 'GET');
     return primeSendJson(res, 405, { error: 'method_not_allowed' });
@@ -271,12 +310,119 @@ async function handlePrimeReport(req, res) {
   // An id that cannot exist is a client error and must never reach the database:
   // a value carrying filter syntax would otherwise be answered as an outage.
   if (!REPORT_ID_PATTERN.test(id)) return primeSendJson(res, 400, { error: 'invalid_report_id' });
-  const mapped = await primeResolveIdentity(auth.user, auth.token);
+  const mapped = await primeResolveIdentity(auth.user);
   if (mapped.error) return primeSendJson(res, mapped.status, { error: mapped.error });
-  const reports = await primeReadReports(auth.token, { id });
+  const reports = await primeReadReports(auth.user.id, { id });
   if (reports.error) return primeSendJson(res, reports.status, { error: reports.error });
   if (!reports.rows.length) return primeSendJson(res, 404, { error: 'report_not_found' });
   return primeSendJson(res, 200, { identity: { role: mapped.identity.role }, report: reports.rows[0] });
+}
+
+async function handlePrimeAuth(req, res, action) {
+  if (req.method !== 'POST') {
+    res.setHeader('Allow', 'POST');
+    return primeSendJson(res, 405, { error: 'method_not_allowed' });
+  }
+  const outcome = await primeProxyAuth(action, {
+    body: req.body,
+    cookie: req.headers?.cookie,
+    origin: requestOrigin(req),
+  });
+  if (outcome.setCookies?.length) res.setHeader('Set-Cookie', outcome.setCookies);
+  if (outcome.error) return primeSendJson(res, outcome.status, { error: outcome.error });
+  return primeSendJson(res, outcome.status, outcome.body);
+}
+
+async function ownerRequest(req, res) {
+  const auth = await primeAuthenticate(req.headers, { origin: requestOrigin(req) });
+  if (auth.error) {
+    primeSendJson(res, auth.status, { error: auth.error });
+    return null;
+  }
+  if (auth.setCookies?.length) res.setHeader('Set-Cookie', auth.setCookies);
+  const mapped = await primeResolveIdentity(auth.user);
+  if (mapped.error) {
+    primeSendJson(res, mapped.status, { error: mapped.error });
+    return null;
+  }
+  if (mapped.identity.role !== 'OWNER') {
+    primeSendJson(res, 403, { error: 'owner_required' });
+    return null;
+  }
+  return { user: auth.user, identity: mapped.identity };
+}
+
+async function handlePrimeIdentity(req, res) {
+  if (req.method !== 'POST') {
+    res.setHeader('Allow', 'POST');
+    return primeSendJson(res, 405, { error: 'method_not_allowed' });
+  }
+  const owner = await ownerRequest(req, res);
+  if (!owner) return;
+  const identity = req.body && typeof req.body === 'object' ? req.body : {};
+  const validId = typeof identity.auth_user_id === 'string' && identity.auth_user_id.length >= 3 && identity.auth_user_id.length <= 200;
+  const validEmail = typeof identity.email === 'string' && /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(identity.email) && identity.email.length <= 320;
+  const validPerson = typeof identity.person_key === 'string' && /^[a-z0-9][a-z0-9._-]{2,63}$/.test(identity.person_key);
+  const validName = typeof identity.display_name === 'string' && identity.display_name.trim().length > 0 && identity.display_name.length <= 120;
+  const validRole = identity.role === 'OWNER' || identity.role === 'MEMBER';
+  if (![validId, validEmail, validPerson, validName, validRole].every(Boolean)) {
+    return primeSendJson(res, 400, { error: 'invalid_identity' });
+  }
+  const outcome = await primeProvisionIdentity(owner.user.id, {
+    auth_user_id: identity.auth_user_id,
+    email: identity.email,
+    person_key: identity.person_key,
+    display_name: identity.display_name,
+    role: identity.role,
+    authority: identity.authority && typeof identity.authority === 'object' ? identity.authority : {},
+  });
+  if (outcome.error) return primeSendJson(res, outcome.status, { error: outcome.error });
+  return primeSendJson(res, 200, outcome);
+}
+
+async function handlePrimePublisher(req, res) {
+  const owner = await ownerRequest(req, res);
+  if (!owner) return;
+  if (req.method !== 'POST' && req.method !== 'DELETE') {
+    res.setHeader('Allow', 'POST, DELETE');
+    return primeSendJson(res, 405, { error: 'method_not_allowed' });
+  }
+  const body = req.body && typeof req.body === 'object' ? req.body : {};
+  if (req.method === 'DELETE') {
+    const publisherKey = String(body.publisher_key || '');
+    if (!/^[a-z0-9][a-z0-9-]{2,63}$/.test(publisherKey)) {
+      return primeSendJson(res, 400, { error: 'invalid_publisher_key' });
+    }
+    const outcome = await primeRevokePublisher(owner.user.id, publisherKey);
+    if (outcome.error) return primeSendJson(res, outcome.status, { error: outcome.error });
+    return primeSendJson(res, 200, outcome);
+  }
+  const publisherKey = String(body.publisher_key || '');
+  const publisherToken = String(body.publisher_token || '');
+  if (!/^[a-z0-9][a-z0-9-]{2,63}$/.test(publisherKey) || publisherToken.length < 24 || publisherToken.length > 512) {
+    return primeSendJson(res, 400, { error: 'invalid_publisher' });
+  }
+  const outcome = await primeRegisterPublisher(owner.user.id, {
+    publisher_key: publisherKey,
+    token_sha256: crypto.createHash('sha256').update(publisherToken, 'utf8').digest('hex'),
+    label: String(body.label || '').slice(0, 120),
+  });
+  if (outcome.error) return primeSendJson(res, outcome.status, { error: outcome.error });
+  return primeSendJson(res, 200, outcome);
+}
+
+async function handlePrimeBoundary(req, res) {
+  if (req.method !== 'GET') {
+    res.setHeader('Allow', 'GET');
+    return primeSendJson(res, 405, { error: 'method_not_allowed' });
+  }
+  const owner = await ownerRequest(req, res);
+  if (!owner) return;
+  const boundary = await privateBoundaryStatus();
+  return primeSendJson(res, 200, {
+    ok: boundary.database && boundary.auth_configured && boundary.schema && boundary.forced_rls && boundary.runtime_role,
+    ...boundary,
+  });
 }
 
 /** Accepts a Vercel-parsed JSON body, or a raw JSON string, but never a non-object. */
@@ -394,7 +540,15 @@ export default async function handler(req, res) {
   if (route === 'evidence') return handleEvidence(req, res);
   if (route === 'experiment-result') return handleExperimentResult(req, res);
   if (route === 'prime-experiment') return handlePrimeExperiment(req, res);
+  if (route === 'prime-login') return handlePrimeAuth(req, res, 'login');
+  if (route === 'prime-signup') return handlePrimeAuth(req, res, 'signup');
+  if (route === 'prime-logout') return handlePrimeAuth(req, res, 'logout');
+  if (route === 'prime-request-password-reset') return handlePrimeAuth(req, res, 'requestPasswordReset');
+  if (route === 'prime-reset-password') return handlePrimeAuth(req, res, 'resetPassword');
   if (route === 'prime') return handlePrime(req, res);
+  if (route === 'prime-boundary') return handlePrimeBoundary(req, res);
+  if (route === 'prime-identity') return handlePrimeIdentity(req, res);
+  if (route === 'prime-publisher') return handlePrimePublisher(req, res);
   if (route === 'prime-publish') return handlePrimePublish(req, res);
   if (route === 'prime-report') return handlePrimeReport(req, res);
   if (route === 'manifest') {

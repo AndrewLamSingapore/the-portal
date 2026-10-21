@@ -40,6 +40,7 @@ jobs:
             sleep 1
           done
           npm run test:admission:postgres
+          PORTAL_PRIVATE_TEST_CONTAINER="$PORTAL_ADMISSION_TEST_CONTAINER" npm run test:private:postgres
       - run: npm run synthetic:result
       - name: Verify the PRIME authorization contract
         run: npm run prime:authorization
