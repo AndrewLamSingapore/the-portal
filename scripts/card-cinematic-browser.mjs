@@ -21,7 +21,8 @@ const artifact = {
   status: 'EXPLORING',
   persistence: 'ARCHIVE',
   evidence_level: 'AI-CURATED',
-  description: 'A synthetic card used only to verify public navigation.',
+  description: 'The surviving specification describes a shared signal. Synthetic unsupported claim for disclosure testing.',
+  provenance: 'An imagined archive record, not independently verified.',
   imagined_future: 'A shared signal arrives before a decision.',
   problem: 'Signals arrive late.',
   modern_descendant: 'Shared status displays.',
@@ -129,6 +130,35 @@ try {
           assert.equal(state.introActive, false);
           assert.equal(state.bodyLocked, false);
           assert.equal(state.seen, null);
+        });
+        await check(label + ' labels unsourced archival language before the description', async () => {
+          const notice = page.locator('#drawer [data-evidence-boundary]');
+          assert.equal(await notice.count(), 1);
+          assert.match(await notice.textContent(), /Speculative reconstruction/);
+          assert.match(await notice.textContent(), /not evidence that an object or archival record exists/);
+          assert.equal(await notice.evaluate(node => Boolean(node.nextElementSibling?.textContent.includes('surviving specification'))), true);
+        });
+        await check(label + ' does not present missing or malformed sources as verified', async () => {
+          const variants = await page.evaluate(base => {
+            const render = value => {
+              const template = document.createElement('template');
+              template.innerHTML = detailMarkup(value);
+              return { notice: template.content.querySelector('[data-evidence-boundary]')?.textContent || '',
+                badge: template.content.querySelector('.badge')?.textContent || '' };
+            };
+            return [
+              render({ ...base, evidence_level: 'HISTORICALLY-VERIFIED', sources: [] }),
+              render({ ...base, evidence_level: 'HISTORICALLY-VERIFIED', sources: [null, { url: 'javascript:bad' }, { url: 'http://example.invalid' }] }),
+              render({ ...base, evidence_level: 'HISTORICALLY-VERIFIED', sources: [{ title: 'A supplied source', url: 'https://example.invalid/source' }] }),
+              render({ ...base, sources: 'invalid source list' }),
+            ];
+          }, artifact);
+          assert.equal(variants[0].badge, 'UNVERIFIED RECORD');
+          assert.match(variants[0].notice, /Source verification incomplete/);
+          assert.equal(variants[1].badge, 'UNVERIFIED RECORD');
+          assert.equal(variants[2].badge, 'HISTORICALLY-VERIFIED');
+          assert.equal(variants[2].notice, '');
+          assert.match(variants[3].notice, /Speculative reconstruction/);
         });
         await page.screenshot({ path: path.join(output, device + '-' + form + '.png') });
         await check(label + ' supports immediate pointer copy and close', async () => {
