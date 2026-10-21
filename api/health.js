@@ -24,13 +24,19 @@ export default async function handler(req, res) {
   if (!database) return res.status(503).json({ ok: false, database: false, archive: false, generation_configured: generation, portfolio_relay: false, schema_version: null, product_version: PRODUCT_VERSION, revision });
   try {
     const sql = db();
-    const [artifacts, columns, participation, resultSchema, relaySchema, outboxStatus] = await Promise.all([
+    const [artifacts, columns, participation, resultSchema, outboxStatus, trustRelayStatus] = await Promise.all([
       findArtifacts({ limit: 1 }),
       sql`select column_name from information_schema.columns where table_schema='public' and table_name='artifacts'`,
       sql`select to_regclass('public.artifact_verdicts') as verdicts`,
       sql`select to_regclass('public.experiment_results') as results`,
-      sql`select to_regclass('public.portfolio_event_outbox') as outbox`,
-      portfolioOutboxStatus(),
+      // Optional integration probes must not change public Portal readiness.
+      portfolioOutboxStatus().catch(() => ({
+        configured: true, available: false, schema: null,
+        counts: null, ready: null, oldest_ready_age_seconds: null,
+      })),
+      sql`select to_regclass('public.prime_trust_relay') as relay`
+        .then(rows => ({ available: true, schema: Boolean(rows[0]?.relay) }))
+        .catch(() => ({ available: false, schema: null })),
     ]);
     const availableColumns = new Set(columns.map(row => row.column_name));
     const evidenceSchema = ['evidence_level', 'sources', 'relationships', 'experiment', 'connections', 'lifecycle', 'current_phase', 'recurrence_conditions', 'realization_signal'].every(column => availableColumns.has(column));
@@ -61,9 +67,9 @@ export default async function handler(req, res) {
         role_credentials_configured: Boolean(process.env.PRIME_TRUST_ABEX_RELAY_TOKEN
           && process.env.PRIME_TRUST_VELYQUA_RELAY_TOKEN
           && process.env.PRIME_TRUST_ABEX_RELAY_TOKEN !== process.env.PRIME_TRUST_VELYQUA_RELAY_TOKEN),
-        schema: Boolean((await sql`select to_regclass('public.prime_trust_relay') as relay`)[0]?.relay),
+        ...trustRelayStatus,
       },
-      portfolio_outbox_schema: Boolean(relaySchema[0]?.outbox),
+      portfolio_outbox_schema: outboxStatus.schema,
       portfolio_outbox: outboxStatus,
       living_observatory: true,
       ethereum_evidence_lab: { network: 'ethereum-sepolia', chain_id: '11155111', mode: 'read-only' },
