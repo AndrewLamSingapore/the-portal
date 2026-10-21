@@ -23,3 +23,13 @@ The .env.example file lists application runtime variables. Values are server-onl
 Require pull requests, one independent approval, successful verify/verify-v2/status checks, resolved conversations, and no force pushes or deletion on main. A policy document is not enforcement; verify the actual GitHub ruleset after applying it. The connected GitHub installation does not expose administration writes.
 
 Enable Supabase leaked-password protection for password-based identity access using the owning Supabase project's Auth security settings, then verify the security advisor clears. Do not disable password access or unrelated project services to remove the warning. Public health does not inspect that Auth setting.
+
+## Public health and optional integrations
+
+GET /api/health observes existing schema; reading outbox status does not create
+tables or indexes. Missing optional outbox or encrypted-relay schema is reported
+without making the public Portal unavailable. An optional probe failure reports
+available=false and schema=null (unknown); schema=false means the probe succeeded
+and the table is absent. These fields do not claim integration delivery is verified.
+Core archive, evidence schema, public participation, generation configuration and
+authenticated result-writing gates continue to determine public health.

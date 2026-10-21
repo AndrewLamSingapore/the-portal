@@ -106,8 +106,11 @@ export async function publishPortalEvents(events, { fetchImpl = fetch } = {}) {
 
 export async function portfolioOutboxStatus() {
   const sql = await database();
-  if (!sql) return { configured: false, counts: {}, ready: 0, oldest_ready_age_seconds: null };
-  await ensurePortfolioOutbox();
+  const empty = { counts: {}, ready: 0, oldest_ready_age_seconds: null };
+  if (!sql) return { configured: false, available: false, schema: false, ...empty };
+  // Status is observation only. Provisioning remains in explicit outbox writes.
+  const schema = Boolean((await sql`select to_regclass('public.portfolio_event_outbox') as outbox`)[0]?.outbox);
+  if (!schema) return { configured: true, available: true, schema: false, ...empty };
   const [counts, ready] = await Promise.all([
     sql`select status,count(*)::integer as count from portfolio_event_outbox group by status`,
     sql`select count(*)::integer as count,
@@ -116,6 +119,8 @@ export async function portfolioOutboxStatus() {
   ]);
   return {
     configured: true,
+    available: true,
+    schema: true,
     counts: Object.fromEntries(counts.map(row => [row.status, Number(row.count || 0)])),
     ready: Number(ready[0]?.count || 0),
     oldest_ready_age_seconds: ready[0]?.oldest_age == null ? null : Number(ready[0].oldest_age),
