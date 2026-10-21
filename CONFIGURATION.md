@@ -33,3 +33,9 @@ available=false and schema=null (unknown); schema=false means the probe succeede
 and the table is absent. These fields do not claim integration delivery is verified.
 Core archive, evidence schema, public participation, generation configuration and
 authenticated result-writing gates continue to determine public health.
+
+## Public artifact generation bounds
+
+The complete serialized OpenAI Responses request is limited to 64 KiB in UTF-8, including instructions, public archive context, schema and settings. Accepted request bodies are unchanged. Oversized or malformed-Unicode context is rejected before any provider call or retry with a safe HTTP 503; the client displays that message. No truncation, model substitution or output-budget change occurs. The existing gpt-5.6-luna model, 6,000 output-token limit, maximum two attempts and shared 52-second deadline remain.
+
+The local fixed-window guard still allows twelve admitted generation requests per client per hour. Address keys are fixed-length SHA-256 values; expired buckets are reclaimed on requests. Each function process holds at most 4,096 active buckets. A new address at capacity gets the existing HTTP 429 response; active client budgets are never evicted to admit new addresses. This guard is per-instance and resets on process restart. It is not a global distributed spend limit, authenticated identity, or guaranteed anonymity of low-entropy address hashes. A separate atomic database-admission design remains review-only; this release adds no schema or policy.
