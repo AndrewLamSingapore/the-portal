@@ -30,21 +30,21 @@ const completed = () => ({ status: 'completed',
 function rows(values) {
   const names = Object.keys(values[0] || {});
   return { ok: true, json: async () => ({
-    fields: names.map(name => ({ name, dataTypeID: name === 'concepts' ? 3802 : name === 'year' ? 23 : 25 })),
+    fields: names.map(name => ({ name, dataTypeID: name === 'concepts' ? 3802 : name === 'accepted' ? 16 : ['year', 'retry_after_seconds'].includes(name) ? 23 : 25 })),
     rows: values.map(value => names.map(name => value[name] == null ? null
       : name === 'concepts' ? JSON.stringify(value[name]) : String(value[name]))),
   }) };
 }
 async function fixture(run, { recent, status = 200 } = {}) {
-  const previous = { key: process.env.OPENAI_API_KEY, database: process.env.DATABASE_URL, vercel: process.env.VERCEL,
+  const previous = { key: process.env.OPENAI_API_KEY, database: process.env.DATABASE_URL, vercel: process.env.VERCEL, vercelEnv: process.env.VERCEL_ENV,
     fetch: globalThis.fetch, databaseFetch: neonConfig.fetchFunction, now: Date.now,
     error: console.error, warn: console.warn };
   const state = { calls: [], queries: [], warnings: [], now: 1_000_000 };
   globalThis.__portalBuckets.clear();
   delete process.env.VERCEL;
   process.env.OPENAI_API_KEY = 'synthetic-provider-fixture-not-real';
-  if (recent) process.env.DATABASE_URL = ['postgresql:', '//fixture:fixture@fixture.invalid/portal'].join('');
-  else delete process.env.DATABASE_URL;
+  process.env.DATABASE_URL = ['postgresql:', '//fixture:fixture@fixture.invalid/portal'].join('');
+  process.env.VERCEL_ENV = 'production';
   Date.now = () => state.now;
   console.error = () => {};
   console.warn = (...values) => state.warnings.push(values);
@@ -53,12 +53,19 @@ async function fixture(run, { recent, status = 200 } = {}) {
     state.calls.push({ body: options.body, signal: options.signal });
     return { ok: status === 200, status, json: async () => completed() };
   };
-  neonConfig.fetchFunction = async (_url, options) => {
-    const request = JSON.parse(options.body);
+  function databaseResult(request) {
     state.queries.push(request.query);
     if (/select \* from artifacts/i.test(request.query)) return rows(recent || []);
     if (/^insert into artifacts/i.test(request.query)) return rows([]);
+    if (/SELECT \* FROM portal_generation_admission\.admit/i.test(request.query))
+      return rows([{ accepted: true, reason: 'admitted', retry_after_seconds: 0, request_id: request.params[0], allowance_micro_usd: 10000000, reserved_micro_usd: 1080000, remaining_micro_usd: 8920000 }]);
+    if (/portal_generation_admission|^(SET LOCAL|SELECT pg_advisory)/i.test(request.query)) return rows([]);
     throw new Error('Unexpected fixture query; external database access is forbidden');
+  }
+  neonConfig.fetchFunction = async (_url, options) => {
+    const request = JSON.parse(options.body);
+    if (request.queries) return { ok: true, json: async () => ({ results: await Promise.all(request.queries.map(query => databaseResult(query).json())) }) };
+    return databaseResult(request);
   };
   try { await run(state); }
   finally {
@@ -67,7 +74,7 @@ async function fixture(run, { recent, status = 200 } = {}) {
     neonConfig.fetchFunction = previous.databaseFetch;
     Date.now = previous.now;
     console.error = previous.error; console.warn = previous.warn;
-    for (const [name, value] of [['OPENAI_API_KEY', previous.key], ['DATABASE_URL', previous.database], ['VERCEL', previous.vercel]]) {
+    for (const [name, value] of [['OPENAI_API_KEY', previous.key], ['DATABASE_URL', previous.database], ['VERCEL', previous.vercel], ['VERCEL_ENV', previous.vercelEnv]]) {
       if (value === undefined) delete process.env[name]; else process.env[name] = value;
     }
   }
@@ -144,7 +151,7 @@ test('unpaired Unicode surrogates are predictably rejected before provider', asy
 test('normal handler generation still succeeds and preserves public evidence controls', async () => fixture(async state => {
   const response = await request();
   assert.equal(response.statusCode, 200);
-  assert.equal(response.body.persistence, 'local');
+  assert.equal(response.body.persistence, 'shared');
   assert.equal(response.body.evidence_level, 'AI-CURATED');
   assert.deepEqual(response.body.sources, []);
   assert.equal(state.calls.length, 1);
