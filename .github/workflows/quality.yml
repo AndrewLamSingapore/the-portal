@@ -33,7 +33,7 @@ jobs:
         env:
           PORTAL_ADMISSION_TEST_CONTAINER: abex-portal-admission-ci
         run: |
-          docker run -d --rm --name "$PORTAL_ADMISSION_TEST_CONTAINER" --label portal.admission-test=1 --network none --memory=384m --cpus=1 --volume /var/lib/postgresql/data -e POSTGRES_HOST_AUTH_METHOD=trust postgres:17-alpine
+          docker run -d --rm --name "$PORTAL_ADMISSION_TEST_CONTAINER" --label portal.admission-test=1 --network none --memory=384m --cpus=1 --volume /var/lib/postgresql/data -e POSTGRES_HOST_AUTH_METHOD=trust postgres@sha256:b0f9560a2de083e2cc7382e75f808c7381a32852a7ec49117deedb300e552b24
           trap 'docker rm -f -v "$PORTAL_ADMISSION_TEST_CONTAINER" >/dev/null 2>&1 || true' EXIT
           for attempt in $(seq 1 40); do
             if docker exec "$PORTAL_ADMISSION_TEST_CONTAINER" pg_isready -U postgres; then break; fi
