@@ -3,6 +3,8 @@ const root=document.getElementById('portalCinematic'),skip=document.getElementBy
 const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;let timers=[],animations=[],priorFocus=null;
 const seen=()=>{try{return sessionStorage.getItem('portal-cinematic-seen')==='1'}catch{return false}};
 const markSeen=()=>{try{sessionStorage.setItem('portal-cinematic-seen','1')}catch{}};
+// Shared cards open directly; keep the first-visit opening for the exhibition.
+const cardDeepLink=/\/card\/[^/]+\/?$/.test(location.pathname)||Boolean(new URLSearchParams(location.search).get('card'));
 const clear=()=>{timers.forEach(clearTimeout);timers=[];animations.forEach(a=>{try{a.cancel()}catch{}});animations=[]};
 const animate=(el,frames,options)=>{if(el)animations.push(el.animate(frames,options))};
 const later=(fn,delay)=>timers.push(setTimeout(fn,delay));
@@ -20,5 +22,5 @@ function run(){
 }
 function close(){clear();root.classList.remove('is-running','is-active');root.setAttribute('aria-hidden','true');document.body.classList.remove('cinematic-locked');markSeen();later(()=>{root.hidden=true;priorFocus?.focus?.()},700)}
 function open(){clear();priorFocus=document.activeElement;root.hidden=false;root.dataset.scene='opening';root.setAttribute('aria-hidden','false');document.body.classList.add('cinematic-locked');requestAnimationFrame(()=>{root.classList.add('is-active','is-running');skip.focus();run()});later(close,reduced?3600:10800)}
-skip.addEventListener('click',close);replay?.addEventListener('click',open);document.addEventListener('keydown',event=>{if(event.key==='Escape'&&root.classList.contains('is-active'))close()});if(!seen())open();
+skip.addEventListener('click',close);replay?.addEventListener('click',open);document.addEventListener('keydown',event=>{if(event.key==='Escape'&&root.classList.contains('is-active'))close()});if(!seen()&&!cardDeepLink)open();
 })();
