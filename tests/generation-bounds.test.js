@@ -36,11 +36,12 @@ function rows(values) {
   }) };
 }
 async function fixture(run, { recent, status = 200 } = {}) {
-  const previous = { key: process.env.OPENAI_API_KEY, database: process.env.DATABASE_URL,
+  const previous = { key: process.env.OPENAI_API_KEY, database: process.env.DATABASE_URL, vercel: process.env.VERCEL,
     fetch: globalThis.fetch, databaseFetch: neonConfig.fetchFunction, now: Date.now,
     error: console.error, warn: console.warn };
   const state = { calls: [], queries: [], warnings: [], now: 1_000_000 };
   globalThis.__portalBuckets.clear();
+  delete process.env.VERCEL;
   process.env.OPENAI_API_KEY = 'synthetic-provider-fixture-not-real';
   if (recent) process.env.DATABASE_URL = ['postgresql:', '//fixture:fixture@fixture.invalid/portal'].join('');
   else delete process.env.DATABASE_URL;
@@ -66,7 +67,7 @@ async function fixture(run, { recent, status = 200 } = {}) {
     neonConfig.fetchFunction = previous.databaseFetch;
     Date.now = previous.now;
     console.error = previous.error; console.warn = previous.warn;
-    for (const [name, value] of [['OPENAI_API_KEY', previous.key], ['DATABASE_URL', previous.database]]) {
+    for (const [name, value] of [['OPENAI_API_KEY', previous.key], ['DATABASE_URL', previous.database], ['VERCEL', previous.vercel]]) {
       if (value === undefined) delete process.env[name]; else process.env[name] = value;
     }
   }
@@ -76,7 +77,7 @@ async function request(address = '2001:db8::1', method = 'POST', mode = 'wander'
     setHeader(name, value) { this.headers[name] = value; },
     status(code) { this.statusCode = code; return this; },
     json(body) { this.body = body; return this; } };
-  await handler({ method, headers: { 'x-forwarded-for': address }, body: { mode } }, response);
+  await handler({ method, headers: { 'x-forwarded-for': address }, body: { mode }, socket: { remoteAddress: address.split(',')[0].trim() } }, response);
   return response;
 }
 async function capture(context) {
@@ -246,4 +247,36 @@ test('persistent upstream failure still stops after exactly two attempts', async
   } }), error => error.code === 'upstream_500');
   assert.equal(state.calls.length, 2);
   assert.equal(state.warnings.length, 1);
+}));
+
+test('Vercel caller budget ignores forged generic forwarding headers', async () => fixture(async state => {
+  process.env.VERCEL = '1';
+  for (let index = 0; index < 13; index++) {
+    const response = { statusCode: 200, setHeader() {}, status(code) { this.statusCode = code; return this; }, json(body) { this.body = body; return this; } };
+    await handler({ method: 'POST', headers: { 'x-forwarded-for': 'forged-' + index,
+      'x-real-ip': 'also-forged-' + index, 'x-vercel-forwarded-for': '2001:db8::42' },
+      socket: { remoteAddress: '127.0.0.1' }, body: { mode: 'wander' } }, response);
+    assert.equal(response.statusCode, index < 12 ? 200 : 429);
+  }
+  assert.equal(state.calls.length, 12);
+}));
+test('self-hosted caller budget uses socket identity despite forged forwarded headers', async () => fixture(async state => {
+  for (let index = 0; index < 13; index++) {
+    const response = { statusCode: 200, setHeader() {}, status(code) { this.statusCode = code; return this; }, json(body) { this.body = body; return this; } };
+    await handler({ method: 'POST', headers: { 'x-forwarded-for': 'forged-' + index,
+      'x-vercel-forwarded-for': 'forged-vercel-' + index }, socket: { remoteAddress: '2001:db8::43' },
+      body: { mode: 'wander' } }, response);
+    assert.equal(response.statusCode, index < 12 ? 200 : 429);
+  }
+  assert.equal(state.calls.length, 12);
+}));
+test('missing trusted ingress identity shares a conservative fallback budget', async () => fixture(async state => {
+  process.env.VERCEL = '1';
+  for (let index = 0; index < 13; index++) {
+    const response = { statusCode: 200, setHeader() {}, status(code) { this.statusCode = code; return this; }, json(body) { this.body = body; return this; } };
+    await handler({ method: 'POST', headers: { 'x-forwarded-for': 'forged-' + index },
+      socket: { remoteAddress: 'also-untrusted-' + index }, body: { mode: 'wander' } }, response);
+    assert.equal(response.statusCode, index < 12 ? 200 : 429);
+  }
+  assert.equal(state.calls.length, 12);
 }));

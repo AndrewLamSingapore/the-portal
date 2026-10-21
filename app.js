@@ -261,11 +261,18 @@ function normalizeTrialCounts(payload = {}) {
   return Object.fromEntries(TRIAL_VERDICTS.map(({ id }) => [id, Math.max(0, Number(source[id]) || 0)]));
 }
 
+function visibleArtifactSources(artifact) {
+  return (Array.isArray(artifact.sources) ? artifact.sources : [])
+    .map(source => ({ ...source, safeUrl: safeHttpsUrl(source?.url) }))
+    .filter(source => source.safeUrl);
+}
+
 function trialEvidenceText(artifact) {
-  const sources = (artifact.sources || []).filter(source => safeHttpsUrl(source.url));
+  const sources = visibleArtifactSources(artifact);
   if (artifact.evidence_level === 'HISTORICALLY-VERIFIED' && sources.length) return `Historically verified · ${sources.length} visible source${sources.length === 1 ? '' : 's'}.`;
   if (sources.length) return `${escapeHtml(artifact.evidence_level || 'AI-CURATED')} · ${sources.length} source lead${sources.length === 1 ? '' : 's'} attached for independent review.`;
-  return `${escapeHtml(artifact.evidence_level || 'AI-CURATED')} · No independent source trail is attached. Judge this as a discovery prompt, not historical authority.`;
+  if (artifact.evidence_level === 'HISTORICALLY-VERIFIED') return 'Source verification incomplete: no visible historical source trail is attached.';
+  return `${escapeHtml(artifact.evidence_level || 'AI-CURATED')} · Speculative reconstruction; object details and dates are imagined, not verified historical claims.`;
 }
 
 function trialResultMarkup(counts, selected) {
@@ -425,7 +432,9 @@ function artifactById(id) {
 }
 
 function evidenceBadge(artifact) {
-  const level = artifact.evidence_level || 'AI-CURATED';
+  const suppliedLevel = artifact.evidence_level || 'AI-CURATED';
+  const level = suppliedLevel === 'HISTORICALLY-VERIFIED' && !visibleArtifactSources(artifact).length
+    ? 'UNVERIFIED RECORD' : suppliedLevel;
   return `<span class="badge ${evidenceClass(level)}">${escapeHtml(level)}</span>`;
 }
 
@@ -589,7 +598,10 @@ function drawGraph() {
 
 function detailMarkup(artifact) {
   const level = artifact.evidence_level || 'AI-CURATED';
-  const sources = (artifact.sources || []).map(source => ({ ...source, safeUrl: safeHttpsUrl(source.url) })).filter(source => source.safeUrl);
+  const sources = visibleArtifactSources(artifact);
+  const disclosure = sources.length ? '' : level === 'HISTORICALLY-VERIFIED'
+    ? '<p class="evidence-notice" data-evidence-boundary><b>Source verification incomplete.</b> This record has no visible historical source trail. Do not treat its details as verified history.</p>'
+    : '<p class="evidence-notice" data-evidence-boundary><b>Speculative reconstruction.</b> No historical sources are supplied. Object details, dates and archival-sounding language are imagined, not evidence that an object or archival record exists.</p>';
   const sourceMarkup = sources.length
     ? `<h3>Source trail</h3>${sources.map(source => `<a href="${escapeHtml(source.safeUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(source.title || source.safeUrl)}</a>`).join('')}`
     : '<p class="evidence-notice"><b>Evidence boundary:</b> no independent source trail is attached. Treat this as a discovery prompt, not historical authority.</p>';
@@ -600,6 +612,7 @@ function detailMarkup(artifact) {
   return `${evidenceBadge(artifact)}
     <h2 id="drawerTitle">${escapeHtml(artifact.title)}</h2>
     <p class="meta">${escapeHtml(artifact.id)} · ${escapeHtml(artifact.year)} · ${escapeHtml(artifact.status || 'EXPLORING')} · ${escapeHtml(artifact.persistence || 'ARCHIVE')}</p>
+    ${disclosure}
     <p>${escapeHtml(artifact.description)}</p>
     <h3>Provenance</h3><p>${escapeHtml(artifact.provenance || 'Not supplied.')}</p>
     <h3>Encounter / imagined future</h3><p>${escapeHtml(artifact.imagined_future)}</p>

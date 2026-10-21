@@ -11,7 +11,10 @@ const MAX_PER_WINDOW = 12;
 const MAX_BUCKETS = 4_096;
 
 function ip(req) {
-  const address = String(req.headers['x-forwarded-for'] || req.headers['x-real-ip'] || 'unknown').split(',')[0].trim();
+  // Vercel overwrites this ingress header. Generic forwarded headers are client-controlled.
+  // Standalone hosting trusts only the socket; missing trusted identity shares one budget.
+  const trusted = process.env.VERCEL ? req.headers?.['x-vercel-forwarded-for'] : req.socket?.remoteAddress;
+  const address = String(trusted || 'unknown').split(',')[0].trim();
   return crypto.createHash('sha256').update(address).digest('hex');
 }
 
