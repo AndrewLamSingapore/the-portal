@@ -5,6 +5,7 @@ import { portfolioOutboxStatus } from '../src/lib/portfolio-events.js';
 import { PRODUCT_VERSION } from '../lib/product-version.js';
 import { trustRelayHandler, postgresTrustStore } from '../src/lib/trust-relay.js';
 import { ADMISSION_POLICY } from '../lib/generation-admission.js';
+import { privateBoundaryStatus } from '../lib/prime-auth.js';
 
 export default async function handler(req, res) {
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
@@ -74,6 +75,20 @@ export default async function handler(req, res) {
       console.error(JSON.stringify({ level: 'error', message: 'admission_status_failed', route: '/api/health?route=admission' }));
       return res.status(503).json({ ok: false, error: 'Admission ledger unavailable' });
     }
+  }
+  if (route === 'identity-boundary') {
+    if (req.method !== 'GET') {
+      res.setHeader('Allow', 'GET');
+      return res.status(405).json({ ok: false, error: 'Method not allowed' });
+    }
+    const boundary = await privateBoundaryStatus();
+    const ok = boundary.database && boundary.auth_configured && boundary.schema && boundary.forced_rls && boundary.runtime_role;
+    return res.status(ok ? 200 : 503).json({
+      ok,
+      scope: 'PORTAL_PRIVATE_IDENTITY_BOUNDARY_READ_ONLY',
+      ...boundary,
+      revision: process.env.VERCEL_GIT_COMMIT_SHA || null,
+    });
   }
   if (route !== 'health') return res.status(404).json({ ok: false, error: 'Route not found' });
   if (req.method !== 'GET') {

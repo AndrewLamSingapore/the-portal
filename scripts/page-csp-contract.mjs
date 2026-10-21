@@ -77,16 +77,13 @@ assert.ok(v2js.includes("$('grid')"), 'v2.js still renders the grid');
 
 /*
  * The same policy decides which origins the shipped client scripts may reach.
- * The private PRIME client authenticates directly against Supabase Auth, and it
- * once shipped against `connect-src 'self'`: the browser refused the request,
- * the rejection had nowhere to go, and every password-recovery submit became a
- * silent no-op in production. Every absolute origin a shipped script passes to
- * fetch() must therefore be allowed by connect-src.
+ * Portal authentication is proxied through same-origin API routes, so browser
+ * code must not depend on an absolute provider origin at all.
  */
-const connectSrc = (policy.split(';').find((part) => part.trim().startsWith('connect-src')) || '')
-  .split(/\s+/)
-  .slice(1);
+const connectDirective = (policy.split(';').find((part) => part.trim().startsWith('connect-src')) || '').trim();
+const connectSrc = connectDirective.split(/\s+/).slice(1);
 assert.ok(connectSrc.includes("'self'"), 'connect-src still permits the deployment origin');
+assert.deepEqual(connectSrc, ["'self'"], 'browser scripts may reach only the Portal origin');
 
 const clientScripts = fs.readdirSync('.').filter((file) => file.endsWith('.js'));
 const fetchedOrigins = new Map();
@@ -111,17 +108,12 @@ for (const script of clientScripts) {
     }
   }
 }
-assert.ok(
-  fetchedOrigins.size >= 1,
-  'expected at least one shipped client script to fetch an absolute origin; the contract would otherwise pass vacuously',
+assert.equal(
+  fetchedOrigins.size,
+  0,
+  `browser scripts must use same-origin APIs, found: ${[...fetchedOrigins].map(([origin, script]) => `${script} -> ${origin}`).join(', ')}`,
 );
-for (const [origin, script] of fetchedOrigins) {
-  assert.ok(
-    connectSrc.includes(origin),
-    `${script} fetches ${origin}, which connect-src blocks; add the origin to the Content-Security-Policy`,
-  );
-}
 
 console.log(
-  `PASS: ${pages.length} pages satisfy the deployed Content Security Policy, and connect-src allows ${fetchedOrigins.size} absolute client origin(s).`,
+  `PASS: ${pages.length} pages satisfy the deployed Content Security Policy, and all client fetches are same-origin.`,
 );

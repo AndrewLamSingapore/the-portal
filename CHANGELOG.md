@@ -2,6 +2,21 @@
 
 # Changelog
 
+## 6.6.0 - Portal-owned private identity boundary
+
+- Moves Portal private authentication, identity mapping, reports and publisher
+  records off the Game Platform Supabase project and onto the Portal-owned Neon
+  database.
+- Uses the existing Neon Auth integration through same-origin Portal API routes;
+  no provider URL, publishable key, access token or private report is shipped in
+  browser storage.
+- Adds additive `portal_identities`, `portal_reports` and `portal_publishers`
+  tables with forced RLS, a restricted runtime role, owner-only identity and
+  publisher administration, and member-visible report filtering.
+- Keeps the legacy Supabase `prime_*` tables untouched as rollback evidence.
+- Adds disposable PostgreSQL RLS verification plus revised authorization,
+  publication and desktop/iPhone browser contracts.
+
 ## Unreleased - Private PRIME report ingestion
 
 - Fixes a private read defect found during the 23 September 2026 production
