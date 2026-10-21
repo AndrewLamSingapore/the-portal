@@ -29,6 +29,17 @@ jobs:
       - run: npm ci
       - run: node --check inhabitants.js && node --check scripts/inhabitants-smoke.mjs
       - run: npm run verify
+      - name: Verify shared admission on disposable PostgreSQL
+        env:
+          PORTAL_ADMISSION_TEST_CONTAINER: abex-portal-admission-ci
+        run: |
+          docker run -d --rm --name "$PORTAL_ADMISSION_TEST_CONTAINER" --label portal.admission-test=1 --network none --memory=384m --cpus=1 --volume /var/lib/postgresql/data -e POSTGRES_HOST_AUTH_METHOD=trust postgres:17-alpine
+          trap 'docker rm -f -v "$PORTAL_ADMISSION_TEST_CONTAINER" >/dev/null 2>&1 || true' EXIT
+          for attempt in $(seq 1 40); do
+            if docker exec "$PORTAL_ADMISSION_TEST_CONTAINER" pg_isready -U postgres; then break; fi
+            sleep 1
+          done
+          npm run test:admission:postgres
       - run: npm run synthetic:result
       - name: Verify the PRIME authorization contract
         run: npm run prime:authorization

@@ -1,6 +1,7 @@
 import crypto from 'node:crypto';
 
-import { ArtifactInputError, MODES, generateArtifact } from '../lib/artifact-generation.js';
+import { ArtifactInputError, MODES, artifactRequestBody, generateArtifact } from '../lib/artifact-generation.js';
+import { ADMISSION_POLICY, GenerationAdmissionError, admitGeneration, finishGeneration } from '../lib/generation-admission.js';
 import { findArtifacts, hasDatabase, saveArtifact } from '../lib/db.js';
 
 const GENERATION_TIMEOUT_MS = 52_000;
@@ -69,44 +70,61 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
   if (!process.env.OPENAI_API_KEY) return res.status(503).json({ error: 'Archive not configured' });
-  if (!allowed(ip(req))) return res.status(429).json({ error: 'The archive needs time to settle. Try again later.' });
+  // Independent preview branches must not create additional public spend allowances.
+  if (process.env.VERCEL && process.env.VERCEL_ENV !== 'production')
+    return res.status(503).json({ error: 'Public generation is unavailable in this environment.' });
+  if (!hasDatabase()) return res.status(503).json({ error: 'Shared generation controls unavailable. Please try again later.' });
+  const clientHash = ip(req);
+  if (!allowed(clientHash)) return res.status(429).json({ error: 'The archive needs time to settle. Try again later.' });
 
   const mode = typeof req.body?.mode === 'string' && Object.hasOwn(MODES, req.body.mode) ? req.body.mode : 'wander';
-  let context = '', recent = [];
-  if (hasDatabase()) {
-    try {
-      recent = await findArtifacts({ limit: 12 });
-      context = `\nRECENT ARTIFACTS: ${recent.map(item => `${item.id}: ${item.year} ${item.title} [${(item.concepts || []).join(', ')}]`).join(' | ')}`;
-    } catch {
-      context = '';
-    }
-  }
-
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), GENERATION_TIMEOUT_MS);
+  let admission;
   try {
+    let context = '', recent = [];
+    try {
+      recent = await findArtifacts({ limit: 12 });
+      context = '\nRECENT ARTIFACTS: ' + recent.map(item => item.id + ': ' + item.year + ' ' + item.title + ' [' + (item.concepts || []).join(', ') + ']').join(' | ');
+    } catch { context = ''; }
+    // Reject malformed/oversized input before a durable reservation or provider call.
+    artifactRequestBody({ mode, context });
+    admission = await admitGeneration(clientHash);
+    // Acknowledged ledger metadata is response-only; never part of the saved artifact.
+    res.setHeader('X-Portal-Generation-Policy', ADMISSION_POLICY.id);
+    res.setHeader('X-Portal-Generation-Allowance-MicroUSD', String(admission.allowance_micro_usd));
+    res.setHeader('X-Portal-Generation-Reserved-MicroUSD', String(admission.reserved_micro_usd));
+    res.setHeader('X-Portal-Generation-Remaining-MicroUSD', String(admission.remaining_micro_usd));
+    if (!admission.accepted) {
+      if (admission.reason === 'credit_exhausted')
+        return res.status(503).json({ error: 'Public generation credit is exhausted. The shared archive remains available.' });
+      res.setHeader('Retry-After', String(Math.max(1, Math.min(3600, Number(admission.retry_after_seconds) || 1))));
+      return res.status(429).json({ error: 'The archive needs time to settle. Try again later.' });
+    }
+    if (controller.signal.aborted) throw new DOMException('Archive timed out', 'AbortError');
     const artifact = canonical(await generateArtifact({ mode, context, signal: controller.signal }), mode, new Set(recent.map(item => item.id)));
-    if (hasDatabase()) {
-      try {
-        await saveArtifact(artifact);
-        artifact.persistence = 'shared';
-      } catch (error) {
-        console.error('persistence', error?.message || error);
-        artifact.persistence = 'local-fallback';
-      }
-    } else {
-      artifact.persistence = 'local';
+    try {
+      await saveArtifact(artifact);
+      artifact.persistence = 'shared';
+    } catch (error) {
+      console.error('persistence', error?.message || error);
+      artifact.persistence = 'local-fallback';
     }
     return res.status(200).json(artifact);
   } catch (error) {
+    const controlsUnavailable = error instanceof GenerationAdmissionError;
     const inputRejected = error instanceof ArtifactInputError;
     const timedOut = error?.name === 'AbortError';
     const upstreamFailure = error?.upstream === true || error instanceof TypeError;
     console.error('artifact error', timedOut ? 'timeout' : error?.code || error?.message || error);
-    return res.status(inputRejected ? 503 : timedOut ? 504 : upstreamFailure ? 502 : 500).json({
-      error: inputRejected ? 'Archive context exceeds generation limits. Please try again later.' : timedOut ? 'Archive timed out' : upstreamFailure ? 'Archive generation was incomplete. Please try again.' : 'Archive failure'
+    return res.status(controlsUnavailable || inputRejected ? 503 : timedOut ? 504 : upstreamFailure ? 502 : 500).json({
+      error: controlsUnavailable ? 'Shared generation controls unavailable. Please try again later.' : inputRejected ? 'Archive context exceeds generation limits. Please try again later.' : timedOut ? 'Archive timed out' : upstreamFailure ? 'Archive generation was incomplete. Please try again.' : 'Archive failure'
     });
   } finally {
     clearTimeout(timer);
+    if (admission?.accepted) {
+      try { await finishGeneration(admission.request_id); }
+      catch { console.error('generation lease completion unavailable'); }
+    }
   }
 }
