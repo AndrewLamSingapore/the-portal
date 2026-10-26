@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="360" viewBox="0 0 1280 360" role="img" aria-labelledby="title description">
+  <title id="title">THE PORTAL — encounter / connect / experiment</title>
+  <desc id="description">Follow an idea into a different future. Connected artifacts / Questions / Evidence boundaries.</desc>
+  <defs>
+    <linearGradient id="background" x2="1" y2="1"><stop stop-color="#0b1120"/><stop offset="1" stop-color="#17273c"/></linearGradient>
+    <radialGradient id="light"><stop stop-color="#c7a6ff" stop-opacity=".17"/><stop offset="1" stop-color="#c7a6ff" stop-opacity="0"/></radialGradient>
+    <pattern id="grid" width="48" height="48" patternUnits="userSpaceOnUse"><path d="M48 0H0V48" fill="none" stroke="#b4c6de" stroke-opacity=".07"/></pattern>
+    <clipPath id="frame"><rect width="1280" height="360" rx="24"/></clipPath>
+  </defs>
+  <g clip-path="url(#frame)">
+    <rect width="1280" height="360" fill="url(#background)"/>
+    <rect width="1280" height="360" fill="url(#grid)"/>
+    <ellipse cx="1060" cy="140" rx="360" ry="310" fill="url(#light)"/>
+    <g fill="none" stroke="#c7a6ff" transform="translate(1080 170)">
+      <circle r="113" stroke-opacity=".18"/><circle r="78" stroke-opacity=".28"/>
+      <path d="M-140 60L-65-35L25 20L100-80M-65-35L35-100L100-80M25 20L90 90" stroke-opacity=".52" stroke-width="2"/>
+      <g fill="#c7a6ff" stroke="none"><circle cx="-140" cy="60" r="5"/><circle cx="-65" cy="-35" r="7"/><circle cx="25" cy="20" r="7"/><circle cx="100" cy="-80" r="5"/><circle cx="35" cy="-100" r="4"/></g>
+      <circle cx="90" cy="90" r="6" fill="#68dfef" stroke="none"/>
+    </g>
+    <g font-family="Segoe UI,Arial,sans-serif">
+      <text x="64" y="68" fill="#c7a6ff" font-size="15" font-weight="700" letter-spacing="2.6">ENCOUNTER / CONNECT / EXPERIMENT</text>
+      <text x="60" y="154" fill="#f4f7fc" font-size="66" font-weight="700" letter-spacing="-1.5">THE PORTAL</text>
+      <text x="64" y="210" fill="#e0e8f4" font-size="28">Follow an idea into a different future.</text>
+      <text x="64" y="252" fill="#b9c9de" font-size="19">Connected artifacts / Questions / Evidence boundaries</text>
+      <text x="64" y="320" fill="#68dfef" font-size="13" font-weight="700" letter-spacing="2.5">ANDREW LAM  /  EXPLORE THE EXPERIENCE + INSPECT THE SOURCE</text>
+    </g>
+    <rect width="7" height="360" fill="#c7a6ff"/>
+  </g>
+</svg>

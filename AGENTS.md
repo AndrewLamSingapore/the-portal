@@ -2,7 +2,7 @@
 
 For ORQEVIA and portfolio work, review current status claims in
 [STATUS.md](https://github.com/AndrewLamSingapore/orqevia/blob/main/STATUS.md) in the
-private ORQEVIA repository. It is a portfolio status record, not a source for
+public ORQEVIA repository. It is a portfolio status record, not a source for
 product code, configuration, contracts, or domain data. Each product owns those
 records in its own repository.
 Only Lam may move an item into its "Verified" sections.
@@ -38,4 +38,4 @@ mutate the sealed ABEX baseline to make a status record look current.
 
 ## Gate Zero — Owner operating doctrine (3 October 2026)
 
-Default to useful execution. Classify `BLOCKER` only with concrete current evidence that a **specific** requested operation is prevented, or would create material risk that cannot reasonably be contained or reversed; stop only that operation. A failed probe, unknown, historical incident, optional check, backlog item or unavailable auxiliary peer is not a global failure or blocker. Continue independent work. Preserve authentication, secrets, data integrity, recoverability and known-good production; do not disable functioning tools, agents, models or probes merely to make status clean. The fuller shared rule is in PRIME's `AGENTS.md`; `STATUS.md` remains status authority, and a candidate/CI result is not live deployment proof.
+Default to useful execution. Classify `BLOCKER` only with concrete current evidence that a **specific** requested operation is prevented, or would create material risk that cannot reasonably be contained or reversed; stop only that operation. A failed probe, unknown, historical incident, optional check, backlog item or unavailable auxiliary peer is not a global failure or blocker. Continue independent work. Preserve authentication, secrets, data integrity, recoverability and known-good production; do not disable functioning tools, agents, models or probes merely to make status clean. The fuller shared rule is in ORQEVIA's `AGENTS.md`; `STATUS.md` remains status authority, and a candidate/CI result is not live deployment proof.

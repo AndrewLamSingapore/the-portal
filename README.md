@@ -1,12 +1,24 @@
+[![THE PORTAL — Follow an idea into a different future.](docs/repository-banner.svg)](https://the-portal-ten.vercel.app/)
+
 # The Portal
 
 [**Open The Portal ↗**](https://the-portal-ten.vercel.app/) · [**Discuss this project**](https://authority-engine-app.vercel.app/contact?source=portal) · [**Meet Andrew Lam**](https://authority-engine-app.vercel.app/about)
 
 The Portal is a continuously evolving model of humanity's imagined futures. It tracks how ideas emerge, disappear, return, fail, partially materialize and become real—without hiding the boundary between generated hypotheses and source-supported history. Its public surfaces combine **The Future on Trial** with a production Living Observatory for bounded evolutionary hypotheses, falsification and fossil memory.
 
+## Start here
+
+| You want to… | Go to |
+| --- | --- |
+| Enter the experience | [The Portal](https://the-portal-ten.vercel.app/) and [the experiment](#the-experiment) |
+| Understand the source | [Architecture](ARCHITECTURE.md), [configuration](CONFIGURATION.md) and [release guide](RELEASE.md) |
+| Contribute | [Contribution guide](CONTRIBUTING.md) and [security policy](SECURITY.md); generated hypotheses need independent source checks |
+
+[Browse all six projects and their source](https://github.com/AndrewLamSingapore/AndrewLamSingapore#selected-work) · [About Andrew](https://authority-engine-app.vercel.app/about)
+
 ## Connected work
 
-[**Explore ORQEVIA**](https://authority-engine-app.vercel.app/jarvis) · [**Meet Andrew**](https://authority-engine-app.vercel.app/about) · [**Start a conversation**](https://authority-engine-app.vercel.app/contact?source=portal&intent=collaboration)
+[**Explore ORQEVIA**](https://authority-engine-app.vercel.app/orqevia) · [**Meet Andrew**](https://authority-engine-app.vercel.app/about) · [**Start a conversation**](https://authority-engine-app.vercel.app/contact?source=portal&intent=collaboration)
 
 ORQEVIA’s public walkthrough connects this project to Andrew’s wider work. Public navigation and enquiries do not merge accounts, data or runtime authority. Current operational evidence comes from the canonical portfolio record; this README describes source capabilities.
 
