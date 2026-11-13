@@ -14,6 +14,8 @@ The Portal is a continuously evolving model of humanity's imagined futures. It t
 | Understand the source | [Architecture](ARCHITECTURE.md), [configuration](CONFIGURATION.md) and [release guide](RELEASE.md) |
 | Contribute | [Contribution guide](CONTRIBUTING.md) and [security policy](SECURITY.md); generated hypotheses need independent source checks |
 
+[Report a bug](https://github.com/AndrewLamSingapore/the-portal/issues) · [Ask a question](https://github.com/AndrewLamSingapore/the-portal/discussions) · [Wiki](https://github.com/AndrewLamSingapore/the-portal/wiki)
+
 [Browse all six projects and their source](https://github.com/AndrewLamSingapore/AndrewLamSingapore#selected-work) · [About Andrew](https://authority-engine-app.vercel.app/about)
 
 ## Connected work
