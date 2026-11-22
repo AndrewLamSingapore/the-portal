@@ -47,3 +47,6 @@ html{overflow-x:clip;scroll-padding-top:100px}html body.public-refresh{overflow-
 .public-header { box-shadow: 0 8px 24px #0002; }
 @media(max-width:900px) { .portal-home .hero { gap: 28px; } .portal-home .hero h1 { font-size: clamp(3rem, 6.2vw, 4.5rem); } }
 @media(max-width:680px) { .portal-home .hero { grid-template-columns: minmax(0, 1fr); padding-block: 34px 42px; } .portal-home .hero h1 { font-size: clamp(2.9rem, 11vw, 4rem); max-width: 15ch; } .portal-home .hero-art { aspect-ratio: 1.6; max-height: 280px; } .portal-home .world-threshold { min-height: 0; } .public-links a { font-size: .875rem; } }
+
+/* Show the invitation immediately; the optional opening remains available. */
+.portal-home .hero h1, .portal-home .hero .eyebrow, .portal-home .hero .thesis { animation: none; opacity: 1; transform: none; }
