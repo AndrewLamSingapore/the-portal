@@ -36,7 +36,8 @@ function link(destination,label,placement){
 }
 const nav=document.createElement('nav');nav.className='ecosystem-nav';nav.setAttribute('aria-label','Lam ecosystem');
 nav.append(link('portal','The Portal','top_nav'),link('authorityEngine','Authority Engine','top_nav'),link('jarvis','ORQEVIA · 奥启维亚','top_nav'),link('gamePlatform','Living Worlds','top_nav'),link('velyqua','VELYQUA','top_nav'),link('skyTablet','Sky Tablet','top_nav'),link('github','GitHub','top_nav'));
-(document.querySelector('footer') || document.querySelector('main'))?.before(nav);
+const navFooter=document.querySelector('footer');
+if(navFooter)navFooter.before(nav);else document.querySelector('main')?.after(nav);
 if(current==='portal'){
   const cta=link('gamePlatform','PLAY LIVING WORLDS →','portal_hero');cta.className='ecosystem-link-subtle';document.querySelector('.entry-footer')?.append(cta);
 }
