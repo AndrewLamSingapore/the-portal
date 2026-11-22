@@ -22,11 +22,17 @@ function json(result, path) {
 
 const home = await get('/');
 assert.equal(home.response.status, 200);
-for (const token of ['<title>THE PORTAL · Living Knowledge System</title>', 'id="futureOnTrial"', 'id="trialStage"', 'id="curatorForm"', 'id="phaseStrip"', 'id="transitions"', 'id="watchlist"', 'id="graph"', 'id="lenses"', 'id="experiments"', 'id="evolution"', 'id="cabinetGrid"', '/motion.css', '/motion.js']) {
+for (const token of ['<title>THE PORTAL · Ideas and Evidence</title>', 'id="futureOnTrial"', 'id="trialStage"', 'id="curatorForm"', 'id="phaseStrip"', 'id="transitions"', 'id="watchlist"', 'id="graph"', 'id="lenses"', 'id="experiments"', 'id="evolution"', 'id="cabinetGrid"', '/motion.css', '/motion.js']) {
   assert.ok(home.text.includes(token), `homepage missing ${token}`);
 }
 assert.equal(home.response.headers.get('x-frame-options'), 'DENY');
 assert.match(home.response.headers.get('content-security-policy') || '', /frame-ancestors 'none'/);
+
+const cloudGuide = await get('/cloud-support');
+assert.equal(cloudGuide.response.status, 200, 'public cloud guide must be available');
+for (const token of ['id="architecture"', 'id="deployment"', 'id="support"', 'href="/api/health"']) {
+  assert.ok(cloudGuide.text.includes(token), `cloud guide missing ${token}`);
+}
 
 const [appResult, styleResult, motionStyleResult, motionResult, livingPageResult, livingResult, versionResult, healthResult, statusResult, readinessResult, manifestResult] = await Promise.all([
   get('/app.js'),

@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>Cloud Support and Deployment · THE PORTAL</title>
+  <meta name="description" content="How THE PORTAL runs on Vercel and Neon, moves from GitHub review to production, and supports troubleshooting and recovery.">
+  <meta name="theme-color" content="#090908"><meta name="robots" content="index,follow,max-image-preview:large">
+  <link rel="canonical" href="https://the-portal-ten.vercel.app/cloud-support">
+  <meta property="og:title" content="Cloud Support and Deployment · THE PORTAL"><meta property="og:description" content="Explore the architecture, release process and support runbook behind the working prototype."><meta property="og:type" content="article"><meta property="og:url" content="https://the-portal-ten.vercel.app/cloud-support"><meta property="og:image" content="https://the-portal-ten.vercel.app/portal-cinematic.webp"><meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="stylesheet" href="/styles.css"><link rel="stylesheet" href="/authority-family.css?v=1"><link rel="stylesheet" href="/ai-biology.css"><link rel="stylesheet" href="/public-experience.css?v=1"><script src="/public-experience.js?v=1" defer></script>
+</head>
+<body class="public-refresh biology-page cloud-page">
+<a class="skip-link" href="#cloud-main">Skip to the cloud guide</a>
+<header class="public-header"><a class="public-brand" href="/" aria-label="The Portal home">THE PORTAL<span aria-hidden="true">↗</span></a><nav class="public-links" aria-label="Main navigation"><a href="/#explore">Explore</a><a href="/cloud-support">Cloud guide</a><a href="/ai-biology">AI &amp; biology</a><a href="/evidence-lab">Evidence Lab</a></nav><details class="public-more"><summary>More</summary><nav aria-label="More from The Portal"><a href="/#howToRead">How it works</a><a href="/living">Living Observatory</a><a href="/inhabitants">Meet the inhabitants</a><a href="/v2">Evidence &amp; ancestry</a><a href="https://github.com/AndrewLamSingapore/the-portal" target="_blank" rel="noopener noreferrer">GitHub source ↗</a></nav></details></header>
+<header class="biology-nav"><span class="biology-section-label">Cloud guide</span><nav aria-label="Cloud guide sections"><a href="#architecture">Architecture</a><a href="#deployment">Deployment</a><a href="#support">Support</a></nav></header>
+<main id="cloud-main" class="biology-main">
+  <header class="biology-hero">
+    <p class="biology-kicker">The working prototype · Cloud support and deployment</p>
+    <h1>Cloud support<br><em>&amp; deployment</em></h1>
+    <p class="biology-lede">How THE PORTAL runs, reaches production, and recovers when something fails.</p>
+    <div class="biology-actions"><a class="biology-action" href="#architecture">Explore the architecture <span aria-hidden="true">↓</span></a><a href="/api/health" target="_blank" rel="noopener noreferrer">Open live health ↗</a></div>
+    <p class="biology-scope">This guide explains the prototype’s implementation and support process. A deployment’s health and revision establish what is currently running.</p>
+  </header>
+
+  <section class="biology-section" id="architecture" aria-labelledby="architecture-title">
+    <p class="biology-kicker">01 · Architecture</p><h2 id="architecture-title">Four layers, clear responsibilities</h2>
+    <p class="biology-scroll-hint">Swipe the table sideways to read all columns.</p>
+    <div class="biology-table-wrap" role="region" aria-label="Cloud architecture table, scroll horizontally on narrow screens" tabindex="0">
+      <table><thead><tr><th scope="col">Layer</th><th scope="col">Technology</th><th scope="col">Responsibility</th></tr></thead><tbody>
+        <tr><th scope="row">Browser</th><td>HTML, CSS and JavaScript</td><td>Present the archive and graph. Retain the private cabinet in this browser.</td></tr>
+        <tr><th scope="row">Server API</th><td>Vercel functions</td><td>Validate requests, enforce generation controls and keep credentials server-side.</td></tr>
+        <tr><th scope="row">Shared archive</th><td>PostgreSQL through Neon</td><td>Persist shared records and relationships when the database is configured.</td></tr>
+        <tr><th scope="row">AI generation</th><td>Server-side model request</td><td>Create one structured discovery object on an explicit request. Preserve its evidence label.</td></tr>
+      </tbody><caption>The biology case study and this guide are static educational pages. THE PORTAL does not run biological simulations.</caption></table>
+    </div>
+    <p>Source: <a href="https://github.com/AndrewLamSingapore/the-portal/blob/main/ARCHITECTURE.md" target="_blank" rel="noopener noreferrer">Architecture</a> and <a href="https://github.com/AndrewLamSingapore/the-portal/blob/main/CONFIGURATION.md" target="_blank" rel="noopener noreferrer">configuration</a>.</p>
+  </section>
+
+  <section class="biology-section" id="deployment" aria-labelledby="deployment-title">
+    <p class="biology-kicker">02 · Deployment</p><h2 id="deployment-title">A reviewed change becomes a live release</h2>
+    <ol class="cloud-steps">
+      <li><strong>Change the source</strong><span>Create a Git branch and pull request with a clear description of the change.</span></li>
+      <li><strong>Run checks</strong><span>Check the application contracts, unit tests and dependencies. Keep private credentials out of browser code.</span></li>
+      <li><strong>Review the preview</strong><span>Vercel builds the candidate. Inspect its desktop and mobile layouts and test the affected interactions.</span></li>
+      <li><strong>Merge and deploy</strong><span>A reviewed merge to the connected main branch triggers the production deployment.</span></li>
+      <li><strong>Verify production</strong><span>Check the live URL, archive and graph. Match the revision returned by the health endpoint to the intended commit.</span></li>
+      <li><strong>Recover if necessary</strong><span>Use Vercel’s deployment controls to return to a known working release, then repeat the health and user-flow checks.</span></li>
+    </ol>
+    <p>Source: <a href="https://github.com/AndrewLamSingapore/the-portal/actions" target="_blank" rel="noopener noreferrer">GitHub Actions</a>, <a href="https://github.com/AndrewLamSingapore/the-portal/blob/main/RELEASE.md" target="_blank" rel="noopener noreferrer">release guide</a> and <a href="https://github.com/AndrewLamSingapore/the-portal/blob/main/scripts/production-smoke.mjs" target="_blank" rel="noopener noreferrer">production checks</a>. Recovery is an operator action.</p>
+  </section>
+
+  <section class="biology-section" id="support" aria-labelledby="support-title">
+    <p class="biology-kicker">03 · Cloud support</p><h2 id="support-title">Locate the failure before changing the system</h2>
+    <p>Start with the affected page and action. Use public health checks to locate the failing layer, then inspect the corresponding deployment or server logs.</p>
+    <div class="biology-stages cloud-troubleshooting">
+      <details><summary><span>01</span><strong>Archive unavailable</strong><span>The page opens, but shared records do not load.</span></summary><p>Check <a href="/api/health" target="_blank" rel="noopener noreferrer">health</a> and <a href="/api/archive" target="_blank" rel="noopener noreferrer">the archive response</a>. Inspect database connectivity and deployment configuration in the operator dashboard. The local cabinet can remain available while the shared archive is unavailable.</p></details>
+      <details><summary><span>02</span><strong>Generation fails</strong><span>Existing ideas load, but a new request fails.</span></summary><p>Inspect the request’s response and the Vercel function logs. Check model configuration, quota or admission limits. Correct the failing dependency, then retry deliberately. Browsing existing records does not require a generation request.</p></details>
+      <details><summary><span>03</span><strong>Wrong version appears</strong><span>The page does not match the intended release.</span></summary><p>Compare the <a href="/api/health" target="_blank" rel="noopener noreferrer">health response’s revision</a> with the reviewed commit. Confirm that the production domain points to the intended Vercel deployment, then refresh the page and check the changed feature.</p></details>
+      <details><summary><span>04</span><strong>A release regresses</strong><span>A previously working action now fails.</span></summary><p>Record the failing action and release revision. Inspect the checks and logs. Recover to a known working deployment when needed, then confirm the archive, card drawer, graph and affected action. A green build alone does not establish runtime health.</p></details>
+    </div>
+    <div class="cloud-checks"><a href="/api/health" target="_blank" rel="noopener noreferrer">Health ↗</a><a href="/api/status" target="_blank" rel="noopener noreferrer">Status ↗</a><a href="/api/readiness" target="_blank" rel="noopener noreferrer">Readiness ↗</a><a href="https://github.com/AndrewLamSingapore/the-portal/issues" target="_blank" rel="noopener noreferrer">Report an issue ↗</a></div>
+    <p>For a useful support report, include the time, page, action, expected result, observed error and release revision. Keep credentials and private payloads out of the report.</p>
+  </section>
+</main>
+<footer class="biology-footer"><a href="/">THE PORTAL</a><p>A working discovery prototype by Andrew Lam. Explore the software, inspect the evidence and ask a better question.</p><a href="/ai-biology">AI &amp; biology ↗</a></footer>
+</body>
+</html>
