@@ -26,7 +26,11 @@ export function hybridSearch(query,nodes,{limit=12,semanticScorer}={}) {
     const node=normalizeNode(raw);
     const text=[node.label,node.title,node.name,node.summary,node.description,node.type].filter(Boolean).join(' ');
     const lexical=jaccard(q,tokens(text));
-    const semantic=typeof semanticScorer==='function' ? Number(semanticScorer(query,node)||0) : 0;
+    const suppliedSemantic=typeof semanticScorer==='function' ? Number(semanticScorer(query,node)||0) : 0;
+    const semantic=Number.isFinite(suppliedSemantic) ? Math.max(0,Math.min(1,suppliedSemantic)) : 0;
+    // A source trail improves the ranking of relevant matches. It cannot make
+    // an unrelated node match a query on its own.
+    if(lexical<=0 && semantic<=0) continue;
     const provenance=Math.min(node.provenance.length/3,1);
     const score=(lexical*.55)+(semantic*.35)+(provenance*.10);
     if(score>0) ranked.push({node,score,lexical,semantic,provenance});
