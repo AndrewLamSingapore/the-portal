@@ -6,7 +6,7 @@
 
 Explore ideas, discover connections, and see what the evidence supports. **THE PORTAL is a working AI-assisted discovery prototype** with an interactive archive and graph. Generated prompts retain their evidence labels.
 
-[Explore the ideas](https://the-portal-ten.vercel.app/#explore) · [AI and biology case study](https://the-portal-ten.vercel.app/ai-biology) · [Ten-slide presentation and speaker notes](docs/presentations/THE-PORTAL-10-SLIDES.md)
+[Explore the ideas](https://the-portal-ten.vercel.app/#explore) · [Cloud support and deployment](https://the-portal-ten.vercel.app/cloud-support) · [AI and biology case study](https://the-portal-ten.vercel.app/ai-biology) · [Ten-slide presentation and speaker notes](docs/presentations/THE-PORTAL-10-SLIDES.md)
 
 ## Start here
 

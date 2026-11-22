@@ -176,7 +176,7 @@ await step('front door and card journey', async () => {
   await page.waitForTimeout(400);
   record('closing the card returns to the exhibition URL', page.url() === `${base}/`, page.url());
   record('closing the card closes the drawer', (await drawerOpen()) === false);
-  record('closing the card restores the exhibition title', (await page.title()).includes('Living Knowledge System'), await page.title());
+  record('closing the card restores the exhibition title', (await page.title()).includes('Ideas and Evidence'), await page.title());
 });
 
 await step('deep link, history and unknown card', async () => {

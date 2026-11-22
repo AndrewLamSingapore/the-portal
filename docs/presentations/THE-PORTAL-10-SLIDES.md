@@ -1,6 +1,6 @@
-# THE PORTAL: ten-slide presentation
+# THE PORTAL: cloud support and deployment
 
-Refreshed 22 November 2026 for a general classroom and public audience. Ten slides including the cover. Each slide includes a spoken script and source references.
+Refreshed 22 November 2026. Ten slides including the cover, with a working-product demonstration, cloud architecture, deployment, support and a sourced AI biology case study.
 
 
 ## 1. THE PORTAL
@@ -9,9 +9,9 @@ Explore ideas. Follow the evidence.
 
 Speaker notes:
 
-Hello, I’m Andrew Lam. THE PORTAL helps people explore ideas, discover connections, and see what the evidence supports. Let me show you how it works.
+Hello, I’m Andrew Lam. THE PORTAL is my working discovery prototype. I’ll show the application, explain its cloud deployment, and demonstrate how I approach support.
 
-Source: https://github.com/AndrewLamSingapore/the-portal. Cover artwork: the project’s original portal-cinematic.webp.
+Sources: https://github.com/AndrewLamSingapore/the-portal and https://the-portal-ten.vercel.app/cloud-support. Cover artwork: the project’s original portal-cinematic.webp.
 
 
 ## 2. The working website
@@ -22,7 +22,7 @@ Open a card to see its question, connections and evidence label.
 
 Speaker notes:
 
-This is the working website. I have kept the introduction short so visitors can explore immediately. The shared archive contains discovery prompts. Some use imagined objects and dates, so the evidence label matters. The biology link opens a separate case study with primary research sources.
+This is the working website. Visitors can explore existing ideas immediately, open the cloud guide, or inspect the biology case study. The archive contains discovery prompts, including imagined objects and dates. The evidence label explains how to read each card.
 
 Source and screenshot: https://the-portal-ten.vercel.app/, public refresh of 22 November 2026.
 
@@ -49,9 +49,11 @@ Sources: README.md, app.js and lib/knowledge.js in https://github.com/AndrewLamS
 
 Speaker notes:
 
-[Switch to the website for about 60 seconds.] I’ll open an existing card and point to its evidence label. If it has no source trail, the drawer explicitly describes its details as speculative. I’ll then show its unresolved question and a conceptual connection. [Return to the slides.] The graph offers directions for investigation. A connection alone does not prove causation.
+[Switch to the website for about 60 seconds.] I’ll open an existing archive card, show its evidence label and inspect its source trail. Unsourced details carry an explicit speculative warning. I’ll point out a question and connection, then open the Cloud guide link. [Return to the slides.] The same application gives us a concrete system to deploy and support.
 
-Demo: https://the-portal-ten.vercel.app/#explore. Use existing cards. No new generation or public verdict is needed. If the archive is unavailable, use this screenshot and the biology case study. Screenshot: the live public card drawer on 22 November 2026.
+Demo: https://the-portal-ten.vercel.app/#explore. Use existing records without generating new content or casting a public verdict. Screenshot: the public card drawer on 22 November 2026.
+
+Evidence labels: AI-CURATED means a generated discovery prompt. CONCEPTUAL-INFERENCE means an interpretive relationship. HISTORICALLY-VERIFIED requires curator review and a source trail. A connection does not establish causation.
 
 
 ## 5. The cloud architecture
@@ -70,22 +72,44 @@ The browser presents the interface and stores the private cabinet locally. Verce
 Sources: ARCHITECTURE.md, CONFIGURATION.md, app.js, lib/db.js and api/artifact.js in https://github.com/AndrewLamSingapore/the-portal.
 
 
-## 6. Evidence labels
+## 6. Cloud deployment
 
-The label tells you how to read the claim
-
-- **AI-CURATED**: A generated discovery prompt.
-- **CONCEPTUAL-INFERENCE**: An interpretive relationship to investigate.
-- **HISTORICALLY-VERIFIED**: A curator-reviewed record with a source trail.
+| Step | Implementation | Release check |
+| --- | --- | --- |
+| 1. GitHub | Branch and pull request | Review the change |
+| 2. Checks | Contracts, tests and dependency audit | Review passing results |
+| 3. Preview | Vercel candidate deployment | Check desktop and mobile |
+| 4. Production | Merge to the connected main branch | Confirm deployment is READY |
+| 5. Live checks | Health, archive and graph | Match the intended Git revision |
 
 Speaker notes:
 
-These labels keep different kinds of content visible. AI-curated material starts a question. A conceptual inference proposes a relationship. A historically verified record requires curator review and a source trail. The interface also warns when a record lacks sources. The biology case study uses primary papers and keeps its proposed workflow explicitly conceptual.
+I develop the change on a Git branch and open a pull request. Automated checks run before release, while Vercel creates a preview for user-flow and mobile review. After the reviewed merge, the connected project deploys production. I then check the public URL and compare the live health revision with the intended Git commit. A green build is one stage of release validation.
 
-Sources: app.js evidenceBadge(), visibleArtifactSources() and detailMarkup(); https://the-portal-ten.vercel.app/ai-biology.
+Sources: .github/workflows, RELEASE.md, vercel.json and scripts/production-smoke.mjs in https://github.com/AndrewLamSingapore/the-portal. Public walkthrough: https://the-portal-ten.vercel.app/cloud-support#deployment.
 
 
-## 7. AI and biology today
+## 7. Cloud support
+
+Health checks guide the next investigation
+
+| Observed issue | Layer to investigate | First checks |
+| --- | --- | --- |
+| Page or assets unavailable | Hosting or domain | Deployment state and HTTP response |
+| Shared archive unavailable | API or database | Health response and function logs |
+| Generation request fails | Function or model service | Request error, configuration and limits |
+| Unexpected release appears | Deployment or alias | Live revision against the Git commit |
+
+Speaker notes:
+
+For support, I first record the failing page and action. If the page loads but the archive fails, I investigate the API and database. If generation alone fails, I inspect the function response, configuration and limits. The public health, status and readiness endpoints help locate the failing layer. If a release causes a regression, I can recover to a known working Vercel deployment, then verify the affected action and revision. Recovery is an operator action.
+
+Support report: include time, URL, action, expected result, observed error and revision. Exclude credentials and private payloads.
+
+Sources: https://the-portal-ten.vercel.app/cloud-support#support, /api/health, /api/status and /api/readiness; scripts/production-smoke.mjs and the repository configuration guide.
+
+
+## 8. AI and biology today
 
 | Capability | Current scope |
 | --- | --- |
@@ -111,7 +135,7 @@ OpenCRISPR, Nature (2025): https://doi.org/10.1038/s41586-025-09298-z
 Virtual cell perspective, Cell (2024): https://doi.org/10.1016/j.cell.2024.11.015
 
 
-## 8. A biology research workflow
+## 9. The biology research frontier
 
 Five capabilities, with gaps between them
 
@@ -123,27 +147,9 @@ Five capabilities, with gaps between them
 
 Speaker notes:
 
-This five-stage workflow is a conceptual way to organize the research. Separate tools already address parts of it. The gap is reliable integration across the stages and biological scales. THE PORTAL helps us explore that question and its sources. It does not perform biological simulation or genetic editing.
+Biology is one case study inside the discovery platform. READ, UNDERSTAND, SIMULATE, DESIGN and VALIDATE organize separate research capabilities. Reliable prediction across DNA regulation, proteins, cells, tissues and a whole organism remains a major integration challenge. THE PORTAL presents this evidence and open question. It does not run biological simulation or genetic editing.
 
-Conceptual synthesis. Sources: AlphaGenome https://doi.org/10.1038/s41586-025-10014-0; Evo 2 https://doi.org/10.1038/s41586-026-10176-5; virtual cell perspective https://doi.org/10.1016/j.cell.2024.11.015.
-
-
-## 9. The prediction frontier
-
-What happens after DNA changes?
-
-| Biological scale | What models must account for |
-| --- | --- |
-| DNA and regulation | Which genes change activity, where and when |
-| Proteins and cells | Interactions, feedback and cellular context |
-| Tissues and organs | Delivery, coordination and different responses |
-| Whole organism | Environment, time and unintended effects |
-
-Speaker notes:
-
-A change in DNA can have different consequences across cells, tissues and time. Better molecular predictions help with parts of that problem. They do not settle every downstream effect. For me, the useful research question is how prediction improves as evidence connects these biological scales. Each application needs its own validation. General whole-body programmability remains speculative.
-
-Sources: Evo 2 https://doi.org/10.1038/s41586-026-10176-5 and the virtual cell perspective https://doi.org/10.1016/j.cell.2024.11.015. This multiscale summary is an interpretation of the research frontier.
+Conceptual synthesis. Sources: AlphaGenome https://doi.org/10.1038/s41586-025-10014-0; Evo 2 https://doi.org/10.1038/s41586-026-10176-5; virtual cell perspective https://doi.org/10.1016/j.cell.2024.11.015. General whole-body programmability remains speculative.
 
 
 ## 10. Your next question
@@ -152,9 +158,10 @@ Which idea would you investigate?
 
 Speaker notes:
 
-THE PORTAL begins with curiosity and keeps the evidence visible. Try one card or the biology case study. Which claim would you investigate, and what evidence would change your view? Thank you.
+THE PORTAL gives us a working application whose cloud deployment and support can be explained and checked. Try an existing card, open the cloud guide, or inspect the biology sources. Which claim would you investigate, and what evidence would change your view? Thank you.
 
 Live website: https://the-portal-ten.vercel.app/
+Cloud guide: https://the-portal-ten.vercel.app/cloud-support
 Biology case study: https://the-portal-ten.vercel.app/ai-biology
 Source: https://github.com/AndrewLamSingapore/the-portal
 Background: the project’s original portal-cinematic.webp.
