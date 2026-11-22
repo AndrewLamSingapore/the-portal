@@ -176,9 +176,12 @@ try {
     try {
       await page.goto(base + '/', { waitUntil: 'domcontentloaded' });
       await page.waitForSelector('#grid .card', { timeout: 6000 });
-      await check(device + ' fresh homepage preserves opening and pointer skip', async () => {
-        assert.equal(await page.locator('#portalCinematic').evaluate(node => node.hidden), false);
+      await check(device + ' fresh homepage opens immediately and offers an optional opening', async () => {
+        assert.equal(await page.locator('#portalCinematic').evaluate(node => node.hidden), true);
         assert.equal(await page.evaluate(() => sessionStorage.getItem('portal-cinematic-seen')), null);
+        assert.equal(await page.locator('body').evaluate(node => node.classList.contains('cinematic-locked')), false);
+        await page.locator('#cinematicReplay').click({ timeout: 1500 });
+        await page.waitForSelector('#portalCinematic.is-active');
         await page.locator('#cinematicSkip').click({ timeout: 1500 });
         await page.waitForFunction(() => document.getElementById('portalCinematic').hidden, null, { timeout: 1800 });
         assert.equal(await page.evaluate(() => sessionStorage.getItem('portal-cinematic-seen')), '1');

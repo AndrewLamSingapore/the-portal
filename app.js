@@ -34,7 +34,7 @@ const safeHttpsUrl = value => {
    or hand-written links keep working. Opening a card records the link, closing
    it returns to the exhibition, and browser back/forward stay in sync. */
 const CARD_ROUTE = '/card/';
-const BASE_TITLE = 'THE PORTAL \u00b7 Living Knowledge System';
+const BASE_TITLE = 'THE PORTAL \u00b7 Ideas and Evidence';
 let syncingCardUrl = false;
 
 function requestedCardId() {
