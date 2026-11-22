@@ -52,6 +52,14 @@ Each discovery becomes a structured artifact with provenance, concepts, an outco
 
 The Portal is **not a historical authority**: AI-generated curation is a discovery surface, and factual historical claims require independent source verification.
 
+## Life + Frontiers: AI and biology
+
+The curated [AI biology case study](https://the-portal-ten.vercel.app/ai-biology) examines DNA interpretation, variant-effect prediction, protein structures and candidate sequence design. It includes all eight capability distinctions, the conceptual READ / UNDERSTAND / SIMULATE / DESIGN / VALIDATE workflow, and six primary research references.
+
+Defined research tasks have demonstrated capabilities. Comprehensive human-cell simulation and safe general whole-body reprogramming remain research or speculative frontiers. The Portal hosts the explanation and source trail; it does not perform biological simulation, genetic editing or clinical interpretation.
+
+This static study is available without AI generation, an account or the shared database. It is separate from generated archive artifacts and public-vote aggregates. [Ten-slide presentation outline and speaker notes](docs/presentations/THE-PORTAL-10-SLIDES.md).
+
 ## The operating loop
 
 ### 01 — ENCOUNTER
