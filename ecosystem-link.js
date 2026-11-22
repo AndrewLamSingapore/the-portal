@@ -1,7 +1,7 @@
 const ECOSYSTEM_APPS={
   portal:'https://the-portal-ten.vercel.app/',
   authorityEngine:'https://authority-engine-app.vercel.app/',
-  jarvis:'https://authority-engine-app.vercel.app/jarvis',
+  jarvis:'https://authority-engine-app.vercel.app/orqevia',
   gamePlatform:'https://game-platform-wine-nine.vercel.app/',
   velyqua:'https://velyqua.vercel.app/',
   skyTablet:'https://sky-tablet.vercel.app/',

@@ -27,3 +27,23 @@ html{overflow-x:clip;scroll-padding-top:100px}html body.public-refresh{overflow-
 
 /* Keep secondary research and related work out of the primary reading path. */
 .research-workspace{border-block:1px solid var(--public-line);padding:24px 0;margin-bottom:30px}.research-workspace>summary{display:flex;align-items:center;justify-content:space-between;gap:20px;min-height:50px;cursor:pointer;list-style:none}.research-workspace>summary::-webkit-details-marker{display:none}.research-workspace>summary>span:first-child{display:grid;gap:6px}.research-workspace small{font-size:10px;letter-spacing:.13em;color:var(--public-gold)}.research-workspace strong{font-size:28px;font-weight:550;letter-spacing:-.03em}.research-workspace>summary>span:last-child{font-size:28px;color:var(--public-gold)}.research-workspace[open]>summary{margin-bottom:24px}.portal-home .research-workspace .section{border-top:0;padding-bottom:20px}.public-related{max-width:1160px;width:calc(100% - 48px);margin:30px auto;border-top:1px solid var(--public-line);padding:16px 0}.public-related>summary{font-size:14px;color:var(--public-muted);min-height:44px;cursor:pointer}.public-related .ecosystem-nav{margin:0;border:0;padding:10px 0;background:none}.portal-home .badge{font-size:12px}.portal-home .drawer .badge{font-size:13px;font-weight:700;color:#47361c;background:#fff9ec;border-color:#796545}.portal-home .entry-footer{justify-content:flex-start}.portal-home .hero-art::after{display:none}
+
+/* A quieter frame lets the archive, images and questions carry the experience. */
+.portal-home .hero { grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 44px; padding-block: 54px 64px; }
+.portal-home .hero h1 { font-family: Georgia, 'Times New Roman', serif; font-size: clamp(3.2rem, 5.7vw, 5.2rem); font-weight: 400; line-height: 1.04; letter-spacing: -.045em; max-width: 15ch; margin-block: 24px; }
+.portal-home .eyebrow, .portal-home .index, .portal-home .world-number, .portal-home .world-entry, .portal-home .status { font-size: .875rem; line-height: 1.45; letter-spacing: .065em; }
+.portal-home .hero-art { border-radius: 20px; aspect-ratio: 1.15; box-shadow: 0 24px 80px #0005; }
+.portal-home .thesis { max-width: 40ch; font-size: 1.18rem; line-height: 1.65; color: #d5cebf; }
+.portal-home .hero-boundary { font-size: .875rem; }
+.public-refresh h1, .public-refresh h2 { text-wrap: balance; }
+.public-refresh .public-primary { border-radius: 999px; min-height: 52px; padding-inline: 26px; }
+.portal-home .world-threshold { min-height: 205px; border-radius: 16px; padding: 26px; transition: border-color .18s, background-color .18s; }
+.portal-home .world-threshold:hover { background: #edc7840b; }
+.portal-home .world-threshold strong { font-size: 27px; }
+.portal-home .world-description, .portal-home .section-note, .portal-home .evidence-grid p { font-size: 1rem; line-height: 1.65; }
+.portal-home .card { border-radius: 16px; }
+.public-refresh .biology-scope, .public-refresh .biology-nav, .cloud-guide-banner small, .public-refresh .frontier-note { font-size: .875rem; line-height: 1.6; }
+.public-refresh .biology-section { padding-block: 42px; }
+.public-header { box-shadow: 0 8px 24px #0002; }
+@media(max-width:900px) { .portal-home .hero { gap: 28px; } .portal-home .hero h1 { font-size: clamp(3rem, 6.2vw, 4.5rem); } }
+@media(max-width:680px) { .portal-home .hero { grid-template-columns: minmax(0, 1fr); padding-block: 34px 42px; } .portal-home .hero h1 { font-size: clamp(2.9rem, 11vw, 4rem); max-width: 15ch; } .portal-home .hero-art { aspect-ratio: 1.6; max-height: 280px; } .portal-home .world-threshold { min-height: 0; } .public-links a { font-size: .875rem; } }
