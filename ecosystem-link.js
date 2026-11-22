@@ -36,11 +36,10 @@ function link(destination,label,placement){
 }
 const nav=document.createElement('nav');nav.className='ecosystem-nav';nav.setAttribute('aria-label','Lam ecosystem');
 nav.append(link('portal','The Portal','top_nav'),link('authorityEngine','Authority Engine','top_nav'),link('jarvis','ORQEVIA · 奥启维亚','top_nav'),link('gamePlatform','Living Worlds','top_nav'),link('velyqua','VELYQUA','top_nav'),link('skyTablet','Sky Tablet','top_nav'),link('github','GitHub','top_nav'));
+const related=document.createElement('details');related.className='public-related';
+const relatedTitle=document.createElement('summary');relatedTitle.textContent='More projects by Andrew Lam';related.append(relatedTitle,nav);
 const navFooter=document.querySelector('footer');
-if(navFooter)navFooter.before(nav);else document.querySelector('main')?.after(nav);
-if(current==='portal'){
-  const cta=link('gamePlatform','PLAY LIVING WORLDS →','portal_hero');cta.className='ecosystem-link-subtle';document.querySelector('.entry-footer')?.append(cta);
-}
+if(navFooter)navFooter.before(related);else document.querySelector('main')?.after(related);
 if(current==='gamePlatform'){
   const back=link('portal','← Return to The Portal','game_return_link');back.className='ecosystem-link-subtle';document.querySelector('#play>.row>div')?.append(back);
 }
@@ -51,7 +50,7 @@ const bridge = document.createElement('section'); bridge.className = 'relationsh
 const intro = document.createElement('div');
 const overline = document.createElement('p'); overline.className = 'relationship-kicker'; overline.textContent = 'BUILT BY ANDREW LAM';
 const title = document.createElement('h2'); title.textContent = current === 'portal' ? 'What connection did you see?' : 'Your next idea could become a world.';
-const copy = document.createElement('p'); copy.textContent = current === 'portal' ? 'I’m Andrew Lam. I built The Portal to explore connections between ideas. Bring a question, a useful source or a project you want to investigate together.' : 'I’m Andrew Lam. I’m exploring worlds where choices matter. Tell me about a story, learning experience or interactive project you would like to build.';
+const copy = document.createElement('p'); copy.textContent = current === 'portal' ? 'Built by Andrew Lam. Bring a question or a useful source.' : 'I’m Andrew Lam. I’m exploring worlds where choices matter. Tell me about a story, learning experience or interactive project you would like to build.';
 intro.append(overline,title,copy);
 const actions = document.createElement('div'); actions.className = 'relationship-actions';
 const talk = document.createElement('a'); talk.href = contactUrl; talk.textContent = current === 'portal' ? 'Explore an idea with Andrew ↗' : 'Discuss a creative project ↗'; talk.className = 'relationship-primary';
