@@ -36,9 +36,10 @@ function link(destination,label,placement){
 }
 const nav=document.createElement('nav');nav.className='ecosystem-nav';nav.setAttribute('aria-label','Lam ecosystem');
 nav.append(link('portal','The Portal','top_nav'),link('authorityEngine','Authority Engine','top_nav'),link('jarvis','ORQEVIA · 奥启维亚','top_nav'),link('gamePlatform','Living Worlds','top_nav'),link('velyqua','VELYQUA','top_nav'),link('skyTablet','Sky Tablet','top_nav'),link('github','GitHub','top_nav'));
-document.querySelector('header')?.after(nav);
+const navFooter=document.querySelector('footer');
+if(navFooter)navFooter.before(nav);else document.querySelector('main')?.after(nav);
 if(current==='portal'){
-  const cta=link('gamePlatform','PLAY LIVING WORLDS →','portal_hero');cta.className='primary ecosystem-cta-primary';document.querySelector('.hero-actions')?.append(cta);
+  const cta=link('gamePlatform','PLAY LIVING WORLDS →','portal_hero');cta.className='ecosystem-link-subtle';document.querySelector('.entry-footer')?.append(cta);
 }
 if(current==='gamePlatform'){
   const back=link('portal','← Return to The Portal','game_return_link');back.className='ecosystem-link-subtle';document.querySelector('#play>.row>div')?.append(back);
@@ -57,9 +58,9 @@ const talk = document.createElement('a'); talk.href = contactUrl; talk.textConte
 const linkedIn = document.createElement('a'); linkedIn.href = 'https://www.linkedin.com/in/lam-teck-sing-andrew-79886719'; linkedIn.textContent = 'Connect on LinkedIn';
 actions.append(talk,linkedIn,link('jarvis','Explore ORQEVIA · 奥启维亚 ↗','creator_bridge')); bridge.append(intro,actions);
 (document.querySelector('main') || document.querySelector('footer'))?.after(bridge);
-// A short creator invitation is visible before the deep experience, not only in the footer.
+// The public Portal keeps its creator invitation in the full footer bridge.
 const creator = document.createElement('aside');creator.className='creator-invitation';creator.setAttribute('aria-label','Meet the creator');
 const creatorText=document.createElement('p');creatorText.textContent=current==='portal'?'An exploration by Andrew Lam. Follow an idea. Find a connection. Bring your perspective.':'An interactive world by Andrew Lam. Play a scene, then imagine what we could create together.';
 const creatorLink=document.createElement('a');creatorLink.href=contactUrl;creatorLink.textContent='Talk with Andrew ↗';creator.append(creatorText,creatorLink);
-const entry=current==='portal'?document.querySelector('.hero'):document.querySelector('.dashboard-hero');entry?.append(creator);
+const entry=current==='portal'?null:document.querySelector('.dashboard-hero');entry?.append(creator);
 captureIncomingReferral();

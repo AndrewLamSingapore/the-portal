@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /prime
+Disallow: /reports
+Sitemap: https://the-portal-ten.vercel.app/sitemap.xml
