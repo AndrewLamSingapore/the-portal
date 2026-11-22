@@ -4,7 +4,9 @@
 
 [**Open The Portal ↗**](https://the-portal-ten.vercel.app/) · [**Discuss this project**](https://authority-engine-app.vercel.app/contact?source=portal) · [**Meet Andrew Lam**](https://authority-engine-app.vercel.app/about)
 
-The Portal is a continuously evolving model of humanity's imagined futures. It tracks how ideas emerge, disappear, return, fail, partially materialize and become real—without hiding the boundary between generated hypotheses and source-supported history. Its public surfaces combine **The Future on Trial** with a production Living Observatory for bounded evolutionary hypotheses, falsification and fossil memory.
+Explore ideas, discover connections, and see what the evidence supports. **THE PORTAL is a working AI-assisted discovery prototype** with an interactive archive and graph. Generated prompts retain their evidence labels.
+
+[Explore the ideas](https://the-portal-ten.vercel.app/#explore) · [AI and biology case study](https://the-portal-ten.vercel.app/ai-biology) · [Ten-slide presentation and speaker notes](docs/presentations/THE-PORTAL-10-SLIDES.md)
 
 ## Start here
 
