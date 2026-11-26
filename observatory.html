@@ -23,6 +23,23 @@
   </header>
   <p class="obs-status" id="obsStatus" role="status" aria-live="polite">Loading the observatory…</p>
   <div class="obs-grid" id="obsGrid" hidden></div>
+  <section class="obs-panel obs-contribute" aria-labelledby="contributeTitle">
+    <header class="obs-panel-head"><p class="obs-index">PARTICIPATE</p><h2 id="contributeTitle">Contribute to collective discovery</h2></header>
+    <p class="obs-note">Share a hypothesis, challenge an idea, or propose an experiment. Nothing is retained or published without your explicit consent, and every contribution is moderated and anonymous.</p>
+    <form id="contributeForm" class="obs-form">
+      <label for="contributeKind">Contribution type</label>
+      <select id="contributeKind" name="kind">
+        <option value="hypothesis">Hypothesis</option>
+        <option value="challenge">Challenge an idea</option>
+        <option value="experiment">Experiment proposal</option>
+      </select>
+      <label for="contributeText">Your contribution</label>
+      <textarea id="contributeText" name="text" maxlength="1000" rows="4" required></textarea>
+      <label class="obs-consent"><input type="checkbox" id="contributeConsent" required> I consent to publishing this anonymously after moderation.</label>
+      <button type="submit">SUBMIT</button>
+      <p class="obs-status" id="contributeStatus" role="status" aria-live="polite"></p>
+    </form>
+  </section>
 </main>
 <footer><p>THE PORTAL · OBSERVE → CONNECT → GENERATE → CHALLENGE → EXPERIMENT → EVALUATE → EVOLVE ↻</p><p>Transparency without pretending uncertainty is certainty.</p></footer>
 </body>

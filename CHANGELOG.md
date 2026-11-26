@@ -2,6 +2,16 @@
 
 # Changelog
 
+## 7.1.0 — Consent-based collective discovery
+
+- Adds anonymous, consent-gated, moderated public contributions
+  (`POST /api/contribute`): hypotheses, challenges and experiment proposals.
+  Nothing is retained or published without explicit visitor consent, no
+  identity or IP address is stored, and submissions enter a moderation queue.
+- Adds `GET /api/contribute` for the published contribution feed and
+  `POST /api/contribute/moderate` for authenticated moderation. The Observatory
+  participation centre now renders real published contributions.
+
 ## 7.0.0 — Collective Evolutionary Intelligence foundations
 
 - Corrects extinction semantics: a hypothesis omitted from a new generation is

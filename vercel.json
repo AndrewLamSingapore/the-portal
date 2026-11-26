@@ -129,6 +129,14 @@
       "destination": "/api/meta?route=observatory"
     },
     {
+      "source": "/api/contribute",
+      "destination": "/api/meta?route=contribute"
+    },
+    {
+      "source": "/api/contribute/moderate",
+      "destination": "/api/meta?route=contribute-moderate"
+    },
+    {
       "source": "/api/benchmark",
       "destination": "/api/meta?route=benchmark"
     },

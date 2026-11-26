@@ -201,6 +201,67 @@
   border-radius: 10px;
 }
 
+.obs-contribute {
+  margin-top: 1.2rem;
+}
+
+.obs-form {
+  display: grid;
+  gap: .55rem;
+}
+
+.obs-form label {
+  color: #b9aa92;
+  font-size: .86rem;
+}
+
+.obs-form select,
+.obs-form textarea,
+.obs-form input[type="checkbox"] {
+  background: #0c0906;
+  color: #f5efe4;
+  border: 1px solid #3a2f24;
+  border-radius: 8px;
+  padding: .65rem .8rem;
+  font: inherit;
+}
+
+.obs-form textarea {
+  resize: vertical;
+  min-height: 6rem;
+}
+
+.obs-form button {
+  justify-self: start;
+  background: #e0a64f;
+  color: #171009;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  padding: .7rem 1.1rem;
+  font: inherit;
+  font-weight: 600;
+  letter-spacing: .04em;
+  cursor: pointer;
+}
+
+.obs-consent {
+  display: flex;
+  gap: .5rem;
+  align-items: center;
+}
+
+.obs-consent input {
+  padding: 0;
+}
+
+.obs-form select:focus-visible,
+.obs-form textarea:focus-visible,
+.obs-form input:focus-visible,
+.obs-form button:focus-visible {
+  outline: 2px solid #e0a64f;
+  outline-offset: 2px;
+}
+
 .observatory-page a:focus-visible,
 .observatory-page button:focus-visible {
   outline: 2px solid #e0a64f;

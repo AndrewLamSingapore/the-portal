@@ -17,6 +17,7 @@ import { isModelBudgetEnabled, modelBudgetStatus, admitModelRequest, settleModel
 import { runModelCycleOnce } from '../lib/living-model-run.js';
 import { ingestEvidence } from '../lib/living-evidence.js';
 import { generateHypothesisPopulation } from '../lib/hypothesis-generation.js';
+import { submitContribution, listPublishedContributions, moderateContribution } from '../lib/public-contribution.js';
 import { semanticScores } from '../lib/semantic-embeddings.js';
 import { handleEvidenceLab } from '../lib/evidence-lab-endpoint.js';
 import { authenticate as primeAuthenticate, publishReport as primePublishReport, readReports as primeReadReports, resolvePrimeIdentity as primeResolveIdentity, sendJson as primeSendJson } from '../lib/prime-auth.js';
@@ -24,7 +25,7 @@ import { REPORT_ID_PATTERN, REPORT_LIMITS, validateReport } from '../lib/prime-r
 import { PRODUCT_VERSION } from '../lib/product-version.js';
 const SCHEMA_VERSION = 6;
 const EXPERIENCE = 'Continuous Futures Model';
-const META_ROUTES = new Set(['benchmark', 'capabilities', 'discover', 'ecosystem-event', 'engine-budget', 'engine-evidence', 'engine-kill', 'engine-model-run', 'engine-run', 'engine-runs', 'engine-tick', 'evidence', 'evidence-lab', 'experiment-result', 'manifest', 'metrics', 'observatory', 'prime', 'prime-experiment', 'prime-publish', 'prime-report', 'readiness', 'status', 'verify', 'version', 'v2']);
+const META_ROUTES = new Set(['benchmark', 'capabilities', 'contribute', 'contribute-moderate', 'discover', 'ecosystem-event', 'engine-budget', 'engine-evidence', 'engine-kill', 'engine-model-run', 'engine-run', 'engine-runs', 'engine-tick', 'evidence', 'evidence-lab', 'experiment-result', 'manifest', 'metrics', 'observatory', 'prime', 'prime-experiment', 'prime-publish', 'prime-report', 'readiness', 'status', 'verify', 'version', 'v2']);
 
 const aiBuckets = globalThis.__portalAiBuckets || (globalThis.__portalAiBuckets = new Map());
 const AI_WINDOW_MS = 3_600_000;
@@ -37,6 +38,19 @@ function aiDiscoveryAllowed(req) {
   const bucket = aiBuckets.get(key);
   if (!bucket) { aiBuckets.set(key, { start: now, count: 1 }); return true; }
   if (bucket.count >= AI_MAX_PER_WINDOW) return false;
+  bucket.count += 1;
+  return true;
+}
+
+const contributionBuckets = globalThis.__portalContributionBuckets || (globalThis.__portalContributionBuckets = new Map());
+function contributionAllowed(req) {
+  const now = Date.now();
+  for (const [key, bucket] of contributionBuckets) if (now - bucket.start >= AI_WINDOW_MS) contributionBuckets.delete(key);
+  const trusted = process.env.VERCEL ? req.headers?.['x-vercel-forwarded-for'] : req.socket?.remoteAddress;
+  const key = crypto.createHash('sha256').update(String(trusted || 'unknown').split(',')[0].trim()).digest('hex');
+  const bucket = contributionBuckets.get(key);
+  if (!bucket) { contributionBuckets.set(key, { start: now, count: 1 }); return true; }
+  if (bucket.count >= 5) return false;
   bucket.count += 1;
   return true;
 }
@@ -493,6 +507,49 @@ async function handleEngineEvidence(req, res) {
   return res.status(outcome.ok ? (outcome.duplicate ? 200 : 201) : 400).json({ mode: 'LIVING_EVIDENCE', ...outcome });
 }
 
+async function handleContribute(req, res) {
+  if (req.method === 'GET') {
+    if (!hasDatabase()) return res.status(503).json({ error: 'Archive unavailable' });
+    const contributions = await listPublishedContributions(db());
+    return res.status(200).json({ mode: 'PUBLIC_CONTRIBUTIONS', contributions });
+  }
+  if (req.method !== 'POST') {
+    res.setHeader('Allow', 'GET, POST');
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+  if (!contributionAllowed(req)) {
+    res.setHeader('Retry-After', '3600');
+    return res.status(429).json({ error: 'Contribution limit reached. Try again later.' });
+  }
+  if (!hasDatabase()) return res.status(503).json({ error: 'Archive unavailable' });
+  const outcome = await submitContribution(db(), {
+    kind: req.body?.kind,
+    text: req.body?.text,
+    targetId: req.body?.target_id,
+    consent: req.body?.consent === true
+  });
+  if (!outcome.ok) {
+    return res.status(outcome.reason === 'consent_required' ? 400 : 400).json({ mode: 'PUBLIC_CONTRIBUTION', ...outcome });
+  }
+  return res.status(outcome.duplicate ? 200 : 201).json({ mode: 'PUBLIC_CONTRIBUTION', ...outcome });
+}
+
+async function handleContributeModerate(req, res) {
+  if (req.method !== 'POST') {
+    res.setHeader('Allow', 'POST');
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+  if (!process.env.PORTAL_ENGINE_TOKEN) return res.status(503).json({ error: 'Engine admin token is not configured' });
+  if (!engineAuthorized(req)) return res.status(401).json({ error: 'Unauthorized' });
+  if (!hasDatabase()) return res.status(503).json({ error: 'Archive unavailable' });
+  const outcome = await moderateContribution(db(), {
+    id: req.body?.id,
+    decision: req.body?.decision,
+    reason: req.body?.reason
+  });
+  return res.status(outcome.ok ? 200 : 400).json({ mode: 'CONTRIBUTION_MODERATION', ...outcome });
+}
+
 async function handleEngineRuns(req, res) {
   if (req.method !== 'GET') {
     res.setHeader('Allow', 'GET');
@@ -547,14 +604,15 @@ async function handleObservatory(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
   if (!hasDatabase()) return res.status(503).json({ error: 'Archive unavailable' });
-  const [artifacts, runs, latest, results] = await Promise.all([
+  const [artifacts, runs, latest, results, contributions] = await Promise.all([
     findArtifacts({ limit: 60 }),
     listPublicRuns(db()),
     latestCompletedRun(db()),
-    listExperimentResults(20)
+    listExperimentResults(20),
+    listPublishedContributions(db())
   ]);
   const graph = buildKnowledgeGraph(artifacts);
-  const payload = buildObservatory({ runs, latestRun: latest, graph, experimentResults: results, productVersion: PRODUCT_VERSION });
+  const payload = buildObservatory({ runs, latestRun: latest, graph, experimentResults: results, contributions, productVersion: PRODUCT_VERSION });
   payload.transparency.benchmark = await computeBenchmark();
   return res.status(200).json(payload);
 }
@@ -661,6 +719,8 @@ export default async function handler(req, res) {
   if (route === 'engine-model-run') return handleEngineModelRun(req, res);
   if (route === 'benchmark') return handleBenchmark(req, res);
   if (route === 'observatory') return handleObservatory(req, res);
+  if (route === 'contribute') return handleContribute(req, res);
+  if (route === 'contribute-moderate') return handleContributeModerate(req, res);
   if (route === 'capabilities') {
     if (!allow(req, res, 'GET')) return;
     return res.status(200).json({
