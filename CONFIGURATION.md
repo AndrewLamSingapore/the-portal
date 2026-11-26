@@ -71,6 +71,9 @@ Public discovery rooms (`/discover-together`) add anonymous, consent-gated
 discussion with a deterministic facilitator and authenticated moderation.
 An optional AI facilitator is budget-gated behind `PORTAL_ROOM_AI_ENABLED=1`;
 promoted room messages enter the shared evidence store for future cycles.
+The retrieval benchmark now includes a BM25 baseline, contamination checks and
+uncertainty, and discovery rooms refresh near-real-time. Full interface
+localization remains a documented limitation; facilitators are multilingual.
 
 ## Search protections
 

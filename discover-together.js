@@ -2,6 +2,7 @@
   'use strict';
 
   const $ = id => document.getElementById(id);
+  let liveTimer = null;
 
   function escapeHtml(value) {
     return String(value ?? '')
@@ -51,7 +52,7 @@
       $('roomView').innerHTML = `
         <header class="tg-panel-head"><p class="index">ROOM</p><h2 id="roomViewTitle">${escapeHtml(room.topic)}</h2></header>
         ${room.question ? `<p class="tg-note">${escapeHtml(room.question)}</p>` : ''}
-        <section class="tg-facilitator">
+        <section class="tg-facilitator" id="tgFacilitator">
           <h3>Facilitator summary</h3>
           <p>${escapeHtml(facilitation.summary || '')}</p>
           ${facilitation.shared_concepts?.length ? `<p class="tg-note">Concepts: ${facilitation.shared_concepts.map(c => escapeHtml(c.name)).join(' · ')}</p>` : ''}
@@ -60,7 +61,8 @@
         </section>
         <button class="tg-ai-button" id="aiFacilitate" type="button">AI FACILITATOR</button>
         <p class="tg-status" id="facilitateStatus" role="status" aria-live="polite"></p>
-        <ul class="tg-messages">${messagesHtml || '<li class="tg-empty">No messages yet.</li>'}</ul>
+        <p class="tg-note" id="tgLive">Live updates every 15 seconds.</p>
+        <ul class="tg-messages" id="tgMessagesList">${messagesHtml || '<li class="tg-empty">No messages yet.</li>'}</ul>
         <form id="replyForm" class="tg-form">
           <label for="replyText">Contribute a thought, question, evidence or challenge</label>
           <textarea id="replyText" maxlength="2000" rows="3" required></textarea>
@@ -69,6 +71,8 @@
           <p class="tg-status" id="replyStatus" role="status" aria-live="polite"></p>
         </form>`;
       $('roomView').hidden = false;
+      clearInterval(liveTimer);
+      liveTimer = setInterval(() => refreshLive(id), 15000);
       $('aiFacilitate').addEventListener('click', async () => {
         status($('facilitateStatus'), 'Synthesising discussion…');
         const result = await fetch('/api/rooms/facilitate', {
@@ -81,7 +85,7 @@
         const concepts = payload.shared_concepts?.length ? `Concepts: ${payload.shared_concepts.map(c => escapeHtml(c.name)).join(' · ')}` : '';
         const disagreements = payload.disagreements?.length ? `Disagreements: ${payload.disagreements.map(escapeHtml).join(' · ')}` : '';
         const hypotheses = (payload.hypotheses || []).map(h => `${escapeHtml(h.statement)} (${escapeHtml(h.epistemic_class)})`).join(' · ');
-        const section = document.querySelector('.tg-facilitator');
+        const section = $('tgFacilitator');
         if (section) {
           section.innerHTML = `<h3>Facilitator summary</h3>
             <p>${escapeHtml(payload.summary || '')}</p>
@@ -111,6 +115,31 @@
       $('roomView').scrollIntoView({ behavior: 'smooth', block: 'start' });
     } catch (error) {
       status($('tgStatus'), error.message);
+    }
+  }
+
+  async function refreshLive(id) {
+    try {
+      const response = await fetch(`/api/rooms?id=${encodeURIComponent(id)}`, { headers: { 'cache-control': 'no-cache' } });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) return;
+      const list = $('tgMessagesList');
+      const facilitator = $('tgFacilitator');
+      if (!list || !facilitator) { clearInterval(liveTimer); return; }
+      const messages = payload.messages || [];
+      const facilitation = payload.facilitation || {};
+      list.innerHTML = messages.length ? messages.map(message => `
+        <li class="tg-message tg-${escapeHtml(message.author_kind)}">
+          <span class="tg-meta">${escapeHtml(message.author_kind === 'ai' ? 'AI facilitator' : 'participant')}</span>
+          <p>${escapeHtml(message.text)}</p>
+        </li>`).join('') : '<li class="tg-empty">No messages yet.</li>';
+      facilitator.innerHTML = `<h3>Facilitator summary</h3>
+        <p>${escapeHtml(facilitation.summary || '')}</p>
+        ${facilitation.shared_concepts?.length ? `<p class="tg-note">Concepts: ${facilitation.shared_concepts.map(c => escapeHtml(c.name)).join(' · ')}</p>` : ''}
+        ${facilitation.open_questions?.length ? `<p class="tg-note">Open questions: ${facilitation.open_questions.map(escapeHtml).join(' · ')}</p>` : ''}
+        <p class="tg-disclosure">${escapeHtml(facilitation.disclosure || '')}</p>`;
+    } catch {
+      // transient network errors are ignored; the next poll retries
     }
   }
 
