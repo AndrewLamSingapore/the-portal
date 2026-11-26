@@ -62,6 +62,10 @@ Connection uses the same hybrid retrieval as the graph: persistent vector embedd
 
 The journey supports conversational follow-up: continue a discovery to refine, challenge or connect the idea, and each turn carries its lineage forward. Saving is opt-in and private to the browser — nothing is published or sent to the server until you choose.
 
+## The Living Engine
+
+Behind the scenes, a governed scheduler runs the deterministic discovery cycle and records every run. Jobs are persisted with idempotency keys, claimed under time-bounded leases, checkpointed and audited, with a database-backed kill switch and authenticated admin controls. Runs are always labelled `DETERMINISTIC_FALLBACK`: zero model calls, no external actuation, no production mutation. A sanitised public feed (`/api/engine/runs`) shows completed and failed runs without exposing operational detail.
+
 ## Life + Frontiers: AI and biology
 
 The curated [AI biology case study](https://the-portal-ten.vercel.app/ai-biology) examines DNA interpretation, variant-effect prediction, protein structures and candidate sequence design. It includes all eight capability distinctions, the conceptual READ / UNDERSTAND / SIMULATE / DESIGN / VALIDATE workflow, and six primary research references.
