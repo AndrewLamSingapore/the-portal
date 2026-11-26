@@ -69,6 +69,8 @@ retains nothing without explicit consent, stores no identity or address, and
 queues every submission for moderation before it appears in the Observatory.
 Public discovery rooms (`/discover-together`) add anonymous, consent-gated
 discussion with a deterministic facilitator and authenticated moderation.
+An optional AI facilitator is budget-gated behind `PORTAL_ROOM_AI_ENABLED=1`;
+promoted room messages enter the shared evidence store for future cycles.
 
 ## Search protections
 

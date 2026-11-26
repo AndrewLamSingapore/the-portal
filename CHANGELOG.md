@@ -2,6 +2,16 @@
 
 # Changelog
 
+## 7.3.0 — AI discussion facilitator and shared living intelligence
+
+- Adds a budget-gated AI discussion facilitator (`POST /api/rooms/facilitate`)
+  that summarises a room, surfaces disagreements and cross-disciplinary
+  connections, and proposes competing falsifiable hypotheses, with the
+  deterministic facilitator as the free fallback.
+- Adds `POST /api/rooms/promote` so an authenticated moderator can promote a
+  room message into the shared evidence store, where it informs the next
+  autonomous discovery cycle with provenance preserved.
+
 ## 7.2.0 — Public discovery rooms (group discovery)
 
 - Adds public discovery rooms: anonymous, consent-gated discussion threads and

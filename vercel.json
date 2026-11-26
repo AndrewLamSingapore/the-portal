@@ -149,6 +149,14 @@
       "destination": "/api/meta?route=room-moderate"
     },
     {
+      "source": "/api/rooms/facilitate",
+      "destination": "/api/meta?route=room-facilitate"
+    },
+    {
+      "source": "/api/rooms/promote",
+      "destination": "/api/meta?route=room-promote"
+    },
+    {
       "source": "/api/benchmark",
       "destination": "/api/meta?route=benchmark"
     },

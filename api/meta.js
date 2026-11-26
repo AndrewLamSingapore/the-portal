@@ -18,7 +18,8 @@ import { runModelCycleOnce } from '../lib/living-model-run.js';
 import { ingestEvidence } from '../lib/living-evidence.js';
 import { generateHypothesisPopulation } from '../lib/hypothesis-generation.js';
 import { submitContribution, listPublishedContributions, moderateContribution } from '../lib/public-contribution.js';
-import { createRoom, listRooms, getRoom, postMessage, hideMessage } from '../lib/discovery-rooms.js';
+import { createRoom, listRooms, getRoom, postMessage, hideMessage, getRoomMessage } from '../lib/discovery-rooms.js';
+import { facilitateRoomWithModel } from '../lib/room-facilitator.js';
 import { semanticScores } from '../lib/semantic-embeddings.js';
 import { handleEvidenceLab } from '../lib/evidence-lab-endpoint.js';
 import { authenticate as primeAuthenticate, publishReport as primePublishReport, readReports as primeReadReports, resolvePrimeIdentity as primeResolveIdentity, sendJson as primeSendJson } from '../lib/prime-auth.js';
@@ -26,7 +27,7 @@ import { REPORT_ID_PATTERN, REPORT_LIMITS, validateReport } from '../lib/prime-r
 import { PRODUCT_VERSION } from '../lib/product-version.js';
 const SCHEMA_VERSION = 6;
 const EXPERIENCE = 'Continuous Futures Model';
-const META_ROUTES = new Set(['benchmark', 'capabilities', 'contribute', 'contribute-moderate', 'discover', 'ecosystem-event', 'engine-budget', 'engine-evidence', 'engine-kill', 'engine-model-run', 'engine-run', 'engine-runs', 'engine-tick', 'evidence', 'evidence-lab', 'experiment-result', 'manifest', 'metrics', 'observatory', 'prime', 'prime-experiment', 'prime-publish', 'prime-report', 'readiness', 'room-messages', 'room-moderate', 'rooms', 'status', 'verify', 'version', 'v2']);
+const META_ROUTES = new Set(['benchmark', 'capabilities', 'contribute', 'contribute-moderate', 'discover', 'ecosystem-event', 'engine-budget', 'engine-evidence', 'engine-kill', 'engine-model-run', 'engine-run', 'engine-runs', 'engine-tick', 'evidence', 'evidence-lab', 'experiment-result', 'manifest', 'metrics', 'observatory', 'prime', 'prime-experiment', 'prime-publish', 'prime-report', 'readiness', 'room-facilitate', 'room-messages', 'room-moderate', 'room-promote', 'rooms', 'status', 'verify', 'version', 'v2']);
 
 const aiBuckets = globalThis.__portalAiBuckets || (globalThis.__portalAiBuckets = new Map());
 const AI_WINDOW_MS = 3_600_000;
@@ -613,6 +614,47 @@ async function handleRoomModerate(req, res) {
   return res.status(outcome.ok ? 200 : 400).json({ mode: 'ROOM_MODERATION', ...outcome });
 }
 
+async function handleRoomFacilitate(req, res) {
+  if (req.method !== 'POST') {
+    res.setHeader('Allow', 'POST');
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+  if (!hasDatabase()) return res.status(503).json({ error: 'Archive unavailable' });
+  const roomId = String(req.body?.room_id || '');
+  const roomData = await getRoom(db(), roomId);
+  if (!roomData) return res.status(404).json({ error: 'Room not found' });
+  if (process.env.PORTAL_ROOM_AI_ENABLED === '1' && aiDiscoveryAllowed(req) && process.env.OPENAI_API_KEY) {
+    const sql = db();
+    const reservation = Number(process.env.PORTAL_DISCOVERY_AI_RESERVATION_MICRO_USD || 100_000);
+    const requestId = `RFA-${crypto.randomUUID()}`;
+    const admission = await admitModelRequest(sql, { requestId, estimatedMicroUsd: reservation });
+    if (admission.allowed) {
+      try {
+        const facilitation = await facilitateRoomWithModel({ topic: roomData.room.topic, question: roomData.room.question, messages: roomData.messages });
+        await settleModelReservation(sql, { requestId, microUsd: reservation, success: true, usage: facilitation.usage });
+        return res.status(200).json({ mode: 'ROOM_FACILITATION', room_id: roomId, ...facilitation });
+      } catch (error) {
+        await settleModelReservation(sql, { requestId, microUsd: reservation, success: false, release: false });
+      }
+    }
+  }
+  return res.status(200).json({ mode: 'ROOM_FACILITATION', room_id: roomId, ...roomData.facilitation });
+}
+
+async function handleRoomPromote(req, res) {
+  if (req.method !== 'POST') {
+    res.setHeader('Allow', 'POST');
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+  if (!process.env.PORTAL_ENGINE_TOKEN) return res.status(503).json({ error: 'Engine admin token is not configured' });
+  if (!engineAuthorized(req)) return res.status(401).json({ error: 'Unauthorized' });
+  if (!hasDatabase()) return res.status(503).json({ error: 'Archive unavailable' });
+  const message = await getRoomMessage(db(), String(req.body?.id || ''));
+  if (!message) return res.status(404).json({ error: 'Message not found' });
+  const outcome = await ingestEvidence(db(), { source: `discovery-room:${message.room_id}`, summary: message.text, relation: 'neutral' });
+  return res.status(outcome.ok ? (outcome.duplicate ? 200 : 201) : 400).json({ mode: 'ROOM_PROMOTION', ...outcome });
+}
+
 async function handleEngineRuns(req, res) {
   if (req.method !== 'GET') {
     res.setHeader('Allow', 'GET');
@@ -787,6 +829,8 @@ export default async function handler(req, res) {
   if (route === 'rooms') return handleRooms(req, res);
   if (route === 'room-messages') return handleRoomMessages(req, res);
   if (route === 'room-moderate') return handleRoomModerate(req, res);
+  if (route === 'room-facilitate') return handleRoomFacilitate(req, res);
+  if (route === 'room-promote') return handleRoomPromote(req, res);
   if (route === 'capabilities') {
     if (!allow(req, res, 'GET')) return;
     return res.status(200).json({
