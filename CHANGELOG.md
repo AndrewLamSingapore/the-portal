@@ -2,6 +2,20 @@
 
 # Changelog
 
+## 6.12.0 — Persistent cumulative model evolution and real semantic benchmark
+
+- The model-originated living engine is now persistent and cumulative: each
+  cycle loads the previous run's hypothesis population and fossil record, passes
+  it back as intellectual memory, increments the generation, and carries forward
+  extinct hypotheses as fossils with lineage. Contradiction tracking remains
+  explicitly empty until evidence-grounded detection lands.
+- The comparative benchmark now measures real embedding-based retrieval when
+  `PORTAL_BENCHMARK_SEMANTIC=1`, reporting semantic mode, status and per-query
+  cost alongside lexical versus hybrid precision, recall and NDCG.
+- Discovery-quality scores are labelled structural checks over recorded outputs
+  rather than proof of originality or scientific accuracy, and now report the
+  recorded generation number and revision count.
+
 ## 6.11.0 — Owner-approved model-originated living runs and benchmark hardening
 
 - Activates paid model-originated living runs under the owner-approved living

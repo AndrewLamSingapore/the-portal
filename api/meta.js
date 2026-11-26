@@ -8,7 +8,6 @@ import { attachExperimentResults } from '../lib/experiment-result.js';
 import { validateExperimentCandidate, validatePrimeRelayResponse } from '../lib/experiment-candidate.js';
 import { buildKnowledgeGraph } from '../lib/knowledge.js';
 import { expandGraphNeighborhood, hybridSearch } from '../src/lib/semantic-world-model.js';
-import { semanticScores } from '../lib/semantic-embeddings.js';
 import { searchAdmission } from '../lib/search-controls.js';
 import { buildBriefing, normalizeSeed, validateFollowup, DiscoveryInputError } from '../lib/discovery-studio.js';
 import { listPublicRuns, latestCompletedRun, runOneCycle, setEngineKilled } from '../lib/living-engine.js';
@@ -16,6 +15,7 @@ import { buildObservatory } from '../lib/observatory.js';
 import { runRetrievalBenchmark, scoreDiscoveryQuality, buildBenchmarkReport } from '../lib/intelligence-benchmark.js';
 import { isModelBudgetEnabled, modelBudgetStatus } from '../lib/living-budget.js';
 import { runModelCycleOnce } from '../lib/living-model-run.js';
+import { semanticScores } from '../lib/semantic-embeddings.js';
 import { handleEvidenceLab } from '../lib/evidence-lab-endpoint.js';
 import { authenticate as primeAuthenticate, publishReport as primePublishReport, readReports as primeReadReports, resolvePrimeIdentity as primeResolveIdentity, sendJson as primeSendJson } from '../lib/prime-auth.js';
 import { REPORT_ID_PATTERN, REPORT_LIMITS, validateReport } from '../lib/prime-reports.js';
@@ -471,14 +471,31 @@ function loadBenchmarkDataset() {
 
 async function computeBenchmark() {
   const dataset = loadBenchmarkDataset();
-  // No paid embedding calls by default: the semantic component is measured only
-  // when the owner explicitly opts in and accepts the cost.
-  const retrieval = runRetrievalBenchmark({ nodes: dataset.nodes, queries: dataset.queries, semanticScorer: null });
+  const nodes = dataset.nodes.map(node => ({ ...node, type: 'asset', provenance: node.provenance || [] }));
+  let semanticScoresByQuery = null;
+  let semanticStatus = null;
+  if (process.env.PORTAL_BENCHMARK_SEMANTIC === '1' && hasDatabase()) {
+    semanticScoresByQuery = new Map();
+    for (const query of dataset.queries) {
+      const result = await semanticScores(query.query, nodes, { sql: db() });
+      semanticScoresByQuery.set(query.id, result.scores);
+      semanticStatus = result.status;
+    }
+  }
+  const retrieval = runRetrievalBenchmark({ nodes: dataset.nodes, queries: dataset.queries, semanticScoresByQuery });
+  if (semanticStatus) retrieval.semantic_status = semanticStatus;
   const latest = await latestCompletedRun(db());
   const discovery = scoreDiscoveryQuality({
     population: latest?.result?.population || [],
     fossils: latest?.result?.fossils || [],
-    run: latest ? { id: latest.id, generation_mode: latest.generation_mode } : {}
+    run: latest ? {
+      id: latest.id,
+      generation_mode: latest.generation_mode,
+      self_correction: latest.result?.self_correction,
+      evolutionary_improvement: latest.result?.evolutionary_improvement,
+      generation_number: latest.result?.generation_number,
+      revisions: latest.result?.revisions
+    } : {}
   });
   return buildBenchmarkReport({ retrieval, discovery, productVersion: PRODUCT_VERSION });
 }
