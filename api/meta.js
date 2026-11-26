@@ -10,7 +10,7 @@ import { buildKnowledgeGraph } from '../lib/knowledge.js';
 import { expandGraphNeighborhood, hybridSearch } from '../src/lib/semantic-world-model.js';
 import { semanticScores } from '../lib/semantic-embeddings.js';
 import { searchAdmission } from '../lib/search-controls.js';
-import { buildBriefing, normalizeSeed, DiscoveryInputError } from '../lib/discovery-studio.js';
+import { buildBriefing, normalizeSeed, validateFollowup, DiscoveryInputError } from '../lib/discovery-studio.js';
 import { handleEvidenceLab } from '../lib/evidence-lab-endpoint.js';
 import { authenticate as primeAuthenticate, publishReport as primePublishReport, readReports as primeReadReports, resolvePrimeIdentity as primeResolveIdentity, sendJson as primeSendJson } from '../lib/prime-auth.js';
 import { REPORT_ID_PATTERN, REPORT_LIMITS, validateReport } from '../lib/prime-reports.js';
@@ -351,8 +351,10 @@ async function handleDiscover(req, res) {
   }
 
   let query;
+  let followup;
   try {
     query = normalizeSeed(req.body?.query);
+    followup = validateFollowup(req.body?.followup);
   } catch (error) {
     return res.status(400).json({ error: error instanceof DiscoveryInputError ? error.message : 'Invalid discovery seed' });
   }
@@ -373,7 +375,7 @@ async function handleDiscover(req, res) {
   const semantic = await semanticScores(query, nodes);
   const ranked = hybridSearch(query, nodes, { limit: 12, semanticScorer: (_query, node) => semantic.scores.get(node.id) || 0 });
   const expanded = expandGraphNeighborhood(ranked, graph, { limit: 24 });
-  const briefing = buildBriefing({ query, graph, semanticStatus: semantic.status, ranked, expanded });
+  const briefing = buildBriefing({ query, graph, semanticStatus: semantic.status, ranked, expanded, followup });
 
   return res.status(200).json({
     product: 'The Portal',

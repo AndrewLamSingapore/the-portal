@@ -161,8 +161,11 @@ seven-stage briefing. Connect and Explore reuse the hybrid semantic graph search
 Hypothesize, Challenge, Experiment and Evolve return clearly labelled
 deterministic scaffolds (`epistemic_class` `CONSTRUCTED` or `SPECULATIVE`,
 generation mode `DETERMINISTIC_HEURISTIC`). No language model is called and
-nothing is persisted. The response reports its retrieval mode and degrades to
-disclosed lexical-only operation when embeddings are unavailable.
+nothing is persisted server-side. An optional bounded follow-up context carries
+the seed and up to six prior hypotheses, so each turn records its lineage and
+ancestry. Saving is opt-in and browser-private. The response reports its
+retrieval mode and degrades to disclosed lexical-only operation when embeddings
+are unavailable.
 
 ## Security boundary
 

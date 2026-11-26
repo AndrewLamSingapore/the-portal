@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {
   classifyIntent,
   normalizeSeed,
+  validateFollowup,
   DiscoveryInputError,
   buildHypothesisScaffolds,
   buildBriefing
@@ -63,4 +64,32 @@ test('briefing keeps semantic retrieval active when embeddings succeed', () => {
   assert.equal(briefing.grounding.degraded, false);
   assert.equal(briefing.grounding.mode, 'persistent_embedding_rerank');
   assert.doesNotMatch(briefing.stages.connect.disclosure, /lexical matching only/i);
+});
+
+test('follow-up context is bounded and normalised', () => {
+  assert.equal(validateFollowup(undefined), null);
+  assert.throws(() => validateFollowup({ seed: 'x', history: [] }), DiscoveryInputError);
+  assert.throws(() => validateFollowup({ seed: 'a valid seed', history: Array(7).fill({ id: 'a', statement: 'b' }) }), DiscoveryInputError);
+  const followup = validateFollowup({ seed: '  Refine this idea  ', turn: 3, history: [{ id: 'DS-HYP-1', statement: 'An earlier idea' }] });
+  assert.equal(followup.seed, 'Refine this idea');
+  assert.equal(followup.turn, 3);
+  assert.equal(followup.history.length, 1);
+});
+
+test('follow-up briefing carries lineage and marks the new turn', () => {
+  const briefing = buildBriefing({
+    query: 'What could that mean for trust?',
+    graph: { nodes: [], edges: [] },
+    semanticStatus: { mode: 'persistent_embedding_rerank', degraded: false },
+    ranked: [],
+    expanded: [],
+    followup: { seed: 'Machines that evolve ethics', turn: 2, history: [{ id: 'DS-HYP-1', statement: 'Machines may need shared ethics.' }] }
+  });
+  assert.equal(briefing.session.turn, 2);
+  assert.equal(briefing.session.seed, 'Machines that evolve ethics');
+  for (const lineage of briefing.session.lineage) {
+    assert.deepEqual(lineage.ancestry.parent_ids, ['DS-HYP-1']);
+    assert.deepEqual(lineage.ancestry.operators, ['MUTATION']);
+  }
+  assert.ok(briefing.stages.hypothesize.candidates.every(candidate => candidate.turn === 2));
 });

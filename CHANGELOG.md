@@ -2,6 +2,20 @@
 
 # Changelog
 
+## 6.7.0 — Discovery Studio follow-up and private saving
+
+- Adds conversational follow-up to the Discovery Studio. A bounded, stateless
+  follow-up context (seed, turn and up to six prior hypotheses) can be sent to
+  `POST /api/discover`; each new turn carries its lineage and marks its ancestry
+  with the deterministic `MUTATION` operator. No language model is called.
+- Adds explicit-consent, browser-private saving. The visitor opts in with
+  "Save this discovery"; the briefing (including their edited hypotheses) is
+  stored only in their browser and can be reopened or deleted. Nothing is
+  published or sent to the server.
+- The journey now behaves as a real session: Encounter → Connect → Explore →
+  Hypothesize → Challenge → Experiment → Evolve, then continue, save or start
+  fresh.
+
 ## 6.6.0 — Discovery Studio public entry
 
 - Adds a free-text "Enter The Portal — Begin Your Discovery" entry on the
