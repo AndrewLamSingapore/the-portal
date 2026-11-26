@@ -67,6 +67,8 @@ per-client usage limit.
 Public collective discovery is anonymous and consent-gated: `POST /api/contribute`
 retains nothing without explicit consent, stores no identity or address, and
 queues every submission for moderation before it appears in the Observatory.
+Public discovery rooms (`/discover-together`) add anonymous, consent-gated
+discussion with a deterministic facilitator and authenticated moderation.
 
 ## Search protections
 
