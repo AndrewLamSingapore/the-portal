@@ -54,6 +54,12 @@ Each discovery becomes a structured artifact with provenance, concepts, an outco
 
 The Portal is **not a historical authority**: AI-generated curation is a discovery surface, and factual historical claims require independent source verification.
 
+## The Discovery Studio
+
+The homepage now leads with a free-text entry: **Enter The Portal — Begin Your Discovery**. Type a question, an observation or an idea, and the Portal walks you through a seven-stage journey — Encounter, Connect, Explore, Hypothesize, Challenge, Experiment, Evolve — while keeping every evidence label visible.
+
+Connection uses the same hybrid retrieval as the graph: persistent vector embeddings, lexical matching and provenance ranking. When embeddings are unavailable the Portal says so and falls back to clearly labelled lexical-only operation. Hypothesis and experiment stages are editable heuristic scaffolds generated without a language model; they are never presented as discoveries or as validated science.
+
 ## Life + Frontiers: AI and biology
 
 The curated [AI biology case study](https://the-portal-ten.vercel.app/ai-biology) examines DNA interpretation, variant-effect prediction, protein structures and candidate sequence design. It includes all eight capability distinctions, the conceptual READ / UNDERSTAND / SIMULATE / DESIGN / VALIDATE workflow, and six primary research references.

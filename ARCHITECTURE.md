@@ -153,6 +153,17 @@ Reports whether durable archive infrastructure is configured and queryable. A mi
 
 `GET ?id=<artifact-id>` returns aggregate counts for `FAILED`, `TOO_EARLY` and `ARRIVED_QUIETLY`. `POST` accepts one canonical `artifact_id` and one permitted `verdict`, validates that the artifact exists, and increments the corresponding counter atomically. The route is `no-store` and applies a lightweight per-instance abuse ceiling without persisting network identifiers.
 
+### `POST /api/discover`
+
+The Discovery Studio entry. A bounded free-text seed is normalised, admitted
+through the same shared search budget as the graph, and composed into a
+seven-stage briefing. Connect and Explore reuse the hybrid semantic graph search;
+Hypothesize, Challenge, Experiment and Evolve return clearly labelled
+deterministic scaffolds (`epistemic_class` `CONSTRUCTED` or `SPECULATIVE`,
+generation mode `DETERMINISTIC_HEURISTIC`). No language model is called and
+nothing is persisted. The response reports its retrieval mode and degrades to
+disclosed lexical-only operation when embeddings are unavailable.
+
 ## Security boundary
 
 - `OPENAI_API_KEY` and `DATABASE_URL` remain server-side.

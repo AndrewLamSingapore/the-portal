@@ -2,16 +2,22 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 
-import { db, findArtifacts, getArtifact, getExperimentResult, hasDatabase, saveExperimentResult } from '../lib/db.js';
+import { db, findArtifacts, getArtifact, getExperimentResult, hasDatabase, listExperimentResults, saveExperimentResult } from '../lib/db.js';
 import { acceptExperimentResult } from '../lib/experiment-result-service.js';
+import { attachExperimentResults } from '../lib/experiment-result.js';
 import { validateExperimentCandidate, validatePrimeRelayResponse } from '../lib/experiment-candidate.js';
+import { buildKnowledgeGraph } from '../lib/knowledge.js';
+import { expandGraphNeighborhood, hybridSearch } from '../src/lib/semantic-world-model.js';
+import { semanticScores } from '../lib/semantic-embeddings.js';
+import { searchAdmission } from '../lib/search-controls.js';
+import { buildBriefing, normalizeSeed, DiscoveryInputError } from '../lib/discovery-studio.js';
 import { handleEvidenceLab } from '../lib/evidence-lab-endpoint.js';
 import { authenticate as primeAuthenticate, publishReport as primePublishReport, readReports as primeReadReports, resolvePrimeIdentity as primeResolveIdentity, sendJson as primeSendJson } from '../lib/prime-auth.js';
 import { REPORT_ID_PATTERN, REPORT_LIMITS, validateReport } from '../lib/prime-reports.js';
 import { PRODUCT_VERSION } from '../lib/product-version.js';
 const SCHEMA_VERSION = 6;
 const EXPERIENCE = 'Continuous Futures Model';
-const META_ROUTES = new Set(['capabilities', 'ecosystem-event', 'evidence', 'evidence-lab', 'experiment-result', 'manifest', 'metrics', 'prime', 'prime-experiment', 'prime-publish', 'prime-report', 'readiness', 'status', 'verify', 'version', 'v2']);
+const META_ROUTES = new Set(['capabilities', 'discover', 'ecosystem-event', 'evidence', 'evidence-lab', 'experiment-result', 'manifest', 'metrics', 'prime', 'prime-experiment', 'prime-publish', 'prime-report', 'readiness', 'status', 'verify', 'version', 'v2']);
 
 function jsonHeaders(res, cache = 'no-store') {
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
@@ -332,6 +338,51 @@ async function handlePrimePublish(req, res) {
   return primeSendJson(res, outcome.published.inserted ? 201 : 200, { published: outcome.published });
 }
 
+/**
+ * Discovery Studio entry. A visitor's free-text seed is run through the seven
+ * public discovery stages using the Portal's existing hybrid semantic graph
+ * search plus clearly labelled deterministic scaffolds. No language model is
+ * called and nothing is persisted without the visitor's explicit consent.
+ */
+async function handleDiscover(req, res) {
+  if (req.method !== 'POST') {
+    res.setHeader('Allow', 'POST');
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  let query;
+  try {
+    query = normalizeSeed(req.body?.query);
+  } catch (error) {
+    return res.status(400).json({ error: error instanceof DiscoveryInputError ? error.message : 'Invalid discovery seed' });
+  }
+
+  const admission = await searchAdmission(req);
+  if (!admission.allowed) {
+    res.setHeader('Retry-After', '60');
+    return res.status(admission.status).json({ error: admission.error });
+  }
+  if (!hasDatabase()) return res.status(503).json({ error: 'Archive unavailable' });
+
+  const [artifacts, results] = await Promise.all([
+    findArtifacts({ limit: 60 }),
+    listExperimentResults(60)
+  ]);
+  const graph = attachExperimentResults(buildKnowledgeGraph(artifacts), results);
+  const nodes = graph.nodes.map(node => ({ ...node, type: 'asset', provenance: Array.isArray(node.sources) ? node.sources : [] }));
+  const semantic = await semanticScores(query, nodes);
+  const ranked = hybridSearch(query, nodes, { limit: 12, semanticScorer: (_query, node) => semantic.scores.get(node.id) || 0 });
+  const expanded = expandGraphNeighborhood(ranked, graph, { limit: 24 });
+  const briefing = buildBriefing({ query, graph, semanticStatus: semantic.status, ranked, expanded });
+
+  return res.status(200).json({
+    product: 'The Portal',
+    product_version: PRODUCT_VERSION,
+    mode: 'DISCOVERY_STUDIO',
+    ...briefing
+  });
+}
+
 export default async function handler(req, res) {
   const routeValue = Array.isArray(req.query?.route) ? req.query.route[0] : req.query?.route;
   const route = String(routeValue || '');
@@ -354,6 +405,7 @@ export default async function handler(req, res) {
 
   jsonHeaders(res, ['capabilities', 'manifest', 'version'].includes(route) ? 'public, s-maxage=3600' : 'no-store');
 
+  if (route === 'discover') return handleDiscover(req, res);
   if (route === 'capabilities') {
     if (!allow(req, res, 'GET')) return;
     return res.status(200).json({
