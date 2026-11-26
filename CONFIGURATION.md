@@ -74,6 +74,8 @@ promoted room messages enter the shared evidence store for future cycles.
 The retrieval benchmark now includes a BM25 baseline, contamination checks and
 uncertainty, and discovery rooms refresh near-real-time. Full interface
 localization remains a documented limitation; facilitators are multilingual.
+Interface chrome (navigation, hero, discovery entry and forms) now ships a
+language selector across the three primary pages; deep content stays English.
 
 ## Search protections
 

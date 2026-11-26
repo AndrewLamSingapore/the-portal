@@ -2,6 +2,14 @@
 
 # Changelog
 
+## 7.5.0 — Interface localization
+
+- Adds a language selector (English, 中文, Español, Français, Deutsch, 日本語)
+  to the homepage, Discover Together and Observatory, localizing navigation,
+  hero actions, discovery entry, room creation and contribution chrome.
+  Deep long-form content and dynamically generated text remain English; this is
+  documented as a partial localization.
+
 ## 7.4.0 — Benchmark expansion, live rooms and multilingual facilitation
 
 - Expands the held-out retrieval benchmark to twenty queries with paraphrases,
