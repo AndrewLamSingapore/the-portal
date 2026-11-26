@@ -2,6 +2,12 @@
 
 # Changelog
 
+## 7.9.0 — Correct abstention accounting
+
+- Fixes a benchmark metric bug: an empty result set is now recorded as a correct
+  abstention for negative queries, so abstention accuracy reflects both
+  no-results and below-threshold outcomes.
+
 ## 7.8.0 — Semantic relevance calibration
 
 - Adds a semantic relevance floor: weak embedding similarity is ignored, so

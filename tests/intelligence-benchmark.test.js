@@ -64,6 +64,16 @@ test('supplied semantic scores rerank paraphrases and are reported as active', (
   assert.equal(result.per_query[0].hybrid.ranked[0], 'A');
 });
 
+test('an empty result is recorded as a correct abstention for a negative query', () => {
+  const result = runRetrievalBenchmark({
+    nodes,
+    queries: [{ id: 'QN', query: 'baking bread', relevant: [] }],
+    semanticScoresByQuery: null
+  });
+  assert.equal(result.per_query[0].abstained, true);
+  assert.equal(result.per_query[0].abstention_correct, true);
+});
+
 test('discovery quality scores are deterministic rubrics over real outputs', () => {
   const scores = scoreDiscoveryQuality({
     population: [
