@@ -14,9 +14,8 @@ import { buildBriefing, normalizeSeed, validateFollowup, DiscoveryInputError } f
 import { listPublicRuns, latestCompletedRun, runOneCycle, setEngineKilled } from '../lib/living-engine.js';
 import { buildObservatory } from '../lib/observatory.js';
 import { runRetrievalBenchmark, scoreDiscoveryQuality, buildBenchmarkReport } from '../lib/intelligence-benchmark.js';
-import { isModelBudgetEnabled, modelBudgetStatus, admitModelRequest, settleModelReservation } from '../lib/living-budget.js';
-import { generateHypothesisPopulation } from '../lib/hypothesis-generation.js';
-import { SANDBOX_SEED, runLivingSandbox } from '../lib/living-sandbox.js';
+import { isModelBudgetEnabled, modelBudgetStatus } from '../lib/living-budget.js';
+import { runModelCycleOnce } from '../lib/living-model-run.js';
 import { handleEvidenceLab } from '../lib/evidence-lab-endpoint.js';
 import { authenticate as primeAuthenticate, publishReport as primePublishReport, readReports as primeReadReports, resolvePrimeIdentity as primeResolveIdentity, sendJson as primeSendJson } from '../lib/prime-auth.js';
 import { REPORT_ID_PATTERN, REPORT_LIMITS, validateReport } from '../lib/prime-reports.js';
@@ -441,7 +440,9 @@ async function handleEngineTick(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
   if (!cronAuthorized(req) && !engineAuthorized(req)) return res.status(401).json({ error: 'Unauthorized' });
-  const outcome = await runOneCycle({ sql: db(), owner: 'cron' });
+  const outcome = isModelBudgetEnabled()
+    ? await runModelCycleOnce({ sql: db(), owner: 'cron' })
+    : await runOneCycle({ sql: db(), owner: 'cron' });
   return res.status(200).json({ mode: 'LIVING_ENGINE_TICK', ...outcome });
 }
 
@@ -506,48 +507,13 @@ async function handleEngineModelRun(req, res) {
   }
   if (!process.env.PORTAL_ENGINE_TOKEN) return res.status(503).json({ error: 'Engine admin token is not configured' });
   if (!engineAuthorized(req)) return res.status(401).json({ error: 'Unauthorized' });
-  if (!isModelBudgetEnabled()) return res.status(503).json({ error: 'Model-originated runs are not enabled' });
-  if (!process.env.OPENAI_API_KEY) return res.status(503).json({ error: 'Generative cortex unavailable' });
-  if (!hasDatabase()) return res.status(503).json({ error: 'Archive unavailable' });
-
-  const sql = db();
-  const requestId = `LMR-${crypto.randomUUID()}`;
-  const reservation = Number(process.env.PORTAL_LIVING_MODEL_RUN_RESERVATION_MICRO_USD || 100_000);
-  const admission = await admitModelRequest(sql, { requestId, estimatedMicroUsd: reservation });
-  if (!admission.allowed) {
-    return res.status(admission.reason === 'budget_suspended' ? 409 : 402).json({
-      mode: 'LIVING_MODEL_RUN',
-      status: 'REJECTED',
-      reason: admission.reason,
-      budget: {
-        daily_limit_micro_usd: admission.daily_limit_micro_usd,
-        daily_spent_micro_usd: admission.daily_spent_micro_usd,
-        monthly_limit_micro_usd: admission.monthly_limit_micro_usd,
-        monthly_spent_micro_usd: admission.monthly_spent_micro_usd
-      }
-    });
-  }
-  try {
-    const seed = runLivingSandbox(SANDBOX_SEED);
-    const generated = await generateHypothesisPopulation({ observations: seed.observations, memory: [], generation: 1 });
-    if (!generated?.candidates?.length) throw new Error('Model returned no candidates');
-    await settleModelReservation(sql, { requestId, microUsd: reservation, success: true });
-    return res.status(200).json({
-      mode: 'LIVING_MODEL_RUN',
-      status: 'COMPLETED',
-      request_id: requestId,
-      generation_mode: 'MODEL_ORIGINATED',
-      model: generated.model,
-      estimated_expenditure_micro_usd: reservation,
-      candidates: generated.candidates,
-      synthesis: generated.synthesis,
-      next_question: generated.next_question,
-      disclosure: 'Expenditure is recorded as a conservative upper bound; token-level usage is not parsed here.'
-    });
-  } catch (error) {
-    await settleModelReservation(sql, { requestId, microUsd: reservation, success: false });
-    return res.status(502).json({ mode: 'LIVING_MODEL_RUN', status: 'FAILED', detail: String(error?.message || error).slice(0, 300) });
-  }
+  const outcome = await runModelCycleOnce({ sql: db(), owner: 'admin', idempotencyKey: `model-manual:${crypto.randomUUID()}` });
+  const status = outcome.status === 'COMPLETED' ? 200
+    : outcome.status === 'REJECTED' ? (outcome.reason === 'budget_suspended' ? 409 : 402)
+    : outcome.status === 'DISABLED' ? 503
+    : outcome.status === 'FAILED' ? 502
+    : 200;
+  return res.status(status).json({ mode: 'LIVING_MODEL_RUN', ...outcome });
 }
 
 export default async function handler(req, res) {
