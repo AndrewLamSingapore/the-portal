@@ -6,21 +6,28 @@ import {
   admitModelRequest,
   settleModelReservation,
   modelBudgetStatus,
-  rollBudgetState
+  rollBudgetState,
+  reconcileUsageMicroUsd
 } from '../lib/living-budget.js';
 
 function fakeSql({ dailyLimit = 1_000_000, monthlyLimit = 30_000_000 } = {}) {
   const state = { daily_limit: dailyLimit, monthly_limit: monthlyLimit, daily_spent: 0, monthly_spent: 0, suspended: false };
+  const ledger = new Set();
   const sql = async (strings, ...values) => {
     const text = strings.join('?');
-    if (text.includes('create table') || text.includes('create index')) return [];
+    if (text.includes('create table') || text.includes('create index') || text.includes('alter table')) return [];
     if (text.includes('insert into living_model_budget') && text.includes('do nothing')) return [];
     if (text.includes('insert into living_model_budget') && text.includes('do update')) {
       state.daily_limit = values[1];
       state.monthly_limit = values[2];
       return [];
     }
-    if (text.includes('insert into living_model_ledger')) return [];
+    if (text.includes('insert into living_model_ledger')) {
+      const requestId = values[0];
+      if (ledger.has(requestId)) return [];
+      ledger.add(requestId);
+      return [{ id: requestId }];
+    }
     if (text.includes('daily_window')) return [];
     if (text.includes('greatest(')) {
       const amount = values[0];
@@ -99,4 +106,36 @@ test('a still-exhausted month keeps the budget suspended after a daily roll', ()
   };
   const next = rollBudgetState(state, { today: '2026-11-26' });
   assert.equal(next.suspended, true);
+});
+
+test('duplicate settlement never refunds other reservations', async () => {
+  const { sql } = fakeSql({ dailyLimit: 1000, monthlyLimit: 1000 });
+  await admitModelRequest(sql, { requestId: 'r1', estimatedMicroUsd: 80 });
+  await admitModelRequest(sql, { requestId: 'r2', estimatedMicroUsd: 50 });
+  await settleModelReservation(sql, { requestId: 'r1', microUsd: 80, success: false });
+  await settleModelReservation(sql, { requestId: 'r1', microUsd: 80, success: false });
+  const status = await modelBudgetStatus(sql);
+  assert.equal(status.daily_spent_micro_usd, 50);
+});
+
+test('usage is reconciled to actual cost when pricing is configured', () => {
+  assert.equal(
+    reconcileUsageMicroUsd({ input_tokens: 1000, output_tokens: 2000 }, { inputMicroUsdPer1k: 1, outputMicroUsdPer1k: 3 }),
+    7
+  );
+  assert.equal(reconcileUsageMicroUsd(null, { inputMicroUsdPer1k: 1, outputMicroUsdPer1k: 1 }), null);
+});
+
+test('successful settlement reconciles reservation down to actual usage', async () => {
+  const previousIn = process.env.PORTAL_MODEL_INPUT_PRICE_MICRO_USD_PER_1K;
+  const previousOut = process.env.PORTAL_MODEL_OUTPUT_PRICE_MICRO_USD_PER_1K;
+  process.env.PORTAL_MODEL_INPUT_PRICE_MICRO_USD_PER_1K = '1';
+  process.env.PORTAL_MODEL_OUTPUT_PRICE_MICRO_USD_PER_1K = '3';
+  const { sql } = fakeSql({ dailyLimit: 1_000_000, monthlyLimit: 1_000_000 });
+  await admitModelRequest(sql, { requestId: 'r1', estimatedMicroUsd: 100_000 });
+  await settleModelReservation(sql, { requestId: 'r1', microUsd: 100_000, success: true, usage: { input_tokens: 1000, output_tokens: 2000 } });
+  const status = await modelBudgetStatus(sql);
+  assert.equal(status.daily_spent_micro_usd, 7);
+  if (previousIn === undefined) delete process.env.PORTAL_MODEL_INPUT_PRICE_MICRO_USD_PER_1K; else process.env.PORTAL_MODEL_INPUT_PRICE_MICRO_USD_PER_1K = previousIn;
+  if (previousOut === undefined) delete process.env.PORTAL_MODEL_OUTPUT_PRICE_MICRO_USD_PER_1K; else process.env.PORTAL_MODEL_OUTPUT_PRICE_MICRO_USD_PER_1K = previousOut;
 });
