@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   lexicalOnlyRank,
+  bm25Rank,
   precisionAt,
   recallAt,
   ndcgAt,
@@ -18,6 +19,11 @@ const nodes = [
 
 test('lexical-only retrieval ranks a relevant record above unrelated records', () => {
   const ranked = lexicalOnlyRank('machine ethics and rights', nodes, 3);
+  assert.equal(ranked[0].node.id, 'A');
+});
+
+test('bm25 baseline ranks a relevant record above unrelated records', () => {
+  const ranked = bm25Rank('machine ethics and rights', nodes, 3);
   assert.equal(ranked[0].node.id, 'A');
 });
 
@@ -41,6 +47,9 @@ test('the retrieval benchmark reports both baselines without claiming superiorit
   assert.equal(result.model_calls, 0);
   assert.ok('precision_at_3' in result.aggregate.lexical);
   assert.ok('precision_at_3' in result.aggregate.hybrid);
+  assert.ok('precision_at_3' in result.aggregate.bm25);
+  assert.ok('contaminated_queries' in result.contamination);
+  assert.ok('hybrid_ndcg_std' in result.uncertainty);
 });
 
 test('supplied semantic scores rerank paraphrases and are reported as active', () => {

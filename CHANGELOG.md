@@ -2,6 +2,17 @@
 
 # Changelog
 
+## 7.4.0 — Benchmark expansion, live rooms and multilingual facilitation
+
+- Expands the held-out retrieval benchmark to twenty queries with paraphrases,
+  conceptual relationships and unrelated negatives, adds a BM25 baseline and
+  reports contamination checks and per-metric standard deviation alongside
+  lexical and hybrid results.
+- Adds near-real-time room updates (polling refresh) so asynchronous discussion
+  reflects new messages and facilitator output without a full page reload.
+- Adds multilingual tokenization to the deterministic facilitator (Latin and
+  CJK); the AI facilitator remains language-agnostic.
+
 ## 7.3.0 — AI discussion facilitator and shared living intelligence
 
 - Adds a budget-gated AI discussion facilitator (`POST /api/rooms/facilitate`)

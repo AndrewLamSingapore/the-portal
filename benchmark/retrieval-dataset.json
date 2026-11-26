@@ -1,6 +1,6 @@
 {
   "description": "Held-out retrieval evaluation set. Relevance is annotated by the Portal owner. It includes paraphrases, conceptual relationships and unrelated negatives.",
-  "dataset_version": "1.1.0",
+  "dataset_version": "1.2.0",
   "nodes": [
     { "id": "BM-A", "title": "Machine ethics", "type": "asset", "concepts": ["intelligence", "ethics"], "provenance": ["owner-annotation"] },
     { "id": "BM-B", "title": "Energy as a commons", "type": "asset", "concepts": ["energy", "commons"], "provenance": ["owner-annotation"] },
@@ -11,7 +11,9 @@
     { "id": "BM-G", "title": "Speculative finance", "type": "asset", "concepts": ["economy", "risk"], "provenance": ["owner-annotation"] },
     { "id": "BM-H", "title": "Urban memory", "type": "asset", "concepts": ["cities", "history"], "provenance": ["owner-annotation"] },
     { "id": "BM-I", "title": "Language acquisition", "type": "asset", "concepts": ["language", "learning"], "provenance": ["owner-annotation"] },
-    { "id": "BM-J", "title": "Planetary boundaries", "type": "asset", "concepts": ["earth", "systems"], "provenance": ["owner-annotation"] }
+    { "id": "BM-J", "title": "Planetary boundaries", "type": "asset", "concepts": ["earth", "systems"], "provenance": ["owner-annotation"] },
+    { "id": "BM-K", "title": "Collective memory", "type": "asset", "concepts": ["society", "memory"], "provenance": ["owner-annotation"] },
+    { "id": "BM-L", "title": "Distributed energy", "type": "asset", "concepts": ["energy", "grids"], "provenance": ["owner-annotation"] }
   ],
   "queries": [
     { "id": "BM-Q1", "query": "Should machines have rights?", "relevant": ["BM-A"] },
@@ -23,6 +25,16 @@
     { "id": "BM-Q7", "query": "How do amino acids fold into shape?", "relevant": ["BM-E"] },
     { "id": "BM-Q8", "query": "How children learn to speak", "relevant": ["BM-I"] },
     { "id": "BM-Q9", "query": "An unrelated request about baking bread", "relevant": [] },
-    { "id": "BM-Q10", "query": "An unrelated request about mountain climbing", "relevant": [] }
+    { "id": "BM-Q10", "query": "An unrelated request about mountain climbing", "relevant": [] },
+    { "id": "BM-Q11", "query": "How a society remembers together", "relevant": ["BM-K"] },
+    { "id": "BM-Q12", "query": "Shared remembering across generations", "relevant": ["BM-K"] },
+    { "id": "BM-Q13", "query": "Local generation feeding a shared grid", "relevant": ["BM-L"] },
+    { "id": "BM-Q14", "query": "Decentralised power and community ownership", "relevant": ["BM-L", "BM-B"] },
+    { "id": "BM-Q15", "query": "Do artificial intelligences deserve consideration?", "relevant": ["BM-A"] },
+    { "id": "BM-Q16", "query": "Moral status of synthetic minds", "relevant": ["BM-A"] },
+    { "id": "BM-Q17", "query": "Why history repeats itself", "relevant": ["BM-C"] },
+    { "id": "BM-Q18", "query": "The recurrence of old concepts", "relevant": ["BM-C"] },
+    { "id": "BM-Q19", "query": "An unrelated request about cooking pasta", "relevant": [] },
+    { "id": "BM-Q20", "query": "An unrelated request about car repair", "relevant": [] }
   ]
 }
