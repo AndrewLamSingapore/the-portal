@@ -632,6 +632,8 @@ async function handleRoomFacilitate(req, res) {
       try {
         const facilitation = await facilitateRoomWithModel({ topic: roomData.room.topic, question: roomData.room.question, messages: roomData.messages });
         await settleModelReservation(sql, { requestId, microUsd: reservation, success: true, usage: facilitation.usage });
+        const summaryText = [facilitation.summary, ...(facilitation.hypotheses || []).map(h => `Hypothesis (${h.epistemic_class}): ${h.statement} — falsified if: ${h.falsifier}`)].join('\n\n');
+        await postMessage(db(), { roomId, text: summaryText, consent: true, authorKind: 'ai', role: 'facilitator' });
         return res.status(200).json({ mode: 'ROOM_FACILITATION', room_id: roomId, ...facilitation });
       } catch (error) {
         await settleModelReservation(sql, { requestId, microUsd: reservation, success: false, release: false });

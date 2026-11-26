@@ -64,6 +64,12 @@
 .tg-meta { font-size: .72rem; letter-spacing: .08em; text-transform: uppercase; color: #8f8373; }
 .tg-ai { border-color: #3a2f24; }
 .tg-empty { color: #8f8373; }
+.tg-reply { margin-left: 1.2rem; border-left: 2px solid #3a2f24; }
+.tg-reply-button {
+  background: transparent; color: #e0a64f; border: 1px solid #3a2f24; border-radius: 999px;
+  padding: .2rem .65rem; font: inherit; font-size: .76rem; cursor: pointer; margin-top: .4rem;
+}
+.tg-reply-button:focus-visible { outline: 2px solid #e0a64f; outline-offset: 2px; }
 
 .together-page a:focus-visible { outline: 2px solid #e0a64f; outline-offset: 2px; }
 

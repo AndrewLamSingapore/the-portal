@@ -3,6 +3,19 @@
 
   const $ = id => document.getElementById(id);
   let liveTimer = null;
+  let replyParentId = null;
+
+  function messageMarkup(message) {
+    const kind = message.author_kind === 'ai' ? 'ai' : message.author_kind === 'system' ? 'system' : 'human';
+    const label = kind === 'ai' ? 'AI facilitator' : kind === 'system' ? 'system' : 'participant';
+    const reply = kind === 'human'
+      ? `<button class="tg-reply-button" type="button" data-parent="${escapeHtml(message.id)}">Reply</button>`
+      : '';
+    return `<li class="tg-message tg-${kind}${message.parent_id ? ' tg-reply' : ''}">
+      <span class="tg-meta">${escapeHtml(label)}</span>
+      <p>${escapeHtml(message.text)}</p>${reply}
+    </li>`;
+  }
 
   function escapeHtml(value) {
     return String(value ?? '')
@@ -44,11 +57,7 @@
       const room = payload.room;
       const messages = payload.messages || [];
       const facilitation = payload.facilitation || {};
-      const messagesHtml = messages.map(message => `
-        <li class="tg-message tg-${escapeHtml(message.author_kind)}">
-          <span class="tg-meta">${escapeHtml(message.author_kind === 'ai' ? 'AI facilitator' : 'participant')}</span>
-          <p>${escapeHtml(message.text)}</p>
-        </li>`).join('');
+      const messagesHtml = messages.map(messageMarkup).join('');
       $('roomView').innerHTML = `
         <header class="tg-panel-head"><p class="index">ROOM</p><h2 id="roomViewTitle">${escapeHtml(room.topic)}</h2></header>
         ${room.question ? `<p class="tg-note">${escapeHtml(room.question)}</p>` : ''}
@@ -73,6 +82,13 @@
       $('roomView').hidden = false;
       clearInterval(liveTimer);
       liveTimer = setInterval(() => refreshLive(id), 15000);
+      $('tgMessagesList').querySelectorAll('[data-parent]').forEach(button => {
+        button.addEventListener('click', () => {
+          replyParentId = button.getAttribute('data-parent');
+          $('replyText').focus();
+          status($('replyStatus'), 'Replying to a message.');
+        });
+      });
       $('aiFacilitate').addEventListener('click', async () => {
         status($('facilitateStatus'), 'Synthesising discussion…');
         const result = await fetch('/api/rooms/facilitate', {
@@ -82,20 +98,8 @@
         });
         const payload = await result.json().catch(() => ({}));
         if (!result.ok) { status($('facilitateStatus'), payload.error || 'Facilitator unavailable.'); return; }
-        const concepts = payload.shared_concepts?.length ? `Concepts: ${payload.shared_concepts.map(c => escapeHtml(c.name)).join(' · ')}` : '';
-        const disagreements = payload.disagreements?.length ? `Disagreements: ${payload.disagreements.map(escapeHtml).join(' · ')}` : '';
-        const hypotheses = (payload.hypotheses || []).map(h => `${escapeHtml(h.statement)} (${escapeHtml(h.epistemic_class)})`).join(' · ');
-        const section = $('tgFacilitator');
-        if (section) {
-          section.innerHTML = `<h3>Facilitator summary</h3>
-            <p>${escapeHtml(payload.summary || '')}</p>
-            ${concepts ? `<p class="tg-note">${concepts}</p>` : ''}
-            ${disagreements ? `<p class="tg-note">${disagreements}</p>` : ''}
-            ${hypotheses ? `<p class="tg-note">Hypotheses: ${hypotheses}</p>` : ''}
-            ${payload.next_question ? `<p class="tg-note">Next question: ${escapeHtml(payload.next_question)}</p>` : ''}
-            <p class="tg-disclosure">${escapeHtml(payload.disclosure || '')}</p>`;
-        }
         status($('facilitateStatus'), payload.generation === 'MODEL_ORIGINATED' ? 'AI synthesis ready.' : 'Deterministic synthesis ready (model unavailable or over budget).');
+        openRoom(id);
       });
       $('replyForm').addEventListener('submit', async event => {
         event.preventDefault();
@@ -105,11 +109,12 @@
         const result = await fetch('/api/rooms/messages', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ room_id: id, text, consent: true })
+          body: JSON.stringify({ room_id: id, text, consent: true, parent_id: replyParentId })
         });
         const reply = await result.json().catch(() => ({}));
         if (!result.ok) { status($('replyStatus'), reply.error || 'Could not post.'); return; }
         status($('replyStatus'), reply.duplicate ? 'Already posted.' : 'Posted. Refreshing…');
+        replyParentId = null;
         openRoom(id);
       });
       $('roomView').scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -128,11 +133,7 @@
       if (!list || !facilitator) { clearInterval(liveTimer); return; }
       const messages = payload.messages || [];
       const facilitation = payload.facilitation || {};
-      list.innerHTML = messages.length ? messages.map(message => `
-        <li class="tg-message tg-${escapeHtml(message.author_kind)}">
-          <span class="tg-meta">${escapeHtml(message.author_kind === 'ai' ? 'AI facilitator' : 'participant')}</span>
-          <p>${escapeHtml(message.text)}</p>
-        </li>`).join('') : '<li class="tg-empty">No messages yet.</li>';
+      list.innerHTML = messages.length ? messages.map(messageMarkup).join('') : '<li class="tg-empty">No messages yet.</li>';
       facilitator.innerHTML = `<h3>Facilitator summary</h3>
         <p>${escapeHtml(facilitation.summary || '')}</p>
         ${facilitation.shared_concepts?.length ? `<p class="tg-note">Concepts: ${facilitation.shared_concepts.map(c => escapeHtml(c.name)).join(' · ')}</p>` : ''}
@@ -160,5 +161,8 @@
     loadRooms();
   });
 
+  const requestedRoom = new URLSearchParams(window.location.search).get('room');
+
   loadRooms();
+  if (requestedRoom) openRoom(requestedRoom);
 })();

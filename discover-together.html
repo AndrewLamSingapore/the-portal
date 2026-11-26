@@ -10,36 +10,37 @@
   <link rel="stylesheet" href="/authority-family.css?v=1">
   <link rel="stylesheet" href="/public-experience.css?v=1">
   <link rel="stylesheet" href="/discover-together.css">
+  <script src="/i18n.js" defer></script>
   <script src="/discover-together.js" defer></script>
 </head>
 <body class="together-page">
 <a class="skip-link" href="#main">Skip to content</a>
-<header class="public-header"><a class="public-brand" href="/" aria-label="The Portal home">THE PORTAL<span aria-hidden="true">↗</span></a><nav class="public-links" aria-label="Main navigation"><a href="/#explore">Explore</a><a href="/discover-together">Discover together</a><a href="/observatory">Observatory</a><a href="/evidence-lab">Evidence Lab</a></nav><details class="public-more"><summary>More</summary><nav aria-label="More from The Portal"><a href="/cloud-support">Cloud guide</a><a href="/ai-biology">AI &amp; biology</a><a href="/living">Living Observatory</a><a href="https://github.com/AndrewLamSingapore/the-portal" target="_blank" rel="noopener noreferrer">GitHub source ↗</a></nav></details></header>
+<header class="public-header"><a class="public-brand" href="/" aria-label="The Portal home">THE PORTAL<span aria-hidden="true">↗</span></a><nav class="public-links" aria-label="Main navigation"><a href="/#explore" data-i18n="nav.explore">Explore</a><a href="/discover-together" data-i18n="nav.together">Discover together</a><a href="/observatory" data-i18n="nav.observatory">Observatory</a><a href="/evidence-lab" data-i18n="nav.evidence">Evidence Lab</a></nav><span class="lang-host" data-lang-switch></span><details class="public-more"><summary>More</summary><nav aria-label="More from The Portal"><a href="/cloud-support" data-i18n="nav.cloud">Cloud guide</a><a href="/ai-biology" data-i18n="nav.bio">AI &amp; biology</a><a href="/living">Living Observatory</a><a href="https://github.com/AndrewLamSingapore/the-portal" target="_blank" rel="noopener noreferrer">GitHub source ↗</a></nav></details></header>
 <main id="main">
   <header class="tg-hero">
     <p class="eyebrow">COLLECTIVE DISCOVERY</p>
-    <h1>Discover together.</h1>
+    <h1 data-i18n="together.title">Discover together.</h1>
     <p class="tg-thesis">Join a public discovery room, contribute evidence, challenge assumptions and build hypotheses with others — human and AI — with every step visible and every contribution anonymous until you choose otherwise.</p>
   </header>
   <p class="tg-status" id="tgStatus" role="status" aria-live="polite">Loading rooms…</p>
   <section class="tg-panel" aria-labelledby="roomsTitle">
-    <header class="tg-panel-head"><p class="index">ROOMS</p><h2 id="roomsTitle">Open discovery rooms</h2></header>
+    <header class="tg-panel-head"><p class="index">ROOMS</p><h2 id="roomsTitle" data-i18n="rooms.title">Open discovery rooms</h2></header>
     <div class="tg-rooms" id="tgRooms"></div>
   </section>
   <section class="tg-panel" aria-labelledby="createTitle">
-    <header class="tg-panel-head"><p class="index">START A ROOM</p><h2 id="createTitle">Pose a question for collective investigation</h2></header>
+    <header class="tg-panel-head"><p class="index">START A ROOM</p><h2 id="createTitle" data-i18n="create.title">Pose a question for collective investigation</h2></header>
     <form id="createRoomForm" class="tg-form">
-      <label for="roomTopic">Topic</label>
+      <label for="roomTopic" data-i18n="create.topic">Topic</label>
       <input id="roomTopic" name="topic" maxlength="200" required>
-      <label for="roomQuestion">Question (optional)</label>
+      <label for="roomQuestion" data-i18n="create.question">Question (optional)</label>
       <input id="roomQuestion" name="question" maxlength="200">
-      <label class="tg-consent"><input type="checkbox" id="roomConsent" required> I consent to publishing this room anonymously.</label>
-      <button type="submit">CREATE ROOM</button>
+      <label class="tg-consent"><input type="checkbox" id="roomConsent" required> <span data-i18n="create.consent">I consent to publishing this room anonymously.</span></label>
+      <button type="submit" data-i18n="create.submit">CREATE ROOM</button>
       <p class="tg-status" id="createStatus" role="status" aria-live="polite"></p>
     </form>
   </section>
   <section class="tg-panel" id="roomView" hidden aria-labelledby="roomViewTitle"></section>
 </main>
-<footer><p>THE PORTAL · QUESTION → DISCUSS → CONNECT → HYPOTHESIZE → CHALLENGE → EXPERIMENT → VALIDATE → EVOLVE ↻</p><p>Popularity is never treated as truth.</p></footer>
+<footer><p>THE PORTAL · QUESTION → DISCUSS → CONNECT → HYPOTHESIZE → CHALLENGE → EXPERIMENT → VALIDATE → EVOLVE ↻</p><p data-i18n="footer.line1">Popularity is never treated as truth.</p></footer>
 </body>
 </html>

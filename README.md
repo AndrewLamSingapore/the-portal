@@ -64,7 +64,9 @@ The journey supports conversational follow-up: continue a discovery to refine, c
 
 ## The Living Engine
 
-Behind the scenes, a governed scheduler runs the deterministic discovery cycle and records every run. Jobs are persisted with idempotency keys, claimed under time-bounded leases, checkpointed and audited, with a database-backed kill switch and authenticated admin controls. Runs are always labelled `DETERMINISTIC_FALLBACK`: zero model calls, no external actuation, no production mutation. A sanitised public feed (`/api/engine/runs`) shows completed and failed runs without exposing operational detail.
+Behind the scenes, a governed scheduler runs discovery cycles and records every run. Jobs are persisted with idempotency keys, claimed under time-bounded leases, checkpointed and audited, with a database-backed kill switch and authenticated admin controls. When the owner-approved living model budget allows, the cycle is model-originated and multigenerational; otherwise it is a clearly labelled deterministic fallback with zero model calls. Neither mode performs external actuation or production mutation. A sanitised public feed (`/api/engine/runs`) shows completed and failed runs, hypotheses, usage and expenditure.
+
+The Portal also supports collective discovery: public rooms with consent-gated discussion, an AI facilitator, and reviewed contributions that can inform future cycles.
 
 The [Open Intelligence Observatory](/observatory) exposes that operation publicly: live run activity, the living knowledge graph, the hypothesis arena, the open experiment laboratory, the intellectual fossil record, the evidence audit centre and the public benchmark centre. Empty or unvalidated sections are labelled rather than simulated.
 

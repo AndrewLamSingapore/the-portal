@@ -5,7 +5,8 @@ import {
   configureModelBudget,
   admitModelRequest,
   settleModelReservation,
-  modelBudgetStatus
+  modelBudgetStatus,
+  rollBudgetState
 } from '../lib/living-budget.js';
 
 function fakeSql({ dailyLimit = 1_000_000, monthlyLimit = 30_000_000 } = {}) {
@@ -76,4 +77,26 @@ test('the budget suspends automatically when exhausted and reports public status
   const next = await admitModelRequest(sql, { requestId: 'r2', estimatedMicroUsd: 1 });
   assert.equal(next.allowed, false);
   assert.equal(next.reason, 'budget_suspended');
+});
+
+test('budget-induced suspension clears automatically when a window rolls', () => {
+  const state = {
+    daily_limit_micro_usd: 100, monthly_limit_micro_usd: 300,
+    daily_spent_micro_usd: 100, monthly_spent_micro_usd: 100,
+    daily_window: '2026-11-25', monthly_window: '2026-11-01'
+  };
+  const next = rollBudgetState(state, { today: '2026-11-26' });
+  assert.equal(next.suspended, false);
+  assert.equal(next.daily_spent_micro_usd, 0);
+  assert.equal(next.monthly_spent_micro_usd, 100, 'monthly spend persists within the same month');
+});
+
+test('a still-exhausted month keeps the budget suspended after a daily roll', () => {
+  const state = {
+    daily_limit_micro_usd: 100, monthly_limit_micro_usd: 300,
+    daily_spent_micro_usd: 100, monthly_spent_micro_usd: 300,
+    daily_window: '2026-11-25', monthly_window: '2026-11-01'
+  };
+  const next = rollBudgetState(state, { today: '2026-11-26' });
+  assert.equal(next.suspended, true);
 });
