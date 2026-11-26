@@ -45,6 +45,12 @@
 .tg-consent { display: flex; gap: .5rem; align-items: center; }
 .tg-form input:focus-visible, .tg-form textarea:focus-visible, .tg-form button:focus-visible { outline: 2px solid #e0a64f; outline-offset: 2px; }
 
+.tg-ai-button {
+  background: transparent; color: #e0a64f; border: 1px solid #3a2f24; border-radius: 8px;
+  padding: .55rem 1rem; font: inherit; font-size: .82rem; letter-spacing: .06em; cursor: pointer; margin: .6rem 0 .4rem;
+}
+.tg-ai-button:focus-visible { outline: 2px solid #e0a64f; outline-offset: 2px; }
+
 .tg-facilitator {
   background: #15100a; border: 1px solid #2c241b; border-radius: 10px; padding: .9rem 1rem; margin: .6rem 0 .9rem;
 }

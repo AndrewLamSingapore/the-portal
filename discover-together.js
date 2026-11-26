@@ -58,6 +58,8 @@
           ${facilitation.open_questions?.length ? `<p class="tg-note">Open questions: ${facilitation.open_questions.map(escapeHtml).join(' · ')}</p>` : ''}
           <p class="tg-disclosure">${escapeHtml(facilitation.disclosure || '')}</p>
         </section>
+        <button class="tg-ai-button" id="aiFacilitate" type="button">AI FACILITATOR</button>
+        <p class="tg-status" id="facilitateStatus" role="status" aria-live="polite"></p>
         <ul class="tg-messages">${messagesHtml || '<li class="tg-empty">No messages yet.</li>'}</ul>
         <form id="replyForm" class="tg-form">
           <label for="replyText">Contribute a thought, question, evidence or challenge</label>
@@ -67,6 +69,30 @@
           <p class="tg-status" id="replyStatus" role="status" aria-live="polite"></p>
         </form>`;
       $('roomView').hidden = false;
+      $('aiFacilitate').addEventListener('click', async () => {
+        status($('facilitateStatus'), 'Synthesising discussion…');
+        const result = await fetch('/api/rooms/facilitate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ room_id: id })
+        });
+        const payload = await result.json().catch(() => ({}));
+        if (!result.ok) { status($('facilitateStatus'), payload.error || 'Facilitator unavailable.'); return; }
+        const concepts = payload.shared_concepts?.length ? `Concepts: ${payload.shared_concepts.map(c => escapeHtml(c.name)).join(' · ')}` : '';
+        const disagreements = payload.disagreements?.length ? `Disagreements: ${payload.disagreements.map(escapeHtml).join(' · ')}` : '';
+        const hypotheses = (payload.hypotheses || []).map(h => `${escapeHtml(h.statement)} (${escapeHtml(h.epistemic_class)})`).join(' · ');
+        const section = document.querySelector('.tg-facilitator');
+        if (section) {
+          section.innerHTML = `<h3>Facilitator summary</h3>
+            <p>${escapeHtml(payload.summary || '')}</p>
+            ${concepts ? `<p class="tg-note">${concepts}</p>` : ''}
+            ${disagreements ? `<p class="tg-note">${disagreements}</p>` : ''}
+            ${hypotheses ? `<p class="tg-note">Hypotheses: ${hypotheses}</p>` : ''}
+            ${payload.next_question ? `<p class="tg-note">Next question: ${escapeHtml(payload.next_question)}</p>` : ''}
+            <p class="tg-disclosure">${escapeHtml(payload.disclosure || '')}</p>`;
+        }
+        status($('facilitateStatus'), payload.generation === 'MODEL_ORIGINATED' ? 'AI synthesis ready.' : 'Deterministic synthesis ready (model unavailable or over budget).');
+      });
       $('replyForm').addEventListener('submit', async event => {
         event.preventDefault();
         const text = $('replyText').value.trim();

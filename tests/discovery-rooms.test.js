@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createRoom, postMessage, facilitateRoom, hideMessage } from '../lib/discovery-rooms.js';
+import { createRoom, postMessage, facilitateRoom, hideMessage, getRoomMessage } from '../lib/discovery-rooms.js';
 
 function fakeSql() {
   const rooms = new Map();
@@ -25,6 +25,9 @@ function fakeSql() {
     }
     if (text.includes('select id,parent_id,author_kind,role,text,created_at from discovery_room_messages')) {
       return [...messages.values()].filter(message => message.room_id === values[0] && message.status !== 'HIDDEN');
+    }
+    if (text.includes('from discovery_room_messages where id=')) {
+      return messages.has(values[0]) ? [messages.get(values[0])] : [];
     }
     if (text.includes("set status='HIDDEN'")) {
       const row = messages.get(values[0]);
@@ -77,4 +80,13 @@ test('moderation hides a message', async () => {
   assert.equal(hidden.ok, true);
   const outcome = await hideMessage(sql, { id: 'missing' });
   assert.equal(outcome.ok, false);
+});
+
+test('a promoted message can be retrieved for evidence ingestion', async () => {
+  const { sql } = fakeSql();
+  const posted = await postMessage(sql, { roomId: 'r', text: 'A well-supported observation', consent: true });
+  const message = await getRoomMessage(sql, posted.message.id);
+  assert.equal(message.id, posted.message.id);
+  assert.equal(message.text, 'A well-supported observation');
+  assert.equal(await getRoomMessage(sql, 'missing'), null);
 });
