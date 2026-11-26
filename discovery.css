@@ -1,0 +1,298 @@
+.discovery-studio {
+  padding: 2.25rem clamp(1rem, 4vw, 3.5rem);
+  max-width: 1120px;
+  margin: 0 auto;
+}
+
+.discovery-heading .index {
+  font-size: .72rem;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: #b98a4a;
+  margin: 0 0 .45rem;
+}
+
+.discovery-heading h2 {
+  font-size: clamp(1.65rem, 4vw, 2.6rem);
+  line-height: 1.05;
+  margin: 0 0 .7rem;
+  letter-spacing: -.01em;
+}
+
+.discovery-intro {
+  max-width: 62ch;
+  color: #cfc4b4;
+  line-height: 1.55;
+  margin: 0 0 1.25rem;
+}
+
+.discovery-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .6rem;
+  align-items: stretch;
+}
+
+.discovery-form input {
+  flex: 1 1 320px;
+  min-width: 0;
+  background: #100c08;
+  color: #f5efe4;
+  border: 1px solid #3a2f24;
+  border-radius: 10px;
+  padding: .9rem 1rem;
+  font: inherit;
+}
+
+.discovery-form input:focus-visible {
+  outline: 2px solid #e0a64f;
+  outline-offset: 2px;
+  border-color: transparent;
+}
+
+.discovery-form button {
+  border-radius: 10px;
+  padding: .9rem 1.15rem;
+  font: inherit;
+  font-weight: 600;
+  letter-spacing: .04em;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+
+.discovery-form #discoverySubmit {
+  background: #e0a64f;
+  color: #171009;
+}
+
+.discovery-form #discoverySurprise {
+  background: transparent;
+  color: #e0a64f;
+  border-color: #3a2f24;
+}
+
+.discovery-form button:focus-visible {
+  outline: 2px solid #e0a64f;
+  outline-offset: 2px;
+}
+
+.discovery-prompts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+  margin: .9rem 0 0;
+}
+
+.prompt-chip {
+  background: #15100a;
+  color: #d9cdba;
+  border: 1px solid #2c241b;
+  border-radius: 999px;
+  padding: .45rem .85rem;
+  font: inherit;
+  font-size: .86rem;
+  cursor: pointer;
+}
+
+.prompt-chip:focus-visible {
+  outline: 2px solid #e0a64f;
+  outline-offset: 2px;
+}
+
+.discovery-status {
+  margin: 1rem 0 0;
+  padding: .7rem 1rem;
+  border-radius: 10px;
+  background: #15100a;
+  color: #d9cdba;
+  line-height: 1.5;
+}
+
+.discovery-status.is-ok { color: #b9d6a5; }
+.discovery-status.is-error { color: #e6b1a5; }
+
+.discovery-result {
+  margin-top: 1.4rem;
+  display: grid;
+  gap: 1.1rem;
+}
+
+.ds-summary,
+.ds-stage {
+  background: #100c08;
+  border: 1px solid #2a2118;
+  border-radius: 14px;
+  padding: 1.15rem 1.25rem;
+}
+
+.ds-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .75rem;
+  align-items: center;
+}
+
+.ds-summary-intent {
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: #e0a64f;
+}
+
+.ds-summary p {
+  flex: 1 1 300px;
+  margin: 0;
+  color: #cfc4b4;
+}
+
+.ds-stage h3 {
+  margin: 0 0 .65rem;
+  font-size: 1.02rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: #f0e6d4;
+}
+
+.ds-stage h4 {
+  margin: 1rem 0 .45rem;
+  font-size: .82rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: #b9aa92;
+}
+
+.ds-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: .6rem;
+}
+
+.ds-match,
+.ds-note {
+  background: #15100a;
+  border: 1px solid #2c241b;
+  border-radius: 10px;
+  padding: .8rem 1rem;
+  display: grid;
+  gap: .3rem;
+}
+
+.ds-match-title { color: #f0e6d4; font-weight: 600; }
+.ds-match-meta { color: #a99980; font-size: .85rem; }
+.ds-match-concepts { color: #c7b89c; font-size: .88rem; }
+
+.ds-badge {
+  display: inline-block;
+  width: fit-content;
+  border-radius: 999px;
+  padding: .2rem .6rem;
+  font-size: .72rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.ds-ai { background: #2a2118; color: #d9c59a; }
+.ds-verified { background: #172617; color: #b9d6a5; }
+.ds-constructed { background: #1c1a22; color: #c4b8e0; }
+.ds-degraded { background: #2b1d14; color: #e6b1a5; }
+
+.ds-disclosure,
+.ds-disclaimer {
+  color: #b9aa92;
+  line-height: 1.5;
+  margin: 0 0 .8rem;
+}
+
+.ds-degraded {
+  border-left: 3px solid #e6b1a5;
+  padding-left: .8rem;
+}
+
+.ds-cards {
+  display: grid;
+  gap: .8rem;
+}
+
+.ds-card {
+  background: #15100a;
+  border: 1px solid #2c241b;
+  border-radius: 10px;
+  padding: 1rem;
+}
+
+.ds-card header {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  margin-bottom: .65rem;
+}
+
+.ds-card-id {
+  font-size: .78rem;
+  letter-spacing: .08em;
+  color: #b9aa92;
+}
+
+.ds-editable {
+  width: 100%;
+  box-sizing: border-box;
+  resize: vertical;
+  min-height: 4.5rem;
+  background: #0c0906;
+  color: #f0e6d4;
+  border: 1px solid #3a2f24;
+  border-radius: 8px;
+  padding: .7rem .8rem;
+  font: inherit;
+  line-height: 1.5;
+}
+
+.ds-editable:focus-visible {
+  outline: 2px solid #e0a64f;
+  outline-offset: 2px;
+}
+
+.ds-fields {
+  display: grid;
+  gap: .5rem;
+  margin: .7rem 0 0;
+}
+
+.ds-fields div {
+  display: grid;
+  grid-template-columns: minmax(130px, auto) 1fr;
+  gap: .6rem;
+  font-size: .86rem;
+}
+
+.ds-fields dt { color: #b9aa92; margin: 0; }
+.ds-fields dd { color: #cfc4b4; margin: 0; }
+
+.ds-note strong { color: #e0a64f; font-size: .85rem; letter-spacing: .04em; }
+.ds-note span { color: #cfc4b4; font-size: .9rem; line-height: 1.45; }
+
+.ds-concepts { color: #c7b89c; line-height: 1.5; margin: .3rem 0; }
+.ds-empty { color: #8f8373; }
+.ds-neighbor { color: #8f8373; font-size: .82rem; }
+.ds-disclaimer { font-size: .88rem; margin-top: .2rem; }
+
+@media (max-width: 680px) {
+  .discovery-form input { flex-basis: 100%; }
+  .discovery-form button { flex: 1 1 auto; }
+  .ds-fields div { grid-template-columns: 1fr; gap: .15rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .discovery-result {
+    scroll-behavior: auto;
+  }
+  .ds-result,
+  .discovery-result,
+  .discovery-studio {
+    animation: none;
+    transition: none;
+  }
+}

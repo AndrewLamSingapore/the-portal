@@ -2,6 +2,24 @@
 
 # Changelog
 
+## 6.6.0 — Discovery Studio public entry
+
+- Adds a free-text "Enter The Portal — Begin Your Discovery" entry on the
+  homepage with example prompts and a Surprise Me action, leading into a
+  seven-stage guided journey (Encounter, Connect, Explore, Hypothesize,
+  Challenge, Experiment, Evolve).
+- Adds `POST /api/discover`, which composes the existing hybrid semantic graph
+  search with clearly labelled deterministic hypothesis and experiment scaffolds.
+  No language model is called and nothing is persisted without the visitor's
+  explicit consent.
+- The response reports its live retrieval mode (`persistent_embedding_rerank`
+  or a disclosed `lexical_fallback`), so lexical matching is never presented as
+  semantic intelligence and degraded operation is explicit in both API and UI.
+- Adds `lib/discovery-studio.js`, `discovery.js`, `discovery.css` and
+  `tests/discovery-studio.test.js`. The endpoint rides the consolidated
+  `/api/meta` dispatcher so the deployment stays within the Hobby function
+  ceiling.
+
 ## Unreleased - Private PRIME report ingestion
 
 - Fixes a private read defect found during the 23 September 2026 production

@@ -101,6 +101,10 @@
       "destination": "/api/meta?route=version"
     },
     {
+      "source": "/api/discover",
+      "destination": "/api/meta?route=discover"
+    },
+    {
       "source": "/api/prime",
       "destination": "/api/meta?route=prime"
     },
