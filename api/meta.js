@@ -13,13 +13,17 @@ import { searchAdmission } from '../lib/search-controls.js';
 import { buildBriefing, normalizeSeed, validateFollowup, DiscoveryInputError } from '../lib/discovery-studio.js';
 import { listPublicRuns, latestCompletedRun, runOneCycle, setEngineKilled } from '../lib/living-engine.js';
 import { buildObservatory } from '../lib/observatory.js';
+import { runRetrievalBenchmark, scoreDiscoveryQuality, buildBenchmarkReport } from '../lib/intelligence-benchmark.js';
+import { isModelBudgetEnabled, modelBudgetStatus, admitModelRequest, settleModelReservation } from '../lib/living-budget.js';
+import { generateHypothesisPopulation } from '../lib/hypothesis-generation.js';
+import { SANDBOX_SEED, runLivingSandbox } from '../lib/living-sandbox.js';
 import { handleEvidenceLab } from '../lib/evidence-lab-endpoint.js';
 import { authenticate as primeAuthenticate, publishReport as primePublishReport, readReports as primeReadReports, resolvePrimeIdentity as primeResolveIdentity, sendJson as primeSendJson } from '../lib/prime-auth.js';
 import { REPORT_ID_PATTERN, REPORT_LIMITS, validateReport } from '../lib/prime-reports.js';
 import { PRODUCT_VERSION } from '../lib/product-version.js';
 const SCHEMA_VERSION = 6;
 const EXPERIENCE = 'Continuous Futures Model';
-const META_ROUTES = new Set(['capabilities', 'discover', 'ecosystem-event', 'engine-kill', 'engine-run', 'engine-runs', 'engine-tick', 'evidence', 'evidence-lab', 'experiment-result', 'manifest', 'metrics', 'observatory', 'prime', 'prime-experiment', 'prime-publish', 'prime-report', 'readiness', 'status', 'verify', 'version', 'v2']);
+const META_ROUTES = new Set(['benchmark', 'capabilities', 'discover', 'ecosystem-event', 'engine-budget', 'engine-kill', 'engine-model-run', 'engine-run', 'engine-runs', 'engine-tick', 'evidence', 'evidence-lab', 'experiment-result', 'manifest', 'metrics', 'observatory', 'prime', 'prime-experiment', 'prime-publish', 'prime-report', 'readiness', 'status', 'verify', 'version', 'v2']);
 
 function jsonHeaders(res, cache = 'no-store') {
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
@@ -413,7 +417,7 @@ async function handleEngineRun(req, res) {
   if (!process.env.PORTAL_ENGINE_TOKEN) return res.status(503).json({ error: 'Engine admin token is not configured' });
   if (!engineAuthorized(req)) return res.status(401).json({ error: 'Unauthorized' });
   if (!hasDatabase()) return res.status(503).json({ error: 'Archive unavailable' });
-  const outcome = await runOneCycle({ sql: db(), owner: 'admin' });
+  const outcome = await runOneCycle({ sql: db(), owner: 'admin', idempotencyKey: `manual:${crypto.randomUUID()}` });
   const status = outcome.status === 'COMPLETED' ? 200 : outcome.status === 'KILLED' ? 409 : outcome.status === 'DISABLED' ? 503 : 200;
   return res.status(status).json({ mode: 'LIVING_ENGINE_RUN', ...outcome });
 }
@@ -455,7 +459,95 @@ async function handleObservatory(req, res) {
   ]);
   const graph = buildKnowledgeGraph(artifacts);
   const payload = buildObservatory({ runs, latestRun: latest, graph, experimentResults: results, productVersion: PRODUCT_VERSION });
+  payload.transparency.benchmark = await computeBenchmark();
   return res.status(200).json(payload);
+}
+
+function loadBenchmarkDataset() {
+  const file = path.join(process.cwd(), 'benchmark', 'retrieval-dataset.json');
+  return JSON.parse(fs.readFileSync(file, 'utf8'));
+}
+
+async function computeBenchmark() {
+  const dataset = loadBenchmarkDataset();
+  // No paid embedding calls by default: the semantic component is measured only
+  // when the owner explicitly opts in and accepts the cost.
+  const retrieval = runRetrievalBenchmark({ nodes: dataset.nodes, queries: dataset.queries, semanticScorer: null });
+  const latest = await latestCompletedRun(db());
+  const discovery = scoreDiscoveryQuality({
+    population: latest?.result?.population || [],
+    fossils: latest?.result?.fossils || [],
+    run: latest ? { id: latest.id, generation_mode: latest.generation_mode } : {}
+  });
+  return buildBenchmarkReport({ retrieval, discovery, productVersion: PRODUCT_VERSION });
+}
+
+async function handleBenchmark(req, res) {
+  if (req.method !== 'GET') {
+    res.setHeader('Allow', 'GET');
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+  return res.status(200).json(await computeBenchmark());
+}
+
+async function handleEngineBudget(req, res) {
+  if (req.method !== 'GET') {
+    res.setHeader('Allow', 'GET');
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+  const status = await modelBudgetStatus(db());
+  return res.status(200).json({ mode: 'LIVING_MODEL_BUDGET', ...status });
+}
+
+async function handleEngineModelRun(req, res) {
+  if (req.method !== 'POST') {
+    res.setHeader('Allow', 'POST');
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+  if (!process.env.PORTAL_ENGINE_TOKEN) return res.status(503).json({ error: 'Engine admin token is not configured' });
+  if (!engineAuthorized(req)) return res.status(401).json({ error: 'Unauthorized' });
+  if (!isModelBudgetEnabled()) return res.status(503).json({ error: 'Model-originated runs are not enabled' });
+  if (!process.env.OPENAI_API_KEY) return res.status(503).json({ error: 'Generative cortex unavailable' });
+  if (!hasDatabase()) return res.status(503).json({ error: 'Archive unavailable' });
+
+  const sql = db();
+  const requestId = `LMR-${crypto.randomUUID()}`;
+  const reservation = Number(process.env.PORTAL_LIVING_MODEL_RUN_RESERVATION_MICRO_USD || 100_000);
+  const admission = await admitModelRequest(sql, { requestId, estimatedMicroUsd: reservation });
+  if (!admission.allowed) {
+    return res.status(admission.reason === 'budget_suspended' ? 409 : 402).json({
+      mode: 'LIVING_MODEL_RUN',
+      status: 'REJECTED',
+      reason: admission.reason,
+      budget: {
+        daily_limit_micro_usd: admission.daily_limit_micro_usd,
+        daily_spent_micro_usd: admission.daily_spent_micro_usd,
+        monthly_limit_micro_usd: admission.monthly_limit_micro_usd,
+        monthly_spent_micro_usd: admission.monthly_spent_micro_usd
+      }
+    });
+  }
+  try {
+    const seed = runLivingSandbox(SANDBOX_SEED);
+    const generated = await generateHypothesisPopulation({ observations: seed.observations, memory: [], generation: 1 });
+    if (!generated?.candidates?.length) throw new Error('Model returned no candidates');
+    await settleModelReservation(sql, { requestId, microUsd: reservation, success: true });
+    return res.status(200).json({
+      mode: 'LIVING_MODEL_RUN',
+      status: 'COMPLETED',
+      request_id: requestId,
+      generation_mode: 'MODEL_ORIGINATED',
+      model: generated.model,
+      estimated_expenditure_micro_usd: reservation,
+      candidates: generated.candidates,
+      synthesis: generated.synthesis,
+      next_question: generated.next_question,
+      disclosure: 'Expenditure is recorded as a conservative upper bound; token-level usage is not parsed here.'
+    });
+  } catch (error) {
+    await settleModelReservation(sql, { requestId, microUsd: reservation, success: false });
+    return res.status(502).json({ mode: 'LIVING_MODEL_RUN', status: 'FAILED', detail: String(error?.message || error).slice(0, 300) });
+  }
 }
 
 export default async function handler(req, res) {
@@ -485,6 +577,9 @@ export default async function handler(req, res) {
   if (route === 'engine-run') return handleEngineRun(req, res);
   if (route === 'engine-kill') return handleEngineKill(req, res);
   if (route === 'engine-tick') return handleEngineTick(req, res);
+  if (route === 'engine-budget') return handleEngineBudget(req, res);
+  if (route === 'engine-model-run') return handleEngineModelRun(req, res);
+  if (route === 'benchmark') return handleBenchmark(req, res);
   if (route === 'observatory') return handleObservatory(req, res);
   if (route === 'capabilities') {
     if (!allow(req, res, 'GET')) return;

@@ -27,6 +27,17 @@ visible in the public feed.
 hypothesis arena and the fossil record, and it marks the benchmark centre as
 pending independent validation rather than inventing a score.
 
+## Living model budget
+
+Paid model-originated runs are disabled by default and fail closed.
+`PORTAL_LIVING_MODEL_ENABLED=1` and an explicit owner spend approval are required
+before they can run. When enabled, `living_model_budget` enforces owner-proposed
+limits of US$1/day and US$30/month through a single atomic admission update:
+concurrent requests and retries can never exceed the cap, failed reservations
+are released, and the budget suspends automatically when exhausted with no
+automatic increase. `POST /api/engine/model-run` reserves before any provider
+call, and `GET /api/engine/budget` reports spend publicly.
+
 ## Search protections
 
 Graph search accepts a single query of at most 256 characters and 1024 bytes, and an optional integer limit from 1 through 24. PostgreSQL atomically enforces 20 searches per client per minute and 100 globally per minute across function instances. Client addresses are hashed, never persisted raw. Admission failure returns 503 without invoking embeddings; exhausted budgets return 429 with Retry-After. Embedding requests abort after eight seconds and degrade to lexical search. Query embeddings are cached for an hour by model and hashed normalized query; node embeddings remain content-addressed. No raw queries are stored in the embedding cache.

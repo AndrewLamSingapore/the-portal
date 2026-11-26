@@ -2,6 +2,25 @@
 
 # Changelog
 
+## 6.10.0 — Comparative intelligence benchmark and living model budget
+
+- Adds the internal, reproducible comparative intelligence benchmark: a
+  held-out retrieval set with annotated relevance, a scoring rubric, and
+  deterministic discovery-quality metrics (novelty, falsifiability, evidence
+  quality, self-correction and evolutionary improvement).
+- Exposes `GET /api/benchmark` and wires the results into the Observatory
+  benchmark centre. Independent validation is marked pending and limitations are
+  published; no superiority claim is made.
+- Adds hard, persistent spend enforcement for paid model-originated runs:
+  `living_model_budget` and `living_model_ledger`, with owner-proposed defaults
+  of US$1/day and US$30/month, atomic admission before any model request,
+  automatic suspension on exhaustion, no automatic increases and release of
+  failed reservations. The model-originated run path (`POST /api/engine/model-run`)
+  is inactive until the owner enables it and approves spend.
+- Adds `GET /api/engine/budget` for public budget status, and makes manual engine
+  runs always executable (unique idempotency keys) while scheduled ticks remain
+  hourly-deduplicated.
+
 ## 6.9.0 — Open Intelligence Observatory
 
 - Adds a public transparency centre at `/observatory` backed by `GET

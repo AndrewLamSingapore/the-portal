@@ -88,8 +88,21 @@
     return `${states}<p class="obs-note">${escapeHtml(audit?.notice || '')}</p>`;
   }
 
-  function renderBenchmark(benchmark) {
-    return `${badge(benchmark?.status || 'PENDING', 'neutral')}<p class="obs-note">${escapeHtml(benchmark?.notice || '')}</p>`;
+  function renderBenchmark(b) {
+    if (b?.retrieval) {
+      const agg = b.retrieval.aggregate || {};
+      const discovery = b.discovery || {};
+      const rows = [
+        `Retrieval · lexical P@3 ${agg.lexical?.precision_at_3} · R@5 ${agg.lexical?.recall_at_5} · NDCG@5 ${agg.lexical?.ndcg_at_5}`,
+        `Retrieval · hybrid P@3 ${agg.hybrid?.precision_at_3} · R@5 ${agg.hybrid?.recall_at_5} · NDCG@5 ${agg.hybrid?.ndcg_at_5} (${b.retrieval.mode})`,
+        `Discovery · novelty ${discovery.novelty} · falsifiability ${discovery.falsifiability} · evidence ${discovery.evidence_quality} · self-correction ${discovery.self_correction} · evolution ${discovery.evolutionary_improvement}`
+      ];
+      return `${badge(b.validation_status || 'PENDING', 'neutral')}
+        <ul class="obs-list">${rows.map(row => `<li class="obs-run"><span class="obs-run-meta">${escapeHtml(row)}</span></li>`).join('')}</ul>
+        <p class="obs-note">${escapeHtml(b.disclosure || '')}</p>
+        <p class="obs-note">${(b.limitations || []).map(item => escapeHtml(item)).join(' ')}</p>`;
+    }
+    return `${badge(b?.status || 'PENDING', 'neutral')}<p class="obs-note">${escapeHtml(b?.notice || '')}</p>`;
   }
 
   function renderOpenSource(source) {

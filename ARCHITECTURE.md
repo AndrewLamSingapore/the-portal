@@ -180,6 +180,12 @@ checkpointed and audited, and the engine fails closed when disabled or killed.
 runs, the knowledge graph and recorded experiment results. It is read-only and
 never exposes operational detail; empty benchmark sections are labelled pending.
 
+`GET /api/benchmark` returns the internal comparative benchmark (retrieval plus
+discovery quality) and `GET /api/engine/budget` returns the public budget status.
+Paid model-originated runs are gated behind `POST /api/engine/model-run`, which
+requires `PORTAL_LIVING_MODEL_ENABLED=1` and passes a hard atomic budget
+admission before any model request. It remains inactive until owner approval.
+
 ## Security boundary
 
 - `OPENAI_API_KEY` and `DATABASE_URL` remain server-side.

@@ -68,6 +68,8 @@ Behind the scenes, a governed scheduler runs the deterministic discovery cycle a
 
 The [Open Intelligence Observatory](/observatory) exposes that operation publicly: live run activity, the living knowledge graph, the hypothesis arena, the open experiment laboratory, the intellectual fossil record, the evidence audit centre and the public benchmark centre. Empty or unvalidated sections are labelled rather than simulated.
 
+The [public benchmark centre](/api/benchmark) reports a reproducible internal comparison of lexical versus hybrid retrieval plus deterministic discovery-quality metrics. It is internal benchmarking, not independent scientific validation, and its limitations are published alongside the numbers.
+
 ## Life + Frontiers: AI and biology
 
 The curated [AI biology case study](https://the-portal-ten.vercel.app/ai-biology) examines DNA interpretation, variant-effect prediction, protein structures and candidate sequence design. It includes all eight capability distinctions, the conceptual READ / UNDERSTAND / SIMULATE / DESIGN / VALIDATE workflow, and six primary research references.
