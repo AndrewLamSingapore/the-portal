@@ -1,19 +1,28 @@
 {
   "description": "Held-out retrieval evaluation set. Relevance is annotated by the Portal owner. It includes paraphrases, conceptual relationships and unrelated negatives.",
+  "dataset_version": "1.1.0",
   "nodes": [
     { "id": "BM-A", "title": "Machine ethics", "type": "asset", "concepts": ["intelligence", "ethics"], "provenance": ["owner-annotation"] },
     { "id": "BM-B", "title": "Energy as a commons", "type": "asset", "concepts": ["energy", "commons"], "provenance": ["owner-annotation"] },
     { "id": "BM-C", "title": "Why old ideas return", "type": "asset", "concepts": ["history", "knowledge"], "provenance": ["owner-annotation"] },
     { "id": "BM-D", "title": "Failure as a foundation", "type": "asset", "concepts": ["failure", "learning"], "provenance": ["owner-annotation"] },
     { "id": "BM-E", "title": "Protein folding", "type": "asset", "concepts": ["life", "biology"], "provenance": ["owner-annotation"] },
-    { "id": "BM-F", "title": "Adaptive systems", "type": "asset", "concepts": ["complexity", "evolution"], "provenance": ["owner-annotation"] }
+    { "id": "BM-F", "title": "Adaptive systems", "type": "asset", "concepts": ["complexity", "evolution"], "provenance": ["owner-annotation"] },
+    { "id": "BM-G", "title": "Speculative finance", "type": "asset", "concepts": ["economy", "risk"], "provenance": ["owner-annotation"] },
+    { "id": "BM-H", "title": "Urban memory", "type": "asset", "concepts": ["cities", "history"], "provenance": ["owner-annotation"] },
+    { "id": "BM-I", "title": "Language acquisition", "type": "asset", "concepts": ["language", "learning"], "provenance": ["owner-annotation"] },
+    { "id": "BM-J", "title": "Planetary boundaries", "type": "asset", "concepts": ["earth", "systems"], "provenance": ["owner-annotation"] }
   ],
   "queries": [
     { "id": "BM-Q1", "query": "Should machines have rights?", "relevant": ["BM-A"] },
-    { "id": "BM-Q2", "query": "Shared ownership of power", "relevant": ["BM-B"] },
-    { "id": "BM-Q3", "query": "Why do old concepts come back?", "relevant": ["BM-C"] },
-    { "id": "BM-Q4", "query": "Can a collapse seed progress?", "relevant": ["BM-D"] },
-    { "id": "BM-Q5", "query": "How do amino acids fold into shape?", "relevant": ["BM-E"] },
-    { "id": "BM-Q6", "query": "An unrelated request about baking bread", "relevant": [] }
+    { "id": "BM-Q2", "query": "Do artificial minds deserve moral standing?", "relevant": ["BM-A"] },
+    { "id": "BM-Q3", "query": "Shared ownership of power", "relevant": ["BM-B"] },
+    { "id": "BM-Q4", "query": "Treating electricity as a shared resource", "relevant": ["BM-B"] },
+    { "id": "BM-Q5", "query": "Why do old concepts come back?", "relevant": ["BM-C"] },
+    { "id": "BM-Q6", "query": "Can a collapse seed progress?", "relevant": ["BM-D"] },
+    { "id": "BM-Q7", "query": "How do amino acids fold into shape?", "relevant": ["BM-E"] },
+    { "id": "BM-Q8", "query": "How children learn to speak", "relevant": ["BM-I"] },
+    { "id": "BM-Q9", "query": "An unrelated request about baking bread", "relevant": [] },
+    { "id": "BM-Q10", "query": "An unrelated request about mountain climbing", "relevant": [] }
   ]
 }

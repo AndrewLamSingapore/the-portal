@@ -2,6 +2,19 @@
 
 # Changelog
 
+## 6.11.0 — Owner-approved model-originated living runs and benchmark hardening
+
+- Activates paid model-originated living runs under the owner-approved living
+  model budget: US$1/day and US$30/month with a US$0.10 per-run reservation.
+  Admission is atomic before any provider call; failed reservations are released
+  and the budget suspends automatically on exhaustion.
+- The hourly engine tick now runs a model-originated cycle when
+  `PORTAL_LIVING_MODEL_ENABLED=1`, subject to available budget, otherwise the
+  deterministic cycle. Model runs are persisted as `MODEL_CYCLE` jobs and their
+  hypotheses, synthesis, next question and recorded expenditure are public.
+- Hardens the benchmark dataset: more nodes, paraphrases, conceptual queries and
+  unrelated negatives (dataset v1.1.0).
+
 ## 6.10.0 — Comparative intelligence benchmark and living model budget
 
 - Adds the internal, reproducible comparative intelligence benchmark: a
