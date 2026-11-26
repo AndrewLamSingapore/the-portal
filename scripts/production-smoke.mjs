@@ -22,7 +22,7 @@ function json(result, path) {
 
 const home = await get('/');
 assert.equal(home.response.status, 200);
-for (const token of ['<title>THE PORTAL — AI Discovery &amp; Knowledge Graph</title>', 'id="futureOnTrial"', 'id="trialStage"', 'id="curatorForm"', 'id="phaseStrip"', 'id="transitions"', 'id="watchlist"', 'id="graph"', 'id="lenses"', 'id="experiments"', 'id="evolution"', 'id="cabinetGrid"', '/motion.css', '/motion.js']) {
+for (const token of ['<title>THE PORTAL — Open Collective Evolutionary Intelligence</title>', 'id="futureOnTrial"', 'id="trialStage"', 'id="curatorForm"', 'id="phaseStrip"', 'id="transitions"', 'id="watchlist"', 'id="graph"', 'id="lenses"', 'id="experiments"', 'id="evolution"', 'id="cabinetGrid"', '/motion.css', '/motion.js']) {
   assert.ok(home.text.includes(token), `homepage missing ${token}`);
 }
 assert.equal(home.response.headers.get('x-frame-options'), 'DENY');
