@@ -11,7 +11,9 @@ database-backed kill switch. It is disabled by default and fails closed:
 - `PORTAL_LIVING_ENGINE_ENABLED=1` enables it (requires `DATABASE_URL`).
 - `POST /api/engine/run` and `POST /api/engine/kill` require the server-side
   `PORTAL_ENGINE_TOKEN`.
-- The hourly `POST /api/engine/tick` Vercel Cron is authorized by `CRON_SECRET`.
+- `POST /api/engine/tick` is authorized by `CRON_SECRET` (daily Vercel Cron on
+  the Hobby plan) or by the hourly GitHub Actions trigger using
+  `PORTAL_ENGINE_TOKEN` as a repository secret.
 - `GET /api/engine/runs` is public and sanitised; it never exposes lease owners,
   job payloads or operational detail.
 

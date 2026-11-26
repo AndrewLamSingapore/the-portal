@@ -20,7 +20,7 @@
     },
     {
       "path": "/api/engine/tick",
-      "schedule": "23 * * * *"
+      "schedule": "23 1 * * *"
     }
   ],
   "rewrites": [

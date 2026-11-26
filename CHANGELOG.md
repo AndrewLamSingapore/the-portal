@@ -10,8 +10,9 @@
   append-only audit trail.
 - Adds a database-backed kill switch that survives process restarts, plus
   authenticated admin controls (`POST /api/engine/run`, `POST /api/engine/kill`)
-  using the server-side `PORTAL_ENGINE_TOKEN`, and an hourly Vercel Cron
-  (`/api/engine/tick`) gated by `PORTAL_LIVING_ENGINE_ENABLED=1` and `CRON_SECRET`.
+  using the server-side `PORTAL_ENGINE_TOKEN`, a daily Vercel Cron
+  (`/api/engine/tick`) gated by `PORTAL_LIVING_ENGINE_ENABLED=1` and `CRON_SECRET`,
+  and an hourly GitHub Actions trigger for the same authenticated endpoint.
 - Adds a public, sanitised run feed (`GET /api/engine/runs`). Runs are always
   labelled `DETERMINISTIC_FALLBACK` with zero model calls and all safety flags
   false; no lease owner, payload or internal detail is exposed.
