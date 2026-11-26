@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - name: Trigger one deterministic living cycle
+      - name: Trigger one living cycle (model-originated when enabled, else deterministic)
         env:
           ENGINE_TOKEN: ${{ secrets.PORTAL_ENGINE_TOKEN }}
           PORTAL_URL: https://the-portal-ten.vercel.app
