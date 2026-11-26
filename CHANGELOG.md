@@ -2,6 +2,18 @@
 
 # Changelog
 
+## 7.7.0 — Transactional settlement and benchmark hardening
+
+- Makes budget settlement idempotent and transactionally safe: a repeated
+  settlement is a no-op and can never refund twice. Successful settlements
+  reconcile the reservation down to actual token usage when provider pricing is
+  configured, so the budget reflects actual rather than reserved expenditure.
+- Expands the held-out benchmark with multilingual, cross-disciplinary and
+  difficult negative queries (dataset v1.3.0).
+- Refreshes capability documentation and clarifies that the living knowledge
+  graph combines the artifact graph with the hypothesis arena and fossil record
+  without artificially inflating the artifact node count.
+
 ## 7.6.0 — Budget recovery, abstention and threaded facilitation
 
 - Fixes budget-window recovery: budget-induced suspension now clears

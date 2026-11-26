@@ -1,6 +1,6 @@
 {
   "description": "Held-out retrieval evaluation set. Relevance is annotated by the Portal owner. It includes paraphrases, conceptual relationships and unrelated negatives.",
-  "dataset_version": "1.2.0",
+  "dataset_version": "1.3.0",
   "nodes": [
     { "id": "BM-A", "title": "Machine ethics", "type": "asset", "concepts": ["intelligence", "ethics"], "provenance": ["owner-annotation"] },
     { "id": "BM-B", "title": "Energy as a commons", "type": "asset", "concepts": ["energy", "commons"], "provenance": ["owner-annotation"] },
@@ -35,6 +35,12 @@
     { "id": "BM-Q17", "query": "Why history repeats itself", "relevant": ["BM-C"] },
     { "id": "BM-Q18", "query": "The recurrence of old concepts", "relevant": ["BM-C"] },
     { "id": "BM-Q19", "query": "An unrelated request about cooking pasta", "relevant": [] },
-    { "id": "BM-Q20", "query": "An unrelated request about car repair", "relevant": [] }
+    { "id": "BM-Q20", "query": "An unrelated request about car repair", "relevant": [] },
+    { "id": "BM-Q21", "query": "机器是否应该拥有权利？", "relevant": ["BM-A"] },
+    { "id": "BM-Q22", "query": "¿Deberían las máquinas tener derechos?", "relevant": ["BM-A"] },
+    { "id": "BM-Q23", "query": "How ethics and adaptive systems relate across disciplines", "relevant": ["BM-A", "BM-F"] },
+    { "id": "BM-Q24", "query": "Energy commons and collective memory in society", "relevant": ["BM-B", "BM-K"] },
+    { "id": "BM-Q25", "query": "An unrelated but tempting query about quantum fishing", "relevant": [] },
+    { "id": "BM-Q26", "query": "An unrelated query about ancient pottery techniques", "relevant": [] }
   ]
 }

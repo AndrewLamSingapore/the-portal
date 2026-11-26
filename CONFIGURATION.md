@@ -77,6 +77,12 @@ localization remains a documented limitation; facilitators are multilingual.
 Interface chrome (navigation, hero, discovery entry and forms) now ships a
 language selector across the three primary pages; deep content stays English.
 
+Model pricing is optional and configurable for reconciliation:
+`PORTAL_MODEL_INPUT_PRICE_MICRO_USD_PER_1K` and
+`PORTAL_MODEL_OUTPUT_PRICE_MICRO_USD_PER_1K`. When unset, the conservative
+reservation is recorded as actual expenditure. Settlement is idempotent, so a
+duplicate settlement never refunds twice.
+
 ## Search protections
 
 Graph search accepts a single query of at most 256 characters and 1024 bytes, and an optional integer limit from 1 through 24. PostgreSQL atomically enforces 20 searches per client per minute and 100 globally per minute across function instances. Client addresses are hashed, never persisted raw. Admission failure returns 503 without invoking embeddings; exhausted budgets return 429 with Retry-After. Embedding requests abort after eight seconds and degrade to lexical search. Query embeddings are cached for an hour by model and hashed normalized query; node embeddings remain content-addressed. No raw queries are stored in the embedding cache.

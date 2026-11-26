@@ -271,6 +271,22 @@ The production Living Observatory is available at `/living`. Its deterministic e
 ### The Portal is not a record of what has been done. It is a living map of how encounters become connections, connections become experiments, and experiments create new ways of seeing the world.
 
 
+## Capability status
+
+Implemented and production-verified: individual Discovery Studio (with an
+optional budget-gated AI mode and free fallback), hybrid semantic retrieval,
+collective discovery rooms with an AI facilitator and threaded replies,
+consent-based anonymous contributions, a persistent evidence-driven
+evolutionary engine with hard US$1/day and US$30/month budget enforcement and
+usage reconciliation, and an internal benchmark with abstention metrics.
+
+The living knowledge graph combines the artifact graph with the hypothesis
+arena and fossil record in the Observatory; hypotheses are not merged into the
+artifact graph, so node counts are never inflated artificially.
+
+Pending and explicitly not claimed: independent scientific validation (external
+reviewers), full deep-content localization, and a dedicated domain.
+
 ## Status and evidence
 
 > Portfolio status: [STATUS.md](https://github.com/AndrewLamSingapore/orqevia/blob/main/STATUS.md) is the sole portfolio status reference. Each product owns its source, configuration, contracts and domain records. The [operational manifest](https://github.com/AndrewLamSingapore/orqevia/blob/main/governance/operational-manifest.json) provides dated ORQEVIA component and observation references; it does not establish deployment status.
