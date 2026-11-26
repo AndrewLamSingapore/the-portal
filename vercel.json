@@ -129,6 +129,18 @@
       "destination": "/api/meta?route=observatory"
     },
     {
+      "source": "/api/benchmark",
+      "destination": "/api/meta?route=benchmark"
+    },
+    {
+      "source": "/api/engine/budget",
+      "destination": "/api/meta?route=engine-budget"
+    },
+    {
+      "source": "/api/engine/model-run",
+      "destination": "/api/meta?route=engine-model-run"
+    },
+    {
       "source": "/api/prime",
       "destination": "/api/meta?route=prime"
     },

@@ -1,0 +1,19 @@
+{
+  "description": "Held-out retrieval evaluation set. Relevance is annotated by the Portal owner. It includes paraphrases, conceptual relationships and unrelated negatives.",
+  "nodes": [
+    { "id": "BM-A", "title": "Machine ethics", "type": "asset", "concepts": ["intelligence", "ethics"], "provenance": ["owner-annotation"] },
+    { "id": "BM-B", "title": "Energy as a commons", "type": "asset", "concepts": ["energy", "commons"], "provenance": ["owner-annotation"] },
+    { "id": "BM-C", "title": "Why old ideas return", "type": "asset", "concepts": ["history", "knowledge"], "provenance": ["owner-annotation"] },
+    { "id": "BM-D", "title": "Failure as a foundation", "type": "asset", "concepts": ["failure", "learning"], "provenance": ["owner-annotation"] },
+    { "id": "BM-E", "title": "Protein folding", "type": "asset", "concepts": ["life", "biology"], "provenance": ["owner-annotation"] },
+    { "id": "BM-F", "title": "Adaptive systems", "type": "asset", "concepts": ["complexity", "evolution"], "provenance": ["owner-annotation"] }
+  ],
+  "queries": [
+    { "id": "BM-Q1", "query": "Should machines have rights?", "relevant": ["BM-A"] },
+    { "id": "BM-Q2", "query": "Shared ownership of power", "relevant": ["BM-B"] },
+    { "id": "BM-Q3", "query": "Why do old concepts come back?", "relevant": ["BM-C"] },
+    { "id": "BM-Q4", "query": "Can a collapse seed progress?", "relevant": ["BM-D"] },
+    { "id": "BM-Q5", "query": "How do amino acids fold into shape?", "relevant": ["BM-E"] },
+    { "id": "BM-Q6", "query": "An unrelated request about baking bread", "relevant": [] }
+  ]
+}
