@@ -433,7 +433,7 @@ async function runDiscoveryAI(query) {
   try {
     const generated = await generateHypothesisPopulation({ observations: [{ id: 'DSA-SEED', summary: query }], memory: [], generation: 1 });
     if (!generated?.candidates?.length) throw new Error('Model returned no candidates');
-    await settleModelReservation(sql, { requestId, microUsd: reservation, success: true });
+    await settleModelReservation(sql, { requestId, microUsd: reservation, success: true, usage: generated.usage });
     const candidates = generated.candidates.map(candidate => ({
       id: candidate.id,
       statement: candidate.statement,
@@ -446,7 +446,7 @@ async function runDiscoveryAI(query) {
       hard_kill_conditions: candidate.hard_kill_conditions || [],
       confidence: candidate.confidence
     }));
-    return { status: 'COMPLETED', model: generated.model, candidates, synthesis: generated.synthesis, next_question: generated.next_question, expenditure_micro_usd: reservation };
+    return { status: 'COMPLETED', model: generated.model, usage: generated.usage || null, candidates, synthesis: generated.synthesis, next_question: generated.next_question, expenditure_micro_usd: reservation };
   } catch (error) {
     await settleModelReservation(sql, { requestId, microUsd: reservation, success: false });
     return { status: 'FAILED', reason: String(error?.message || error).slice(0, 200) };
