@@ -1,8 +1,12 @@
-> Portfolio status: [STATUS.md](https://github.com/AndrewLamSingapore/orqevia/blob/main/STATUS.md) is the sole portfolio status reference. Each product owns its source, configuration, contracts and domain records. The [operational manifest](https://github.com/AndrewLamSingapore/orqevia/blob/main/governance/operational-manifest.json) provides dated ORQEVIA component and observation references; it does not establish deployment status.
+> Current ORQEVIA source: [ORQEVIA-CURRENT-STATE.md](https://github.com/AndrewLamSingapore/orqevia/blob/main/ORQEVIA-CURRENT-STATE.md), reached through the portfolio pointer [STATUS.md](https://github.com/AndrewLamSingapore/orqevia/blob/main/STATUS.md). Each product owns its source, configuration, contracts and domain records. The [operational manifest](https://github.com/AndrewLamSingapore/orqevia/blob/main/governance/operational-manifest.json) is a dated historical reference. Source, CI, deployment and runtime acceptance are separate evidence.
 
 # Public identity architecture
 
-The product identity is **THE PORTAL · Living Knowledge Graph**.
+The product identity is **THE PORTAL · Open Evolutionary Discovery Intelligence**.
+
+Public positioning: **From ideas to cumulative discovery.** The live experience connects guided individual discovery, collective discussion rooms and an Open Intelligence Observatory. The living knowledge graph remains a core surface; the archive alone no longer describes the whole product.
+
+This is a working research prototype. Persistent discussion, generated hypotheses and internal benchmark results do not establish scientific superiority or independently validated collaboration.
 
 Canonical product language:
 

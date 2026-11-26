@@ -4,9 +4,11 @@
 
 [**Open The Portal ↗**](https://the-portal-ten.vercel.app/) · [**Discuss this project**](https://authority-engine-app.vercel.app/contact?source=portal) · [**Meet Andrew Lam**](https://authority-engine-app.vercel.app/about)
 
-Explore ideas, discover connections, and see what the evidence supports. **THE PORTAL is a working AI-assisted discovery prototype** with an interactive archive and graph. Generated prompts retain their evidence labels.
+**From ideas to cumulative discovery.** THE PORTAL is an open evolutionary discovery intelligence prototype: explore an idea alone, develop a question in a collective discussion room, or inspect the living engine through its public Observatory. Sources, hypotheses, deterministic guidance and model output retain separate evidence labels.
 
-[Explore the ideas](https://the-portal-ten.vercel.app/#explore) · [Cloud support and deployment](https://the-portal-ten.vercel.app/cloud-support) · [AI and biology case study](https://the-portal-ten.vercel.app/ai-biology) · [Ten-slide presentation and speaker notes](docs/presentations/THE-PORTAL-10-SLIDES.md)
+[Guided solo discovery](https://the-portal-ten.vercel.app/) · [Discover Together](https://the-portal-ten.vercel.app/discover-together) · [Open Intelligence Observatory](https://the-portal-ten.vercel.app/observatory) · [Archive and graph](https://the-portal-ten.vercel.app/#explore) · [Cloud support](https://the-portal-ten.vercel.app/cloud-support)
+
+The operating loop is **Encounter → Connect → Experiment → Evolve**. Room persistence and software operation do not establish independent multi-user effectiveness or scientific discovery. Optional model modes and engine availability depend on their configured budgets; inspect the current run and budget records in the Observatory.
 
 ## Start here
 
@@ -18,13 +20,13 @@ Explore ideas, discover connections, and see what the evidence supports. **THE P
 
 [Report a bug](https://github.com/AndrewLamSingapore/the-portal/issues) · [Ask a question](https://github.com/AndrewLamSingapore/the-portal/discussions) · [Wiki](https://github.com/AndrewLamSingapore/the-portal/wiki)
 
-[Browse all six projects and their source](https://github.com/AndrewLamSingapore/AndrewLamSingapore#selected-work) · [About Andrew](https://authority-engine-app.vercel.app/about)
+[Browse the project and source directory](https://github.com/AndrewLamSingapore/AndrewLamSingapore#selected-work) · [About Andrew](https://authority-engine-app.vercel.app/about)
 
 ## Connected work
 
 [**Explore ORQEVIA**](https://authority-engine-app.vercel.app/orqevia) · [**Meet Andrew**](https://authority-engine-app.vercel.app/about) · [**Start a conversation**](https://authority-engine-app.vercel.app/contact?source=portal&intent=collaboration)
 
-ORQEVIA’s public walkthrough connects this project to Andrew’s wider work. Public navigation and enquiries do not merge accounts, data or runtime authority. Current operational evidence comes from the canonical portfolio record; this README describes source capabilities.
+ORQEVIA’s public walkthrough connects this project to Andrew’s wider work. Public navigation and enquiries do not merge accounts, data or runtime authority. Each product owns its source and domain records. Current operation requires its own deployment and runtime evidence; this README describes source capabilities.
 
 ## An explorable model of how encounters become connections, experiments and new ways of seeing.
 
@@ -68,9 +70,9 @@ Behind the scenes, a governed scheduler runs discovery cycles and records every 
 
 The Portal also supports collective discovery: public rooms with consent-gated discussion, an AI facilitator, and reviewed contributions that can inform future cycles.
 
-The [Open Intelligence Observatory](/observatory) exposes that operation publicly: live run activity, the living knowledge graph, the hypothesis arena, the open experiment laboratory, the intellectual fossil record, the evidence audit centre and the public benchmark centre. Empty or unvalidated sections are labelled rather than simulated.
+The [Open Intelligence Observatory](https://the-portal-ten.vercel.app/observatory) exposes that operation publicly: live run activity, the living knowledge graph, the hypothesis arena, the open experiment laboratory, the intellectual fossil record, the evidence audit centre and the public benchmark centre. Empty or unvalidated sections are labelled rather than simulated.
 
-The [public benchmark centre](/api/benchmark) reports a reproducible internal comparison of lexical versus hybrid retrieval plus deterministic discovery-quality metrics. It is internal benchmarking, not independent scientific validation, and its limitations are published alongside the numbers.
+The [public benchmark centre](https://the-portal-ten.vercel.app/api/benchmark) reports a reproducible internal comparison of lexical versus hybrid retrieval plus deterministic discovery-quality metrics. It is internal benchmarking, not independent scientific validation, and its limitations are published alongside the numbers.
 
 ## Life + Frontiers: AI and biology
 
@@ -273,20 +275,19 @@ The production Living Observatory is available at `/living`. Its deterministic e
 
 ## Capability status
 
-Implemented and production-verified: individual Discovery Studio (with an
-optional budget-gated AI mode and free fallback), hybrid semantic retrieval,
-collective discovery rooms with an AI facilitator and threaded replies,
-consent-based anonymous contributions, a persistent evidence-driven
-evolutionary engine with hard US$1/day and US$30/month budget enforcement and
-usage reconciliation, and an internal benchmark with abstention metrics.
+| Surface | Current evidence boundary |
+| --- | --- |
+| Individual Discovery Studio | Seven guided stages with deterministic guidance; optional budget-controlled model mode is implemented in source and requires separate live-session verification. |
+| Discover Together | Public rooms, persistent consent-based discussion and facilitator scaffolding are implemented. A stored public room is observable; independent multi-user effectiveness and live model facilitation are not established by that record. |
+| Retrieval and Observatory | Hybrid retrieval, run histories, hypothesis ancestry, evidence records and internal benchmarks are inspectable. Lexical fallback and empty or unvalidated states remain visible. |
+| Living engine | Source supports model-originated generations, evidence review and durable jobs under daily/monthly limits. Current availability is reported by the run and budget endpoints; generation counts do not prove scientific improvement. |
 
 The living knowledge graph combines the artifact graph with the hypothesis
 arena and fossil record in the Observatory; hypotheses are not merged into the
 artifact graph, so node counts are never inflated artificially.
 
-Pending and explicitly not claimed: independent scientific validation (external
-reviewers), full deep-content localization, and a dedicated domain.
+Pending: independent scientific evaluation, verified multi-user collaboration, complete shared-graph integration, live qualification of optional model modes, full deep-content localization and a dedicated domain. The eight-stage collaborative research workflow is an intended direction, not a claim that every stage is complete.
 
 ## Status and evidence
 
-> Portfolio status: [STATUS.md](https://github.com/AndrewLamSingapore/orqevia/blob/main/STATUS.md) is the sole portfolio status reference. Each product owns its source, configuration, contracts and domain records. The [operational manifest](https://github.com/AndrewLamSingapore/orqevia/blob/main/governance/operational-manifest.json) provides dated ORQEVIA component and observation references; it does not establish deployment status.
+> Current ORQEVIA source: [ORQEVIA-CURRENT-STATE.md](https://github.com/AndrewLamSingapore/orqevia/blob/main/ORQEVIA-CURRENT-STATE.md), reached through the portfolio pointer [STATUS.md](https://github.com/AndrewLamSingapore/orqevia/blob/main/STATUS.md). Each product owns its source, configuration, contracts and domain records. The [operational manifest](https://github.com/AndrewLamSingapore/orqevia/blob/main/governance/operational-manifest.json) is a dated historical reference. Source, CI, deployment and runtime acceptance are separate evidence.
