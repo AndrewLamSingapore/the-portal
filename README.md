@@ -60,6 +60,8 @@ The homepage now leads with a free-text entry: **Enter The Portal — Begin Your
 
 Connection uses the same hybrid retrieval as the graph: persistent vector embeddings, lexical matching and provenance ranking. When embeddings are unavailable the Portal says so and falls back to clearly labelled lexical-only operation. Hypothesis and experiment stages are editable heuristic scaffolds generated without a language model; they are never presented as discoveries or as validated science.
 
+The journey supports conversational follow-up: continue a discovery to refine, challenge or connect the idea, and each turn carries its lineage forward. Saving is opt-in and private to the browser — nothing is published or sent to the server until you choose.
+
 ## Life + Frontiers: AI and biology
 
 The curated [AI biology case study](https://the-portal-ten.vercel.app/ai-biology) examines DNA interpretation, variant-effect prediction, protein structures and candidate sequence design. It includes all eight capability distinctions, the conceptual READ / UNDERSTAND / SIMULATE / DESIGN / VALIDATE workflow, and six primary research references.
