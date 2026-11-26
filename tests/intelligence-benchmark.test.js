@@ -34,13 +34,25 @@ test('the retrieval benchmark reports both baselines without claiming superiorit
       { id: 'Q1', query: 'machine ethics', relevant: ['A'] },
       { id: 'Q2', query: 'unrelated baking bread', relevant: [] }
     ],
-    semanticScorer: null
+    semanticScoresByQuery: null
   });
   assert.equal(result.semantic_scorer_supplied, false);
   assert.equal(result.mode, 'hybrid_without_semantic');
   assert.equal(result.model_calls, 0);
   assert.ok('precision_at_3' in result.aggregate.lexical);
   assert.ok('precision_at_3' in result.aggregate.hybrid);
+});
+
+test('supplied semantic scores rerank paraphrases and are reported as active', () => {
+  const scoresByQuery = new Map([['Q1', new Map([['A', 0.9], ['B', 0.2], ['C', 0.1]])]]);
+  const result = runRetrievalBenchmark({
+    nodes,
+    queries: [{ id: 'Q1', query: 'machine ethics', relevant: ['A'] }],
+    semanticScoresByQuery: scoresByQuery
+  });
+  assert.equal(result.mode, 'hybrid_with_semantic');
+  assert.equal(result.semantic_scorer_supplied, true);
+  assert.equal(result.per_query[0].hybrid.ranked[0], 'A');
 });
 
 test('discovery quality scores are deterministic rubrics over real outputs', () => {

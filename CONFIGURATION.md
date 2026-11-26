@@ -44,6 +44,12 @@ model-originated cycle when the budget allows, and suspends itself when the
 limit is reached. Expenditure and hypotheses are published in the run feed and
 the Observatory.
 
+The model-originated cycle is cumulative: it reloads the previous run's
+population and fossils, increments the generation, and preserves extinct
+hypotheses in the fossil record. `PORTAL_BENCHMARK_SEMANTIC=1` enables real
+embedding-based retrieval measurement in the benchmark (small, owner-approved
+embedding cost).
+
 ## Search protections
 
 Graph search accepts a single query of at most 256 characters and 1024 bytes, and an optional integer limit from 1 through 24. PostgreSQL atomically enforces 20 searches per client per minute and 100 globally per minute across function instances. Client addresses are hashed, never persisted raw. Admission failure returns 503 without invoking embeddings; exhausted budgets return 429 with Retry-After. Embedding requests abort after eight seconds and degrade to lexical search. Query embeddings are cached for an hour by model and hashed normalized query; node embeddings remain content-addressed. No raw queries are stored in the embedding cache.

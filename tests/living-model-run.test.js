@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mapPopulation, runModelCycleOnce } from '../lib/living-model-run.js';
+import { mapPopulation, nextGenerationNumber, buildPriorMemory, computeFossils, runModelCycleOnce } from '../lib/living-model-run.js';
 
 test('model candidates map to observatory population with ancestry preserved', () => {
   const population = mapPopulation([
@@ -35,4 +35,29 @@ test('model runs require a database even when enabled', async () => {
   const outcome = await runModelCycleOnce({ sql: null });
   assert.equal(outcome.status, 'BLOCKED');
   if (previous === undefined) delete process.env.PORTAL_LIVING_MODEL_ENABLED; else process.env.PORTAL_LIVING_MODEL_ENABLED = previous;
+});
+
+test('generation increments and prior hypotheses become memory for the next cycle', () => {
+  const latest = { result: { generation_number: 2 } };
+  assert.equal(nextGenerationNumber(latest), 3);
+  assert.equal(nextGenerationNumber(null), 1);
+  const memory = buildPriorMemory([{ id: 'HYP-G1-01', statement: 'A survives', state: 'EMERGING' }]);
+  assert.equal(memory[0].id, 'HYP-G1-01');
+  assert.equal(memory[0].layer, 'EPISTEMIC');
+});
+
+test('extinct prior hypotheses are preserved as fossils with lineage', () => {
+  const outcome = computeFossils({
+    priorPopulation: [
+      { id: 'HYP-G1-01', statement: 'kept', confidence: 0.5, ancestry: { parent_ids: ['OBS'] } },
+      { id: 'HYP-G1-02', statement: 'dropped', confidence: 0.3, ancestry: { parent_ids: ['OBS'] } }
+    ],
+    priorFossils: [],
+    newCandidates: [{ id: 'HYP-G2-01', ancestry: { parent_ids: ['HYP-G1-01'] } }]
+  });
+  assert.equal(outcome.extinct.length, 1);
+  assert.equal(outcome.extinct[0].id, 'HYP-G1-02');
+  assert.equal(outcome.fossils.length, 1);
+  assert.equal(outcome.fossils[0].superseded_by, 'HYP-G2-01');
+  assert.equal(outcome.self_correction, true);
 });
