@@ -115,7 +115,13 @@
 
   function renderParticipation(participation) {
     const channels = (participation?.channels || []).map(channel => escapeHtml(channel)).join(' · ');
-    return `<p class="obs-note">${channels} · explicit consent required before anything personal is retained or published.</p>`;
+    const items = (participation?.contributions || []).map(item => `
+      <li class="obs-run">
+        ${badge(item.kind || 'contribution', 'neutral')}
+        <span class="obs-run-meta">${escapeHtml(item.text || '')}</span>
+      </li>`).join('');
+    return `<p class="obs-note">${channels} · explicit consent required · anonymous aggregation.</p>
+      ${items ? `<ul class="obs-list">${items}</ul>` : empty('No published contributions yet.')}`;
   }
 
   function render(data) {
@@ -150,5 +156,29 @@
     }
   }
 
+  async function submitContribution(event) {
+    event.preventDefault();
+    const form = $('contributeForm');
+    const status = $('contributeStatus');
+    const text = $('contributeText').value.trim();
+    const consent = $('contributeConsent').checked;
+    if (text.length < 2) { status.textContent = 'Enter your contribution first.'; return; }
+    if (!consent) { status.textContent = 'Consent is required before anything is retained.'; return; }
+    try {
+      const response = await fetch('/api/contribute', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ kind: $('contributeKind').value, text, consent: true })
+      });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(payload.error || 'Submission failed.');
+      status.textContent = payload.duplicate ? 'Already submitted.' : 'Submitted for moderation. Nothing is published until approved.';
+      form.reset();
+    } catch (error) {
+      status.textContent = error.message || 'Submission failed.';
+    }
+  }
+
   load();
+  $('contributeForm')?.addEventListener('submit', submitContribution);
 })();
