@@ -2,6 +2,13 @@
 
 # Changelog
 
+## 7.8.0 — Semantic relevance calibration
+
+- Adds a semantic relevance floor: weak embedding similarity is ignored, so
+  unrelated records can no longer surface on noise alone. This corrects the
+  false positives observed on difficult negative benchmark queries while
+  preserving genuine multilingual and cross-lingual matches.
+
 ## 7.7.0 — Transactional settlement and benchmark hardening
 
 - Makes budget settlement idempotent and transactionally safe: a repeated

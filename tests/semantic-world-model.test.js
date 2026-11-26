@@ -7,6 +7,7 @@ assert.equal(contradictions(nodes,[{source:'b',target:'a',type:'contradicts',pro
 assert.equal(buildWorldModel({nodes,edges:[{source:'b',target:'a',type:'contradicts'}]}).contradictions.length,1);
 const semantic=hybridSearch('unrelated',nodes,{semanticScorer:(_query,node)=>node.id==='b'?.99:.01});
 assert.equal(semantic[0].node.id,'b');
+assert.deepEqual(hybridSearch('ancient pottery',nodes,{semanticScorer:()=>0.2}),[],'weak embedding similarity must not surface unrelated records');
 const expanded=expandGraphNeighborhood([{node:nodes[0],score:1}],{nodes,edges:[{source:'a',target:'b',type:'related_to'}]});
 assert.deepEqual(expanded.map(item=>item.node.id),['a','b']);
 assert.equal(cosine([1,0],[1,0]),1);assert.equal(cosine([1,0],[0,1]),0);

@@ -1,5 +1,6 @@
 const TOKEN_RE = /[a-z0-9][a-z0-9_-]{2,}/g;
 export const MIN_RELEVANCE_SCORE = 0.12;
+export const SEMANTIC_FLOOR = 0.3;
 
 export const ENTITY_TYPES = new Set(['person','project','objective','decision','experiment','evidence','claim','source','observation','hypothesis','asset','repository','capability','failure','lesson']);
 export const EDGE_TYPES = new Set(['supports','contradicts','depends_on','derived_from','tested_by','owned_by','supersedes','failed_because','related_to','generated','validated_by']);
@@ -28,7 +29,10 @@ export function hybridSearch(query,nodes,{limit=12,semanticScorer}={}) {
     const text=[node.label,node.title,node.name,node.summary,node.description,node.type].filter(Boolean).join(' ');
     const lexical=jaccard(q,tokens(text));
     const suppliedSemantic=typeof semanticScorer==='function' ? Number(semanticScorer(query,node)||0) : 0;
-    const semantic=Number.isFinite(suppliedSemantic) ? Math.max(0,Math.min(1,suppliedSemantic)) : 0;
+    const semanticRaw=Number.isFinite(suppliedSemantic) ? Math.max(0,Math.min(1,suppliedSemantic)) : 0;
+    // Weak embedding similarity is not evidence of relevance. Ignore it so
+    // unrelated records cannot pass a relevance threshold on noise alone.
+    const semantic=semanticRaw >= SEMANTIC_FLOOR ? semanticRaw : 0;
     // A source trail improves the ranking of relevant matches. It cannot make
     // an unrelated node match a query on its own.
     if(lexical<=0 && semantic<=0) continue;
