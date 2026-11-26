@@ -58,6 +58,12 @@ fossil. The Discovery Studio accepts `mode: ai` when
 `PORTAL_DISCOVERY_AI_ENABLED=1`, spending against the living model budget with a
 deterministic fallback.
 
+Hypothesis selection is evidence-grounded: omission from a new generation is not
+falsification. Only explicitly contradicted hypotheses are fossilized with a
+rejection reason; the rest remain dormant. A post-provider failure settles
+conservatively (its reservation is retained), and AI discovery carries a
+per-client usage limit.
+
 ## Search protections
 
 Graph search accepts a single query of at most 256 characters and 1024 bytes, and an optional integer limit from 1 through 24. PostgreSQL atomically enforces 20 searches per client per minute and 100 globally per minute across function instances. Client addresses are hashed, never persisted raw. Admission failure returns 503 without invoking embeddings; exhausted budgets return 429 with Retry-After. Embedding requests abort after eight seconds and degrade to lexical search. Query embeddings are cached for an hour by model and hashed normalized query; node embeddings remain content-addressed. No raw queries are stored in the embedding cache.

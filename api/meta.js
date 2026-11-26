@@ -10,9 +10,9 @@ import { buildKnowledgeGraph } from '../lib/knowledge.js';
 import { expandGraphNeighborhood, hybridSearch } from '../src/lib/semantic-world-model.js';
 import { searchAdmission } from '../lib/search-controls.js';
 import { buildBriefing, normalizeSeed, validateFollowup, DiscoveryInputError } from '../lib/discovery-studio.js';
-import { listPublicRuns, latestCompletedRun, runOneCycle, setEngineKilled } from '../lib/living-engine.js';
+import { listPublicRuns, latestCompletedRun, listCompletedRuns, runOneCycle, setEngineKilled } from '../lib/living-engine.js';
 import { buildObservatory } from '../lib/observatory.js';
-import { runRetrievalBenchmark, scoreDiscoveryQuality, buildBenchmarkReport } from '../lib/intelligence-benchmark.js';
+import { runRetrievalBenchmark, scoreDiscoveryQuality, buildBenchmarkReport, buildLongitudinal } from '../lib/intelligence-benchmark.js';
 import { isModelBudgetEnabled, modelBudgetStatus, admitModelRequest, settleModelReservation } from '../lib/living-budget.js';
 import { runModelCycleOnce } from '../lib/living-model-run.js';
 import { ingestEvidence } from '../lib/living-evidence.js';
@@ -25,6 +25,21 @@ import { PRODUCT_VERSION } from '../lib/product-version.js';
 const SCHEMA_VERSION = 6;
 const EXPERIENCE = 'Continuous Futures Model';
 const META_ROUTES = new Set(['benchmark', 'capabilities', 'discover', 'ecosystem-event', 'engine-budget', 'engine-evidence', 'engine-kill', 'engine-model-run', 'engine-run', 'engine-runs', 'engine-tick', 'evidence', 'evidence-lab', 'experiment-result', 'manifest', 'metrics', 'observatory', 'prime', 'prime-experiment', 'prime-publish', 'prime-report', 'readiness', 'status', 'verify', 'version', 'v2']);
+
+const aiBuckets = globalThis.__portalAiBuckets || (globalThis.__portalAiBuckets = new Map());
+const AI_WINDOW_MS = 3_600_000;
+const AI_MAX_PER_WINDOW = 3;
+function aiDiscoveryAllowed(req) {
+  const now = Date.now();
+  for (const [key, bucket] of aiBuckets) if (now - bucket.start >= AI_WINDOW_MS) aiBuckets.delete(key);
+  const trusted = process.env.VERCEL ? req.headers?.['x-vercel-forwarded-for'] : req.socket?.remoteAddress;
+  const key = crypto.createHash('sha256').update(String(trusted || 'unknown').split(',')[0].trim()).digest('hex');
+  const bucket = aiBuckets.get(key);
+  if (!bucket) { aiBuckets.set(key, { start: now, count: 1 }); return true; }
+  if (bucket.count >= AI_MAX_PER_WINDOW) return false;
+  bucket.count += 1;
+  return true;
+}
 
 function jsonHeaders(res, cache = 'no-store') {
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
@@ -393,8 +408,12 @@ async function handleDiscover(req, res) {
   const briefing = buildBriefing({ query, graph, semanticStatus: semantic.status, ranked, expanded, followup });
 
   if (req.body?.mode === 'ai') {
-    const ai = await runDiscoveryAI(query);
-    if (ai.status === 'COMPLETED') {
+    if (!aiDiscoveryAllowed(req)) {
+      briefing.stages.hypothesize.disclosure += ' AI discovery limit reached for this session; deterministic scaffolds retained.';
+      briefing.grounding.ai = { mode: 'DETERMINISTIC_FALLBACK', reason: 'rate_limited' };
+    } else {
+      const ai = await runDiscoveryAI(query);
+      if (ai.status === 'COMPLETED') {
       briefing.stages.hypothesize.generation = 'MODEL_ORIGINATED';
       briefing.stages.hypothesize.model = ai.model;
       briefing.stages.hypothesize.candidates = ai.candidates;
@@ -407,9 +426,10 @@ async function handleDiscover(req, res) {
       }));
       briefing.grounding.ai = { mode: 'MODEL_ORIGINATED', model: ai.model, expenditure_micro_usd: ai.expenditure_micro_usd };
       briefing.safety.model_calls = 1;
-    } else {
-      briefing.stages.hypothesize.disclosure += ' AI discovery is disabled, blocked or over budget; deterministic scaffolds retained.';
-      briefing.grounding.ai = { mode: 'DETERMINISTIC_FALLBACK', reason: ai.reason || ai.status };
+      } else {
+        briefing.stages.hypothesize.disclosure += ' AI discovery is disabled, blocked or over budget; deterministic scaffolds retained.';
+        briefing.grounding.ai = { mode: 'DETERMINISTIC_FALLBACK', reason: ai.reason || ai.status };
+      }
     }
   }
 
@@ -448,7 +468,7 @@ async function runDiscoveryAI(query) {
     }));
     return { status: 'COMPLETED', model: generated.model, usage: generated.usage || null, candidates, synthesis: generated.synthesis, next_question: generated.next_question, expenditure_micro_usd: reservation };
   } catch (error) {
-    await settleModelReservation(sql, { requestId, microUsd: reservation, success: false });
+    await settleModelReservation(sql, { requestId, microUsd: reservation, success: false, release: false });
     return { status: 'FAILED', reason: String(error?.message || error).slice(0, 200) };
   }
 }
@@ -572,7 +592,8 @@ async function computeBenchmark() {
       revisions: latest.result?.revisions
     } : {}
   });
-  return buildBenchmarkReport({ retrieval, discovery, productVersion: PRODUCT_VERSION });
+  const longitudinal = buildLongitudinal({ runs: await listCompletedRuns(db()) });
+  return buildBenchmarkReport({ retrieval, discovery, longitudinal, productVersion: PRODUCT_VERSION });
 }
 
 async function handleBenchmark(req, res) {

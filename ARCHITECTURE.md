@@ -188,6 +188,12 @@ admission before any model request. It remains inactive until owner approval.
 `POST /api/engine/evidence` ingests authorized evidence and the Discovery Studio
 accepts an optional `mode: ai` gated by the living model budget.
 
+Fossilization is evidence-grounded: omission is not falsification; only
+explicitly contradicted hypotheses are fossilized with a rejection reason and
+the rest remain dormant. Job claiming is type-safe, post-provider failures
+settle conservatively, and the benchmark reports a longitudinal section over
+recorded generations.
+
 ## Security boundary
 
 - `OPENAI_API_KEY` and `DATABASE_URL` remain server-side.

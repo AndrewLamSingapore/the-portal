@@ -2,6 +2,22 @@
 
 # Changelog
 
+## 7.0.0 — Collective Evolutionary Intelligence foundations
+
+- Corrects extinction semantics: a hypothesis omitted from a new generation is
+  no longer treated as falsified. Only evidence-contradicted hypotheses become
+  fossils, each carrying an explicit `rejection_reason`; the rest remain dormant
+  in intellectual memory for reconsideration.
+- Adds type-safe job claiming so a scheduled deterministic cycle and a
+  model-originated cycle can never claim each other's work.
+- Settles post-provider failures conservatively: a failed model call no longer
+  releases its reservation, so billable failed requests cannot be under-counted.
+- Adds a per-client AI Discovery Studio usage limit with the deterministic
+  fallback retained.
+- Adds a longitudinal evaluation section comparing recorded generations
+  (falsifiability coverage, confidence range, dormancy and revision counts) as
+  structural measures, not proof of accuracy.
+
 ## 6.14.0 — Provider-usage reconciliation and budget concurrency test
 
 - Model runs and AI discovery now record the provider's actual token usage

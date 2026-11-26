@@ -46,18 +46,30 @@ test('generation increments and prior hypotheses become memory for the next cycl
   assert.equal(memory[0].layer, 'EPISTEMIC');
 });
 
-test('extinct prior hypotheses are preserved as fossils with lineage', () => {
+test('only contradicted hypotheses are fossilized with explicit rejection reasons', () => {
   const outcome = computeFossils({
     priorPopulation: [
       { id: 'HYP-G1-01', statement: 'kept', confidence: 0.5, ancestry: { parent_ids: ['OBS'] } },
       { id: 'HYP-G1-02', statement: 'dropped', confidence: 0.3, ancestry: { parent_ids: ['OBS'] } }
     ],
     priorFossils: [],
-    newCandidates: [{ id: 'HYP-G2-01', ancestry: { parent_ids: ['HYP-G1-01'] } }]
+    contradictions: [{ hypothesis_id: 'HYP-G1-02', evidence_id: 'EV-1' }]
   });
-  assert.equal(outcome.extinct.length, 1);
-  assert.equal(outcome.extinct[0].id, 'HYP-G1-02');
+  assert.equal(outcome.rejected.length, 1);
+  assert.equal(outcome.rejected[0].id, 'HYP-G1-02');
+  assert.equal(outcome.dormant, 1);
   assert.equal(outcome.fossils.length, 1);
-  assert.equal(outcome.fossils[0].superseded_by, 'HYP-G2-01');
+  assert.equal(outcome.fossils[0].rejection_reason, 'contradicted_by_evidence');
   assert.equal(outcome.self_correction, true);
+});
+
+test('omission from a new generation is not falsification', () => {
+  const outcome = computeFossils({
+    priorPopulation: [{ id: 'HYP-A', statement: 'unreferenced', confidence: 0.3, ancestry: { parent_ids: ['OBS'] } }],
+    priorFossils: [],
+    contradictions: []
+  });
+  assert.equal(outcome.rejected.length, 0);
+  assert.equal(outcome.dormant, 1);
+  assert.equal(outcome.fossils.length, 0);
 });
