@@ -176,6 +176,10 @@ trigger authorized by `CRON_SECRET` (daily Vercel Cron on Hobby) or by the
 hourly GitHub Actions workflow using `PORTAL_ENGINE_TOKEN`. Jobs are claimed under leases,
 checkpointed and audited, and the engine fails closed when disabled or killed.
 
+`GET /api/observatory` composes the public transparency centre from recorded
+runs, the knowledge graph and recorded experiment results. It is read-only and
+never exposes operational detail; empty benchmark sections are labelled pending.
+
 ## Security boundary
 
 - `OPENAI_API_KEY` and `DATABASE_URL` remain server-side.

@@ -11,14 +11,15 @@ import { expandGraphNeighborhood, hybridSearch } from '../src/lib/semantic-world
 import { semanticScores } from '../lib/semantic-embeddings.js';
 import { searchAdmission } from '../lib/search-controls.js';
 import { buildBriefing, normalizeSeed, validateFollowup, DiscoveryInputError } from '../lib/discovery-studio.js';
-import { listPublicRuns, runOneCycle, setEngineKilled } from '../lib/living-engine.js';
+import { listPublicRuns, latestCompletedRun, runOneCycle, setEngineKilled } from '../lib/living-engine.js';
+import { buildObservatory } from '../lib/observatory.js';
 import { handleEvidenceLab } from '../lib/evidence-lab-endpoint.js';
 import { authenticate as primeAuthenticate, publishReport as primePublishReport, readReports as primeReadReports, resolvePrimeIdentity as primeResolveIdentity, sendJson as primeSendJson } from '../lib/prime-auth.js';
 import { REPORT_ID_PATTERN, REPORT_LIMITS, validateReport } from '../lib/prime-reports.js';
 import { PRODUCT_VERSION } from '../lib/product-version.js';
 const SCHEMA_VERSION = 6;
 const EXPERIENCE = 'Continuous Futures Model';
-const META_ROUTES = new Set(['capabilities', 'discover', 'ecosystem-event', 'engine-kill', 'engine-run', 'engine-runs', 'engine-tick', 'evidence', 'evidence-lab', 'experiment-result', 'manifest', 'metrics', 'prime', 'prime-experiment', 'prime-publish', 'prime-report', 'readiness', 'status', 'verify', 'version', 'v2']);
+const META_ROUTES = new Set(['capabilities', 'discover', 'ecosystem-event', 'engine-kill', 'engine-run', 'engine-runs', 'engine-tick', 'evidence', 'evidence-lab', 'experiment-result', 'manifest', 'metrics', 'observatory', 'prime', 'prime-experiment', 'prime-publish', 'prime-report', 'readiness', 'status', 'verify', 'version', 'v2']);
 
 function jsonHeaders(res, cache = 'no-store') {
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
@@ -440,6 +441,23 @@ async function handleEngineTick(req, res) {
   return res.status(200).json({ mode: 'LIVING_ENGINE_TICK', ...outcome });
 }
 
+async function handleObservatory(req, res) {
+  if (req.method !== 'GET') {
+    res.setHeader('Allow', 'GET');
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+  if (!hasDatabase()) return res.status(503).json({ error: 'Archive unavailable' });
+  const [artifacts, runs, latest, results] = await Promise.all([
+    findArtifacts({ limit: 60 }),
+    listPublicRuns(db()),
+    latestCompletedRun(db()),
+    listExperimentResults(20)
+  ]);
+  const graph = buildKnowledgeGraph(artifacts);
+  const payload = buildObservatory({ runs, latestRun: latest, graph, experimentResults: results, productVersion: PRODUCT_VERSION });
+  return res.status(200).json(payload);
+}
+
 export default async function handler(req, res) {
   const routeValue = Array.isArray(req.query?.route) ? req.query.route[0] : req.query?.route;
   const route = String(routeValue || '');
@@ -467,6 +485,7 @@ export default async function handler(req, res) {
   if (route === 'engine-run') return handleEngineRun(req, res);
   if (route === 'engine-kill') return handleEngineKill(req, res);
   if (route === 'engine-tick') return handleEngineTick(req, res);
+  if (route === 'observatory') return handleObservatory(req, res);
   if (route === 'capabilities') {
     if (!allow(req, res, 'GET')) return;
     return res.status(200).json({

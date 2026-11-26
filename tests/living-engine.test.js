@@ -85,6 +85,9 @@ test('the deterministic cycle is honest about being deterministic and contained'
   assert.equal(result.deterministic, true);
   assert.equal(result.generation_mode, 'DETERMINISTIC_FALLBACK');
   assert.equal(result.model_calls, 0);
+  assert.ok(Array.isArray(result.population) && result.population.length > 0);
+  assert.ok(result.population.every(item => item.id && item.statement && item.epistemic_class));
+  assert.ok(Array.isArray(result.fossils));
   assert.equal(result.safety.actuation_allowed, false);
   assert.equal(result.safety.production_source_mutation_allowed, false);
   assert.equal(result.safety.deployment_mutation_allowed, false);
