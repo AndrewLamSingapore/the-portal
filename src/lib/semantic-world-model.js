@@ -1,4 +1,5 @@
 const TOKEN_RE = /[a-z0-9][a-z0-9_-]{2,}/g;
+export const MIN_RELEVANCE_SCORE = 0.12;
 
 export const ENTITY_TYPES = new Set(['person','project','objective','decision','experiment','evidence','claim','source','observation','hypothesis','asset','repository','capability','failure','lesson']);
 export const EDGE_TYPES = new Set(['supports','contradicts','depends_on','derived_from','tested_by','owned_by','supersedes','failed_because','related_to','generated','validated_by']);
@@ -36,6 +37,10 @@ export function hybridSearch(query,nodes,{limit=12,semanticScorer}={}) {
     if(score>0) ranked.push({node,score,lexical,semantic,provenance});
   }
   return ranked.sort((a,b)=>b.score-a.score).slice(0,Math.max(1,Math.min(limit,50)));
+}
+
+export function aboveRelevanceThreshold(ranked, threshold = MIN_RELEVANCE_SCORE) {
+  return (ranked || []).filter(item => item.score >= threshold);
 }
 
 export function contradictions(nodes,edges) {

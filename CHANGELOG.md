@@ -2,6 +2,18 @@
 
 # Changelog
 
+## 7.6.0 — Budget recovery, abstention and threaded facilitation
+
+- Fixes budget-window recovery: budget-induced suspension now clears
+  automatically when a daily or monthly window rolls and capacity returns,
+  while the separate engine kill switch remains the intentional shutdown.
+- Adds calibrated semantic relevance thresholds with explicit abstention in
+  graph search and abstention-accuracy and false-positive metrics in the
+  benchmark.
+- Persists AI facilitator summaries as AI messages (no longer overwritten by
+  the deterministic refresh), adds shareable room deep links and threaded
+  replies.
+
 ## 7.5.0 — Interface localization
 
 - Adds a language selector (English, 中文, Español, Français, Deutsch, 日本語)

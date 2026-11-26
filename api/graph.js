@@ -1,7 +1,7 @@
 import { findArtifacts, hasDatabase, listExperimentResults } from '../lib/db.js';
 import { attachExperimentResults } from '../lib/experiment-result.js';
 import { buildKnowledgeGraph } from '../lib/knowledge.js';
-import { expandGraphNeighborhood, hybridSearch } from '../src/lib/semantic-world-model.js';
+import { expandGraphNeighborhood, hybridSearch, aboveRelevanceThreshold, MIN_RELEVANCE_SCORE } from '../src/lib/semantic-world-model.js';
 import { searchAdmission, validateSearch } from '../lib/search-controls.js';
 import { semanticScores } from '../lib/semantic-embeddings.js';
 
@@ -24,6 +24,6 @@ export default async function handler(req, res) {
   const graph = attachExperimentResults(buildKnowledgeGraph(artifacts), results);
   if (!query) return res.status(200).json(graph);
   const nodes=graph.nodes.map(node=>({...node,type:'asset',provenance:Array.isArray(node.sources)?node.sources:[]}));
-  const semantic=await semanticScores(query,nodes);const ranked=hybridSearch(query,nodes,{limit:req.query?.limit,semanticScorer:(_query,node)=>semantic.scores.get(node.id)||0});const expanded=expandGraphNeighborhood(ranked,graph,{limit:24});const ids=new Set(expanded.map(item=>item.node.id));const rank=new Map(ranked.map(item=>[item.node.id,item]));
-  return res.status(200).json({...graph,nodes:expanded.map(item=>{const scored=rank.get(item.node.id);return {...item.node,grounding_score:scored?Math.round(scored.score*100):0,semantic_score:scored?.semantic||0,lexical_score:scored?.lexical||0,graph_neighbor:!item.match}}),edges:graph.edges.filter(edge=>ids.has(edge.from)&&ids.has(edge.to)),grounding:{query,matched_nodes:ranked.length,expanded_nodes:expanded.length,...semantic.status}});
+  const semantic=await semanticScores(query,nodes);const ranked=hybridSearch(query,nodes,{limit:req.query?.limit,semanticScorer:(_query,node)=>semantic.scores.get(node.id)||0});const relevant=aboveRelevanceThreshold(ranked);const abstained=ranked.length>0&&relevant.length===0;const expanded=expandGraphNeighborhood(relevant,graph,{limit:24});const ids=new Set(expanded.map(item=>item.node.id));const rank=new Map(relevant.map(item=>[item.node.id,item]));
+  return res.status(200).json({...graph,nodes:abstained?[]:expanded.map(item=>{const scored=rank.get(item.node.id);return {...item.node,grounding_score:scored?Math.round(scored.score*100):0,semantic_score:scored?.semantic||0,lexical_score:scored?.lexical||0,graph_neighbor:!item.match}}),edges:abstained?[]:graph.edges.filter(edge=>ids.has(edge.from)&&ids.has(edge.to)),grounding:{query,matched_nodes:ranked.length,relevant_nodes:relevant.length,expanded_nodes:expanded.length,abstained,relevance_threshold:MIN_RELEVANCE_SCORE,...semantic.status}});
 }
