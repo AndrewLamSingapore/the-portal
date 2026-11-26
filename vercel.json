@@ -137,6 +137,18 @@
       "destination": "/api/meta?route=contribute-moderate"
     },
     {
+      "source": "/api/rooms",
+      "destination": "/api/meta?route=rooms"
+    },
+    {
+      "source": "/api/rooms/messages",
+      "destination": "/api/meta?route=room-messages"
+    },
+    {
+      "source": "/api/rooms/moderate",
+      "destination": "/api/meta?route=room-moderate"
+    },
+    {
       "source": "/api/benchmark",
       "destination": "/api/meta?route=benchmark"
     },

@@ -18,6 +18,7 @@ import { runModelCycleOnce } from '../lib/living-model-run.js';
 import { ingestEvidence } from '../lib/living-evidence.js';
 import { generateHypothesisPopulation } from '../lib/hypothesis-generation.js';
 import { submitContribution, listPublishedContributions, moderateContribution } from '../lib/public-contribution.js';
+import { createRoom, listRooms, getRoom, postMessage, hideMessage } from '../lib/discovery-rooms.js';
 import { semanticScores } from '../lib/semantic-embeddings.js';
 import { handleEvidenceLab } from '../lib/evidence-lab-endpoint.js';
 import { authenticate as primeAuthenticate, publishReport as primePublishReport, readReports as primeReadReports, resolvePrimeIdentity as primeResolveIdentity, sendJson as primeSendJson } from '../lib/prime-auth.js';
@@ -25,7 +26,7 @@ import { REPORT_ID_PATTERN, REPORT_LIMITS, validateReport } from '../lib/prime-r
 import { PRODUCT_VERSION } from '../lib/product-version.js';
 const SCHEMA_VERSION = 6;
 const EXPERIENCE = 'Continuous Futures Model';
-const META_ROUTES = new Set(['benchmark', 'capabilities', 'contribute', 'contribute-moderate', 'discover', 'ecosystem-event', 'engine-budget', 'engine-evidence', 'engine-kill', 'engine-model-run', 'engine-run', 'engine-runs', 'engine-tick', 'evidence', 'evidence-lab', 'experiment-result', 'manifest', 'metrics', 'observatory', 'prime', 'prime-experiment', 'prime-publish', 'prime-report', 'readiness', 'status', 'verify', 'version', 'v2']);
+const META_ROUTES = new Set(['benchmark', 'capabilities', 'contribute', 'contribute-moderate', 'discover', 'ecosystem-event', 'engine-budget', 'engine-evidence', 'engine-kill', 'engine-model-run', 'engine-run', 'engine-runs', 'engine-tick', 'evidence', 'evidence-lab', 'experiment-result', 'manifest', 'metrics', 'observatory', 'prime', 'prime-experiment', 'prime-publish', 'prime-report', 'readiness', 'room-messages', 'room-moderate', 'rooms', 'status', 'verify', 'version', 'v2']);
 
 const aiBuckets = globalThis.__portalAiBuckets || (globalThis.__portalAiBuckets = new Map());
 const AI_WINDOW_MS = 3_600_000;
@@ -550,6 +551,68 @@ async function handleContributeModerate(req, res) {
   return res.status(outcome.ok ? 200 : 400).json({ mode: 'CONTRIBUTION_MODERATION', ...outcome });
 }
 
+async function handleRooms(req, res) {
+  if (req.method === 'GET') {
+    if (!hasDatabase()) return res.status(503).json({ error: 'Archive unavailable' });
+    const id = req.query?.id ? String(req.query.id) : null;
+    if (id) {
+      const room = await getRoom(db(), id);
+      if (!room) return res.status(404).json({ error: 'Room not found' });
+      return res.status(200).json({ mode: 'DISCOVERY_ROOM', ...room });
+    }
+    const rooms = await listRooms(db());
+    return res.status(200).json({ mode: 'DISCOVERY_ROOMS', rooms });
+  }
+  if (req.method === 'POST') {
+    if (!contributionAllowed(req)) {
+      res.setHeader('Retry-After', '3600');
+      return res.status(429).json({ error: 'Contribution limit reached. Try again later.' });
+    }
+    if (!hasDatabase()) return res.status(503).json({ error: 'Archive unavailable' });
+    const outcome = await createRoom(db(), {
+      topic: req.body?.topic,
+      question: req.body?.question,
+      consent: req.body?.consent === true
+    });
+    if (!outcome.ok) return res.status(400).json({ mode: 'DISCOVERY_ROOM', ...outcome });
+    return res.status(201).json({ mode: 'DISCOVERY_ROOM', ...outcome });
+  }
+  res.setHeader('Allow', 'GET, POST');
+  return res.status(405).json({ error: 'Method not allowed' });
+}
+
+async function handleRoomMessages(req, res) {
+  if (req.method !== 'POST') {
+    res.setHeader('Allow', 'POST');
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+  if (!contributionAllowed(req)) {
+    res.setHeader('Retry-After', '3600');
+    return res.status(429).json({ error: 'Contribution limit reached. Try again later.' });
+  }
+  if (!hasDatabase()) return res.status(503).json({ error: 'Archive unavailable' });
+  const outcome = await postMessage(db(), {
+    roomId: req.body?.room_id,
+    text: req.body?.text,
+    parentId: req.body?.parent_id,
+    consent: req.body?.consent === true
+  });
+  if (!outcome.ok) return res.status(400).json({ mode: 'ROOM_MESSAGE', ...outcome });
+  return res.status(outcome.duplicate ? 200 : 201).json({ mode: 'ROOM_MESSAGE', ...outcome });
+}
+
+async function handleRoomModerate(req, res) {
+  if (req.method !== 'POST') {
+    res.setHeader('Allow', 'POST');
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+  if (!process.env.PORTAL_ENGINE_TOKEN) return res.status(503).json({ error: 'Engine admin token is not configured' });
+  if (!engineAuthorized(req)) return res.status(401).json({ error: 'Unauthorized' });
+  if (!hasDatabase()) return res.status(503).json({ error: 'Archive unavailable' });
+  const outcome = await hideMessage(db(), { id: req.body?.id, reason: req.body?.reason });
+  return res.status(outcome.ok ? 200 : 400).json({ mode: 'ROOM_MODERATION', ...outcome });
+}
+
 async function handleEngineRuns(req, res) {
   if (req.method !== 'GET') {
     res.setHeader('Allow', 'GET');
@@ -721,6 +784,9 @@ export default async function handler(req, res) {
   if (route === 'observatory') return handleObservatory(req, res);
   if (route === 'contribute') return handleContribute(req, res);
   if (route === 'contribute-moderate') return handleContributeModerate(req, res);
+  if (route === 'rooms') return handleRooms(req, res);
+  if (route === 'room-messages') return handleRoomMessages(req, res);
+  if (route === 'room-moderate') return handleRoomModerate(req, res);
   if (route === 'capabilities') {
     if (!allow(req, res, 'GET')) return;
     return res.status(200).json({

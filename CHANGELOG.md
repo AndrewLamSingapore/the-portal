@@ -2,6 +2,16 @@
 
 # Changelog
 
+## 7.2.0 — Public discovery rooms (group discovery)
+
+- Adds public discovery rooms: anonymous, consent-gated discussion threads and
+  replies around questions and topics, with a deterministic AI facilitator that
+  surfaces shared concepts, open questions, likely disagreements and unsupported
+  claims. Popularity is never treated as truth.
+- Adds `POST /api/rooms`, `GET /api/rooms`, `POST /api/rooms/messages` and
+  authenticated `POST /api/rooms/moderate`, plus a new `/discover-together`
+  page linked from the homepage.
+
 ## 7.1.0 — Consent-based collective discovery
 
 - Adds anonymous, consent-gated, moderated public contributions

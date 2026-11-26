@@ -1,0 +1,66 @@
+.together-page main {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 2.25rem clamp(1rem, 4vw, 3rem) 3rem;
+}
+
+.tg-hero { margin: 0 0 1.4rem; }
+.tg-hero .eyebrow {
+  font-size: .72rem; letter-spacing: .18em; text-transform: uppercase; color: #b98a4a; margin: 0 0 .45rem;
+}
+.tg-hero h1 { font-size: clamp(1.8rem, 5vw, 3rem); line-height: 1.05; margin: 0 0 .7rem; }
+.tg-thesis { max-width: 68ch; color: #cfc4b4; line-height: 1.55; margin: 0; }
+
+.tg-status {
+  padding: .7rem 1rem; border-radius: 10px; background: #15100a; color: #d9cdba; line-height: 1.5; margin: 0 0 1.2rem;
+}
+
+.tg-panel {
+  background: #100c08; border: 1px solid #2a2118; border-radius: 14px; padding: 1.1rem 1.2rem; margin-bottom: 1.1rem;
+}
+.tg-panel-head .index {
+  font-size: .7rem; letter-spacing: .18em; text-transform: uppercase; color: #8f8373; margin: 0 0 .25rem;
+}
+.tg-panel h2 { margin: 0 0 .75rem; font-size: 1.05rem; letter-spacing: .06em; text-transform: uppercase; color: #f0e6d4; }
+
+.tg-rooms { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: .7rem; }
+.tg-room {
+  text-align: left; background: #15100a; border: 1px solid #2c241b; border-radius: 10px; padding: .85rem 1rem;
+  color: #f0e6d4; font: inherit; cursor: pointer; display: grid; gap: .3rem;
+}
+.tg-room strong { font-size: 1rem; }
+.tg-room span { color: #a99980; font-size: .86rem; }
+.tg-room:focus-visible { outline: 2px solid #e0a64f; outline-offset: 2px; }
+
+.tg-form { display: grid; gap: .55rem; }
+.tg-form label { color: #b9aa92; font-size: .86rem; }
+.tg-form input, .tg-form textarea {
+  background: #0c0906; color: #f5efe4; border: 1px solid #3a2f24; border-radius: 8px; padding: .65rem .8rem; font: inherit;
+}
+.tg-form textarea { resize: vertical; min-height: 4.5rem; }
+.tg-form button {
+  justify-self: start; background: #e0a64f; color: #171009; border: 1px solid transparent; border-radius: 8px;
+  padding: .7rem 1.1rem; font: inherit; font-weight: 600; letter-spacing: .04em; cursor: pointer;
+}
+.tg-consent { display: flex; gap: .5rem; align-items: center; }
+.tg-form input:focus-visible, .tg-form textarea:focus-visible, .tg-form button:focus-visible { outline: 2px solid #e0a64f; outline-offset: 2px; }
+
+.tg-facilitator {
+  background: #15100a; border: 1px solid #2c241b; border-radius: 10px; padding: .9rem 1rem; margin: .6rem 0 .9rem;
+}
+.tg-facilitator h3 { margin: 0 0 .45rem; font-size: .86rem; letter-spacing: .1em; text-transform: uppercase; color: #e0a64f; }
+.tg-facilitator p { color: #cfc4b4; line-height: 1.5; margin: .3rem 0; }
+.tg-disclosure, .tg-note { color: #b9aa92; font-size: .88rem; line-height: 1.5; margin: .3rem 0; }
+
+.tg-messages { list-style: none; margin: 0; padding: 0; display: grid; gap: .6rem; }
+.tg-message { background: #15100a; border: 1px solid #2c241b; border-radius: 10px; padding: .7rem .9rem; }
+.tg-message p { color: #f0e6d4; margin: .35rem 0 0; line-height: 1.5; }
+.tg-meta { font-size: .72rem; letter-spacing: .08em; text-transform: uppercase; color: #8f8373; }
+.tg-ai { border-color: #3a2f24; }
+.tg-empty { color: #8f8373; }
+
+.together-page a:focus-visible { outline: 2px solid #e0a64f; outline-offset: 2px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .together-page * { animation: none; transition: none; scroll-behavior: auto; }
+}
