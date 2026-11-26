@@ -17,6 +17,10 @@
     {
       "path": "/api/portfolio-events",
       "schedule": "37 1 * * *"
+    },
+    {
+      "path": "/api/engine/tick",
+      "schedule": "23 1 * * *"
     }
   ],
   "rewrites": [
@@ -103,6 +107,22 @@
     {
       "source": "/api/discover",
       "destination": "/api/meta?route=discover"
+    },
+    {
+      "source": "/api/engine/runs",
+      "destination": "/api/meta?route=engine-runs"
+    },
+    {
+      "source": "/api/engine/run",
+      "destination": "/api/meta?route=engine-run"
+    },
+    {
+      "source": "/api/engine/kill",
+      "destination": "/api/meta?route=engine-kill"
+    },
+    {
+      "source": "/api/engine/tick",
+      "destination": "/api/meta?route=engine-tick"
     },
     {
       "source": "/api/prime",

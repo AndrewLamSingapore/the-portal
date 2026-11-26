@@ -105,3 +105,38 @@ create table if not exists semantic_embeddings (
   primary key(entity_id,model)
 );
 create index if not exists semantic_embeddings_updated_idx on semantic_embeddings(model,updated_at desc);
+
+-- Living Engine v1. Durable, leased, idempotent job execution for the
+-- deterministic discovery cycle, with an append-only audit trail and a
+-- database-backed kill switch. No language model calls; results are always
+-- labelled DETERMINISTIC_FALLBACK.
+create table if not exists living_jobs (
+  id text primary key,
+  kind text not null,
+  status text not null default 'QUEUED' check (status in ('QUEUED','RUNNING','COMPLETED','FAILED','SKIPPED')),
+  idempotency_key text not null unique,
+  attempt integer not null default 0,
+  lease_owner text,
+  lease_expires_at timestamptz,
+  payload jsonb not null default '{}'::jsonb,
+  checkpoint jsonb not null default '{}'::jsonb,
+  result jsonb not null default '{}'::jsonb,
+  error text,
+  created_at timestamptz not null default now(),
+  started_at timestamptz,
+  finished_at timestamptz
+);
+create index if not exists living_jobs_claim_idx on living_jobs(status, created_at);
+create table if not exists living_audit (
+  id bigserial primary key,
+  event text not null,
+  job_id text,
+  detail jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default now()
+);
+create index if not exists living_audit_created_idx on living_audit(created_at desc);
+create table if not exists living_engine_state (
+  id integer primary key default 1,
+  killed boolean not null default false,
+  updated_at timestamptz not null default now()
+);

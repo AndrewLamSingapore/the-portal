@@ -2,6 +2,25 @@
 
 # Changelog
 
+## 6.8.0 — Living Engine durable foundation
+
+- Adds a durable, governed execution layer for the deterministic discovery
+  cycle: a persisted job queue with idempotency keys, time-bounded worker leases
+  (crashed leases are reclaimable), checkpointing, retry/attempt tracking and an
+  append-only audit trail.
+- Adds a database-backed kill switch that survives process restarts, plus
+  authenticated admin controls (`POST /api/engine/run`, `POST /api/engine/kill`)
+  using the server-side `PORTAL_ENGINE_TOKEN`, a daily Vercel Cron
+  (`/api/engine/tick`) gated by `PORTAL_LIVING_ENGINE_ENABLED=1` and `CRON_SECRET`,
+  and an hourly GitHub Actions trigger for the same authenticated endpoint.
+- Adds a public, sanitised run feed (`GET /api/engine/runs`). Runs are always
+  labelled `DETERMINISTIC_FALLBACK` with zero model calls and all safety flags
+  false; no lease owner, payload or internal detail is exposed.
+- Adds `lib/living-engine.js`, `tests/living-engine.test.js`, the
+  `living_jobs` / `living_audit` / `living_engine_state` schema and a migration.
+  The new routes ride the `/api/meta` dispatcher so the deployment stays within
+  the Hobby function ceiling.
+
 ## 6.7.0 — Discovery Studio follow-up and private saving
 
 - Adds conversational follow-up to the Discovery Studio. A bounded, stateless

@@ -167,6 +167,15 @@ ancestry. Saving is opt-in and browser-private. The response reports its
 retrieval mode and degrades to disclosed lexical-only operation when embeddings
 are unavailable.
 
+### Living Engine routes
+
+`GET /api/engine/runs` returns a sanitised public feed of durable run records.
+`POST /api/engine/run` and `POST /api/engine/kill` are authenticated admin
+controls (`PORTAL_ENGINE_TOKEN`); `POST /api/engine/tick` is the scheduled
+trigger authorized by `CRON_SECRET` (daily Vercel Cron on Hobby) or by the
+hourly GitHub Actions workflow using `PORTAL_ENGINE_TOKEN`. Jobs are claimed under leases,
+checkpointed and audited, and the engine fails closed when disabled or killed.
+
 ## Security boundary
 
 - `OPENAI_API_KEY` and `DATABASE_URL` remain server-side.

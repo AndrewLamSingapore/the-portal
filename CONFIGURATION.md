@@ -2,6 +2,27 @@
 
 The Portal owns its public archive, discovery graph and Evidence Lab. ORQEVIA is an optional integration; public use does not depend on it. Existing protocol identifiers containing `PRIME` remain compatibility identifiers, not current product names. Historical records remain intact.
 
+## Living Engine
+
+The Living Engine executes the deterministic discovery cycle through a durable,
+leased, idempotent job queue with an append-only audit trail and a
+database-backed kill switch. It is disabled by default and fails closed:
+
+- `PORTAL_LIVING_ENGINE_ENABLED=1` enables it (requires `DATABASE_URL`).
+- `POST /api/engine/run` and `POST /api/engine/kill` require the server-side
+  `PORTAL_ENGINE_TOKEN`.
+- `POST /api/engine/tick` is authorized by `CRON_SECRET` (daily Vercel Cron on
+  the Hobby plan) or by the hourly GitHub Actions trigger using
+  `PORTAL_ENGINE_TOKEN` as a repository secret.
+- `GET /api/engine/runs` is public and sanitised; it never exposes lease owners,
+  job payloads or operational detail.
+
+Every run is `DETERMINISTIC_FALLBACK` with zero model calls, no external
+actuation, no production source or deployment mutation, and no database writes
+beyond the engine's own job and audit tables. Do not claim continuous autonomous
+intelligence unless the cron is actually running and its recorded runs are
+visible in the public feed.
+
 ## Search protections
 
 Graph search accepts a single query of at most 256 characters and 1024 bytes, and an optional integer limit from 1 through 24. PostgreSQL atomically enforces 20 searches per client per minute and 100 globally per minute across function instances. Client addresses are hashed, never persisted raw. Admission failure returns 503 without invoking embeddings; exhausted budgets return 429 with Retry-After. Embedding requests abort after eight seconds and degrade to lexical search. Query embeddings are cached for an hour by model and hashed normalized query; node embeddings remain content-addressed. No raw queries are stored in the embedding cache.

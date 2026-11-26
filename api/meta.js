@@ -11,13 +11,14 @@ import { expandGraphNeighborhood, hybridSearch } from '../src/lib/semantic-world
 import { semanticScores } from '../lib/semantic-embeddings.js';
 import { searchAdmission } from '../lib/search-controls.js';
 import { buildBriefing, normalizeSeed, validateFollowup, DiscoveryInputError } from '../lib/discovery-studio.js';
+import { listPublicRuns, runOneCycle, setEngineKilled } from '../lib/living-engine.js';
 import { handleEvidenceLab } from '../lib/evidence-lab-endpoint.js';
 import { authenticate as primeAuthenticate, publishReport as primePublishReport, readReports as primeReadReports, resolvePrimeIdentity as primeResolveIdentity, sendJson as primeSendJson } from '../lib/prime-auth.js';
 import { REPORT_ID_PATTERN, REPORT_LIMITS, validateReport } from '../lib/prime-reports.js';
 import { PRODUCT_VERSION } from '../lib/product-version.js';
 const SCHEMA_VERSION = 6;
 const EXPERIENCE = 'Continuous Futures Model';
-const META_ROUTES = new Set(['capabilities', 'discover', 'ecosystem-event', 'evidence', 'evidence-lab', 'experiment-result', 'manifest', 'metrics', 'prime', 'prime-experiment', 'prime-publish', 'prime-report', 'readiness', 'status', 'verify', 'version', 'v2']);
+const META_ROUTES = new Set(['capabilities', 'discover', 'ecosystem-event', 'engine-kill', 'engine-run', 'engine-runs', 'engine-tick', 'evidence', 'evidence-lab', 'experiment-result', 'manifest', 'metrics', 'prime', 'prime-experiment', 'prime-publish', 'prime-report', 'readiness', 'status', 'verify', 'version', 'v2']);
 
 function jsonHeaders(res, cache = 'no-store') {
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
@@ -171,6 +172,14 @@ function bearerMatches(req, expected) {
   const left = Buffer.from(expected);
   const right = Buffer.from(supplied);
   return Boolean(expected) && left.length === right.length && crypto.timingSafeEqual(left, right);
+}
+
+function engineAuthorized(req) {
+  return bearerMatches(req, process.env.PORTAL_ENGINE_TOKEN || '');
+}
+
+function cronAuthorized(req) {
+  return bearerMatches(req, process.env.CRON_SECRET || '');
 }
 
 async function handlePrimeExperiment(req, res) {
@@ -385,6 +394,52 @@ async function handleDiscover(req, res) {
   });
 }
 
+async function handleEngineRuns(req, res) {
+  if (req.method !== 'GET') {
+    res.setHeader('Allow', 'GET');
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+  if (!hasDatabase()) return res.status(503).json({ error: 'Archive unavailable' });
+  const runs = await listPublicRuns(db());
+  return res.status(200).json({ mode: 'LIVING_ENGINE_RUNS', runs });
+}
+
+async function handleEngineRun(req, res) {
+  if (req.method !== 'POST') {
+    res.setHeader('Allow', 'POST');
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+  if (!process.env.PORTAL_ENGINE_TOKEN) return res.status(503).json({ error: 'Engine admin token is not configured' });
+  if (!engineAuthorized(req)) return res.status(401).json({ error: 'Unauthorized' });
+  if (!hasDatabase()) return res.status(503).json({ error: 'Archive unavailable' });
+  const outcome = await runOneCycle({ sql: db(), owner: 'admin' });
+  const status = outcome.status === 'COMPLETED' ? 200 : outcome.status === 'KILLED' ? 409 : outcome.status === 'DISABLED' ? 503 : 200;
+  return res.status(status).json({ mode: 'LIVING_ENGINE_RUN', ...outcome });
+}
+
+async function handleEngineKill(req, res) {
+  if (req.method !== 'POST') {
+    res.setHeader('Allow', 'POST');
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+  if (!process.env.PORTAL_ENGINE_TOKEN) return res.status(503).json({ error: 'Engine admin token is not configured' });
+  if (!engineAuthorized(req)) return res.status(401).json({ error: 'Unauthorized' });
+  if (!hasDatabase()) return res.status(503).json({ error: 'Archive unavailable' });
+  const killed = req.body?.killed === true;
+  await setEngineKilled(db(), killed);
+  return res.status(200).json({ mode: 'LIVING_ENGINE_KILL', killed });
+}
+
+async function handleEngineTick(req, res) {
+  if (req.method !== 'POST') {
+    res.setHeader('Allow', 'POST');
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+  if (!cronAuthorized(req) && !engineAuthorized(req)) return res.status(401).json({ error: 'Unauthorized' });
+  const outcome = await runOneCycle({ sql: db(), owner: 'cron' });
+  return res.status(200).json({ mode: 'LIVING_ENGINE_TICK', ...outcome });
+}
+
 export default async function handler(req, res) {
   const routeValue = Array.isArray(req.query?.route) ? req.query.route[0] : req.query?.route;
   const route = String(routeValue || '');
@@ -408,6 +463,10 @@ export default async function handler(req, res) {
   jsonHeaders(res, ['capabilities', 'manifest', 'version'].includes(route) ? 'public, s-maxage=3600' : 'no-store');
 
   if (route === 'discover') return handleDiscover(req, res);
+  if (route === 'engine-runs') return handleEngineRuns(req, res);
+  if (route === 'engine-run') return handleEngineRun(req, res);
+  if (route === 'engine-kill') return handleEngineKill(req, res);
+  if (route === 'engine-tick') return handleEngineTick(req, res);
   if (route === 'capabilities') {
     if (!allow(req, res, 'GET')) return;
     return res.status(200).json({

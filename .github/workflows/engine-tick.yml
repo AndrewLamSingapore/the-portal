@@ -1,0 +1,28 @@
+name: Living Engine tick
+
+on:
+  schedule:
+    - cron: '23 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: portal-engine-tick
+  cancel-in-progress: true
+
+jobs:
+  tick:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Trigger one deterministic living cycle
+        env:
+          ENGINE_TOKEN: ${{ secrets.PORTAL_ENGINE_TOKEN }}
+          PORTAL_URL: https://the-portal-ten.vercel.app
+        run: |
+          curl -fsS -X POST "$PORTAL_URL/api/engine/tick" \
+            -H "Authorization: Bearer $ENGINE_TOKEN" \
+            -H "Content-Type: application/json" \
+            -d '{}'
