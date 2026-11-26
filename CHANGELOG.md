@@ -2,6 +2,22 @@
 
 # Changelog
 
+## 6.9.0 — Open Intelligence Observatory
+
+- Adds a public transparency centre at `/observatory` backed by `GET
+  /api/observatory`: live run activity, the living knowledge graph, a hypothesis
+  arena, an open experiment laboratory, an intellectual fossil record, an
+  evidence audit centre, an open source centre and a public participation
+  centre.
+- The observatory is composed from recorded engine runs, the live graph and
+  recorded experiment results. Nothing is fabricated: the benchmark centre is
+  labelled `PENDING_INDEPENDENT_VALIDATION` and empty sections are shown as
+  empty rather than simulated.
+- The deterministic engine now records its full hypothesis population and fossil
+  record with each run, so the arena and fossil record reflect actual recorded
+  state. Adds `lib/observatory.js`, `observatory.html/js/css` and
+  `tests/observatory.test.js`.
+
 ## 6.8.0 — Living Engine durable foundation
 
 - Adds a durable, governed execution layer for the deterministic discovery

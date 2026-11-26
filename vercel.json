@@ -125,6 +125,10 @@
       "destination": "/api/meta?route=engine-tick"
     },
     {
+      "source": "/api/observatory",
+      "destination": "/api/meta?route=observatory"
+    },
+    {
       "source": "/api/prime",
       "destination": "/api/meta?route=prime"
     },

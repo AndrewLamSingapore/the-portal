@@ -23,6 +23,10 @@ beyond the engine's own job and audit tables. Do not claim continuous autonomous
 intelligence unless the cron is actually running and its recorded runs are
 visible in the public feed.
 
+`GET /api/observatory` is public and read-only. It surfaces recorded runs, the
+hypothesis arena and the fossil record, and it marks the benchmark centre as
+pending independent validation rather than inventing a score.
+
 ## Search protections
 
 Graph search accepts a single query of at most 256 characters and 1024 bytes, and an optional integer limit from 1 through 24. PostgreSQL atomically enforces 20 searches per client per minute and 100 globally per minute across function instances. Client addresses are hashed, never persisted raw. Admission failure returns 503 without invoking embeddings; exhausted budgets return 429 with Retry-After. Embedding requests abort after eight seconds and degrade to lexical search. Query embeddings are cached for an hour by model and hashed normalized query; node embeddings remain content-addressed. No raw queries are stored in the embedding cache.

@@ -66,6 +66,8 @@ The journey supports conversational follow-up: continue a discovery to refine, c
 
 Behind the scenes, a governed scheduler runs the deterministic discovery cycle and records every run. Jobs are persisted with idempotency keys, claimed under time-bounded leases, checkpointed and audited, with a database-backed kill switch and authenticated admin controls. Runs are always labelled `DETERMINISTIC_FALLBACK`: zero model calls, no external actuation, no production mutation. A sanitised public feed (`/api/engine/runs`) shows completed and failed runs without exposing operational detail.
 
+The [Open Intelligence Observatory](/observatory) exposes that operation publicly: live run activity, the living knowledge graph, the hypothesis arena, the open experiment laboratory, the intellectual fossil record, the evidence audit centre and the public benchmark centre. Empty or unvalidated sections are labelled rather than simulated.
+
 ## Life + Frontiers: AI and biology
 
 The curated [AI biology case study](https://the-portal-ten.vercel.app/ai-biology) examines DNA interpretation, variant-effect prediction, protein structures and candidate sequence design. It includes all eight capability distinctions, the conceptual READ / UNDERSTAND / SIMULATE / DESIGN / VALIDATE workflow, and six primary research references.
