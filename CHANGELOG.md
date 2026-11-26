@@ -2,6 +2,17 @@
 
 # Changelog
 
+## 6.13.0 — Evidence-driven revision, rebirth and AI Discovery Studio
+
+- Adds authorized evidence ingestion (`POST /api/engine/evidence`) with source
+  provenance, content-hash deduplication, relevance assessment and explicit
+  support/contradiction relations.
+- Feeds pending evidence into the next model cycle as observations, contests
+  hypotheses that are contradicted, and revives a fossil when new evidence
+  supports it (controlled rebirth with REBIRTH ancestry).
+- Adds an optional AI-powered Discovery Studio mode (`mode: ai`) gated by the
+  living model budget with the deterministic scaffolding as the free fallback.
+
 ## 6.12.0 — Persistent cumulative model evolution and real semantic benchmark
 
 - The model-originated living engine is now persistent and cumulative: each

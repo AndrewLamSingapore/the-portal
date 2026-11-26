@@ -281,6 +281,8 @@
     surprise.disabled = true;
     setStatus('Following your idea through the Portal…', null);
     const body = { query };
+    const aiToggle = $('discoveryAI');
+    if (aiToggle?.checked) body.mode = 'ai';
     if (session) {
       body.followup = { seed: session.seed, turn: (session.turn || 1) + 1, history: session.history || [] };
     }

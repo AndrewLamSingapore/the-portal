@@ -137,6 +137,10 @@
       "destination": "/api/meta?route=engine-budget"
     },
     {
+      "source": "/api/engine/evidence",
+      "destination": "/api/meta?route=engine-evidence"
+    },
+    {
       "source": "/api/engine/model-run",
       "destination": "/api/meta?route=engine-model-run"
     },

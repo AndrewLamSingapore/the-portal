@@ -13,8 +13,10 @@ import { buildBriefing, normalizeSeed, validateFollowup, DiscoveryInputError } f
 import { listPublicRuns, latestCompletedRun, runOneCycle, setEngineKilled } from '../lib/living-engine.js';
 import { buildObservatory } from '../lib/observatory.js';
 import { runRetrievalBenchmark, scoreDiscoveryQuality, buildBenchmarkReport } from '../lib/intelligence-benchmark.js';
-import { isModelBudgetEnabled, modelBudgetStatus } from '../lib/living-budget.js';
+import { isModelBudgetEnabled, modelBudgetStatus, admitModelRequest, settleModelReservation } from '../lib/living-budget.js';
 import { runModelCycleOnce } from '../lib/living-model-run.js';
+import { ingestEvidence } from '../lib/living-evidence.js';
+import { generateHypothesisPopulation } from '../lib/hypothesis-generation.js';
 import { semanticScores } from '../lib/semantic-embeddings.js';
 import { handleEvidenceLab } from '../lib/evidence-lab-endpoint.js';
 import { authenticate as primeAuthenticate, publishReport as primePublishReport, readReports as primeReadReports, resolvePrimeIdentity as primeResolveIdentity, sendJson as primeSendJson } from '../lib/prime-auth.js';
@@ -22,7 +24,7 @@ import { REPORT_ID_PATTERN, REPORT_LIMITS, validateReport } from '../lib/prime-r
 import { PRODUCT_VERSION } from '../lib/product-version.js';
 const SCHEMA_VERSION = 6;
 const EXPERIENCE = 'Continuous Futures Model';
-const META_ROUTES = new Set(['benchmark', 'capabilities', 'discover', 'ecosystem-event', 'engine-budget', 'engine-kill', 'engine-model-run', 'engine-run', 'engine-runs', 'engine-tick', 'evidence', 'evidence-lab', 'experiment-result', 'manifest', 'metrics', 'observatory', 'prime', 'prime-experiment', 'prime-publish', 'prime-report', 'readiness', 'status', 'verify', 'version', 'v2']);
+const META_ROUTES = new Set(['benchmark', 'capabilities', 'discover', 'ecosystem-event', 'engine-budget', 'engine-evidence', 'engine-kill', 'engine-model-run', 'engine-run', 'engine-runs', 'engine-tick', 'evidence', 'evidence-lab', 'experiment-result', 'manifest', 'metrics', 'observatory', 'prime', 'prime-experiment', 'prime-publish', 'prime-report', 'readiness', 'status', 'verify', 'version', 'v2']);
 
 function jsonHeaders(res, cache = 'no-store') {
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
@@ -390,12 +392,85 @@ async function handleDiscover(req, res) {
   const expanded = expandGraphNeighborhood(ranked, graph, { limit: 24 });
   const briefing = buildBriefing({ query, graph, semanticStatus: semantic.status, ranked, expanded, followup });
 
+  if (req.body?.mode === 'ai') {
+    const ai = await runDiscoveryAI(query);
+    if (ai.status === 'COMPLETED') {
+      briefing.stages.hypothesize.generation = 'MODEL_ORIGINATED';
+      briefing.stages.hypothesize.model = ai.model;
+      briefing.stages.hypothesize.candidates = ai.candidates;
+      briefing.stages.hypothesize.disclosure = 'AI-generated hypotheses with visible epistemic labels and falsifiers, gated by the living model budget.';
+      briefing.stages.challenge.notes = ai.candidates.map(candidate => ({
+        candidate_id: candidate.id,
+        challenge: 'What evidence would most efficiently separate this hypothesis from its strongest alternative?',
+        confounder: 'A third factor could explain both the claim and its apparent support.',
+        uncertainty: 'Confidence is model-assigned and remains provisional until evidence is attached.'
+      }));
+      briefing.grounding.ai = { mode: 'MODEL_ORIGINATED', model: ai.model, expenditure_micro_usd: ai.expenditure_micro_usd };
+      briefing.safety.model_calls = 1;
+    } else {
+      briefing.stages.hypothesize.disclosure += ' AI discovery is disabled, blocked or over budget; deterministic scaffolds retained.';
+      briefing.grounding.ai = { mode: 'DETERMINISTIC_FALLBACK', reason: ai.reason || ai.status };
+    }
+  }
+
   return res.status(200).json({
     product: 'The Portal',
     product_version: PRODUCT_VERSION,
     mode: 'DISCOVERY_STUDIO',
     ...briefing
   });
+}
+
+async function runDiscoveryAI(query) {
+  if (process.env.PORTAL_DISCOVERY_AI_ENABLED !== '1') return { status: 'DISABLED', reason: 'PORTAL_DISCOVERY_AI_ENABLED is not 1' };
+  if (!process.env.OPENAI_API_KEY) return { status: 'BLOCKED', reason: 'OPENAI_API_KEY not configured' };
+  if (!hasDatabase()) return { status: 'BLOCKED', reason: 'Archive unavailable' };
+  const sql = db();
+  const reservation = Number(process.env.PORTAL_DISCOVERY_AI_RESERVATION_MICRO_USD || 100_000);
+  const requestId = `DSA-${crypto.randomUUID()}`;
+  const admission = await admitModelRequest(sql, { requestId, estimatedMicroUsd: reservation });
+  if (!admission.allowed) return { status: 'REJECTED', reason: admission.reason };
+  try {
+    const generated = await generateHypothesisPopulation({ observations: [{ id: 'DSA-SEED', summary: query }], memory: [], generation: 1 });
+    if (!generated?.candidates?.length) throw new Error('Model returned no candidates');
+    await settleModelReservation(sql, { requestId, microUsd: reservation, success: true });
+    const candidates = generated.candidates.map(candidate => ({
+      id: candidate.id,
+      statement: candidate.statement,
+      epistemic_class: candidate.epistemic_class,
+      generation: 'MODEL_ORIGINATED',
+      turn: 1,
+      ancestry: candidate.ancestry || null,
+      predictions: candidate.predictions || [],
+      falsifiers: candidate.falsifiers || [],
+      hard_kill_conditions: candidate.hard_kill_conditions || [],
+      confidence: candidate.confidence
+    }));
+    return { status: 'COMPLETED', model: generated.model, candidates, synthesis: generated.synthesis, next_question: generated.next_question, expenditure_micro_usd: reservation };
+  } catch (error) {
+    await settleModelReservation(sql, { requestId, microUsd: reservation, success: false });
+    return { status: 'FAILED', reason: String(error?.message || error).slice(0, 200) };
+  }
+}
+
+async function handleEngineEvidence(req, res) {
+  if (req.method !== 'POST') {
+    res.setHeader('Allow', 'POST');
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+  if (!process.env.PORTAL_ENGINE_TOKEN) return res.status(503).json({ error: 'Engine admin token is not configured' });
+  if (!engineAuthorized(req)) return res.status(401).json({ error: 'Unauthorized' });
+  if (!hasDatabase()) return res.status(503).json({ error: 'Archive unavailable' });
+  const artifacts = await findArtifacts({ limit: 60 });
+  const concepts = [...new Set(artifacts.flatMap(artifact => artifact.concepts || []))];
+  const outcome = await ingestEvidence(db(), {
+    source: req.body?.source,
+    summary: req.body?.summary,
+    relation: req.body?.relation,
+    targetId: req.body?.target_id,
+    concepts
+  });
+  return res.status(outcome.ok ? (outcome.duplicate ? 200 : 201) : 400).json({ mode: 'LIVING_EVIDENCE', ...outcome });
 }
 
 async function handleEngineRuns(req, res) {
@@ -561,6 +636,7 @@ export default async function handler(req, res) {
   if (route === 'engine-kill') return handleEngineKill(req, res);
   if (route === 'engine-tick') return handleEngineTick(req, res);
   if (route === 'engine-budget') return handleEngineBudget(req, res);
+  if (route === 'engine-evidence') return handleEngineEvidence(req, res);
   if (route === 'engine-model-run') return handleEngineModelRun(req, res);
   if (route === 'benchmark') return handleBenchmark(req, res);
   if (route === 'observatory') return handleObservatory(req, res);

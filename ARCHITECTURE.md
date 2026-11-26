@@ -185,6 +185,8 @@ discovery quality) and `GET /api/engine/budget` returns the public budget status
 Paid model-originated runs are gated behind `POST /api/engine/model-run`, which
 requires `PORTAL_LIVING_MODEL_ENABLED=1` and passes a hard atomic budget
 admission before any model request. It remains inactive until owner approval.
+`POST /api/engine/evidence` ingests authorized evidence and the Discovery Studio
+accepts an optional `mode: ai` gated by the living model budget.
 
 ## Security boundary
 

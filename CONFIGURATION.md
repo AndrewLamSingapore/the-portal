@@ -50,6 +50,14 @@ hypotheses in the fossil record. `PORTAL_BENCHMARK_SEMANTIC=1` enables real
 embedding-based retrieval measurement in the benchmark (small, owner-approved
 embedding cost).
 
+Authorized evidence can be ingested through `POST /api/engine/evidence`
+(`PORTAL_ENGINE_TOKEN`). Evidence is deduplicated by content hash, assessed for
+relevance against the archive, and fed into the next model cycle; contradicting
+evidence contests the target hypothesis and supporting evidence can revive a
+fossil. The Discovery Studio accepts `mode: ai` when
+`PORTAL_DISCOVERY_AI_ENABLED=1`, spending against the living model budget with a
+deterministic fallback.
+
 ## Search protections
 
 Graph search accepts a single query of at most 256 characters and 1024 bytes, and an optional integer limit from 1 through 24. PostgreSQL atomically enforces 20 searches per client per minute and 100 globally per minute across function instances. Client addresses are hashed, never persisted raw. Admission failure returns 503 without invoking embeddings; exhausted budgets return 429 with Retry-After. Embedding requests abort after eight seconds and degrade to lexical search. Query embeddings are cached for an hour by model and hashed normalized query; node embeddings remain content-addressed. No raw queries are stored in the embedding cache.
