@@ -83,6 +83,20 @@
   margin: .9rem 0 0;
 }
 
+.discovery-ai-opt {
+  display: flex;
+  gap: .5rem;
+  align-items: center;
+  margin-top: .8rem;
+  font-size: .86rem;
+  color: #b9aa92;
+}
+
+.discovery-ai-opt input:focus-visible {
+  outline: 2px solid #e0a64f;
+  outline-offset: 2px;
+}
+
 .prompt-chip {
   background: #15100a;
   color: #d9cdba;
