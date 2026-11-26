@@ -2,6 +2,16 @@
 
 # Changelog
 
+## 6.14.0 — Provider-usage reconciliation and budget concurrency test
+
+- Model runs and AI discovery now record the provider's actual token usage
+  (input and output tokens) in the ledger and public run feed, alongside the
+  conservative reservation. Cost remains an upper-bound reservation until a
+  provider rate is configured.
+- Adds a disposable-PostgreSQL concurrency test that fires twenty parallel
+  budget admissions and proves the atomic cap cannot be exceeded, plus a
+  failed-reservation release and retry.
+
 ## 6.13.0 — Evidence-driven revision, rebirth and AI Discovery Studio
 
 - Adds authorized evidence ingestion (`POST /api/engine/evidence`) with source

@@ -40,6 +40,7 @@ jobs:
             sleep 1
           done
           npm run test:admission:postgres
+          npm run test:budget:postgres
       - run: npm run synthetic:result
       - name: Verify the PRIME authorization contract
         run: npm run prime:authorization
